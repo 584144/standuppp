@@ -32,6 +32,24 @@ public enum PetMood: String, Sendable, CaseIterable, Hashable {
         }
     }
 
+    /// How long the pet says something after a break ends.
+    public static let afterBreakLineWindow: TimeInterval = 6
+
+    /// Whether the pet says anything at all. It talks only when there is something to remind
+    /// you of: a due break, for as long as it is due, or the few seconds after one ends.
+    public static func speaks(_ mood: PetMood, lastBreak: LastBreak?, now: Date) -> Bool {
+        switch mood {
+        case .nudging:
+            return true
+        case .proud, .sulking:
+            guard let lastBreak else { return false }
+            let since = now.timeIntervalSince(lastBreak.endedAt)
+            return since >= 0 && since < afterBreakLineWindow
+        case .fresh, .focused, .tired, .resting, .away:
+            return false
+        }
+    }
+
     public static func mood(
         indicator: IndicatorState,
         workFraction: Double,

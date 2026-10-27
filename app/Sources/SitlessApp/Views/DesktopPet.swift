@@ -103,7 +103,7 @@ struct DesktopPetView: View {
     let moved: () -> Void
     let hide: () -> Void
 
-    @State private var showingInfo = false
+    @State private var infoUntil: Date?
     @State private var lastDrag: CGSize = .zero
     @State private var dragging = false
     @State private var spunAt: Date?
@@ -124,7 +124,7 @@ struct DesktopPetView: View {
             let mood = mood(at: now)
             let t = now.timeIntervalSinceReferenceDate
             VStack(spacing: 4) {
-                bubble(for: mood)
+                bubble(for: mood, at: now)
                     .frame(height: 44, alignment: .bottom)
                 PetFace(
                     mood: mood, time: reduceMotion ? 0 : t,
@@ -138,8 +138,9 @@ struct DesktopPetView: View {
                     .gesture(drag)
                     .onTapGesture(count: 2) { model.takeBreakNow() }
                     .onTapGesture {
-                        showingInfo.toggle()
+                        infoUntil = .now.addingTimeInterval(3)
                         spunAt = .now
+                        PetSound.play(.pop, model: model)
                     }
                     .contextMenu {
                         Button(L("Take a break now")) { model.takeBreakNow() }
@@ -149,6 +150,10 @@ struct DesktopPetView: View {
                     .accessibilityLabel(L(Self.spoken(mood)))
             }
             .frame(width: 230, height: 160, alignment: .bottom)
+        }
+        .onChange(of: model.lastBreak) { _, ended in
+            guard let ended, !ended.counted else { return }
+            PetSound.play(.hmm, model: model)
         }
     }
 
@@ -190,13 +195,17 @@ struct DesktopPetView: View {
     }
 
     @ViewBuilder
-    private func bubble(for mood: PetMood) -> some View {
-        if showingInfo {
+    private func bubble(for mood: PetMood, at now: Date) -> some View {
+        if PetMood.speaks(mood, lastBreak: model.lastBreak, now: now), let line = Self.line(for: mood) {
+            SpeechBubble(text: mood == .nudging ? L(line) + "\n" + sittingLine : L(line))
+        } else if let infoUntil, now < infoUntil {
             SpeechBubble(text: infoLine)
-                .onTapGesture { showingInfo = false }
-        } else if let line = Self.line(for: mood) {
-            SpeechBubble(text: L(line))
         }
+    }
+
+    private var sittingLine: String {
+        let sat = DurationText.short(model.displayedContinuousWork)
+        return Localizer.chinese ? "已连续坐 \(sat)" : "Sitting for \(sat)"
     }
 
     private var infoLine: String {
@@ -242,6 +251,36 @@ struct DesktopPetView: View {
         case .tired, .sulking: return sin(t * 0.8) * 1.5
         case .resting, .away: return 0
         }
+    }
+}
+
+/// Soft sounds the pet makes. All of them are macOS's own, played quietly, and none plays
+/// while a microphone or camera is live or when the setting is off.
+@MainActor
+enum PetSound {
+    enum Cue {
+        case pop, hmm
+
+        var name: String {
+            switch self {
+            case .pop: return "Pop"
+            case .hmm: return "Bottle"
+            }
+        }
+
+        var volume: Float {
+            switch self {
+            case .pop: return 0.18
+            case .hmm: return 0.15
+            }
+        }
+    }
+
+    static func play(_ cue: Cue, model: AppModel) {
+        guard model.settings.petSounds, !model.captureLive,
+              let sound = NSSound(named: NSSound.Name(cue.name)) else { return }
+        sound.volume = cue.volume
+        sound.play()
     }
 }
 

@@ -154,7 +154,7 @@ final class AppModel {
     @ObservationIgnored private var micInhibitUntil: Date?
     @ObservationIgnored private var unheldDeviceSince: Double?
     @ObservationIgnored private var lastAudioDeviceRunning = false
-    @ObservationIgnored private var captureLive = false
+    @ObservationIgnored private(set) var captureLive = false
     @ObservationIgnored private var workClockAdvanced = false
     @ObservationIgnored private var breakOrigin: BreakOrigin?
     @ObservationIgnored private var lastVerdict: InterruptionVerdict?
@@ -208,6 +208,14 @@ final class AppModel {
         return policy
     }
 
+    /// settings.json is the record of whether the app opens at login. If it says yes and the
+    /// login item is missing (a fresh install, or the app moved), register it again.
+    private func syncLaunchAtLogin() {
+        guard settings.launchAtLogin, AppPaths.isBundled,
+              SMAppService.mainApp.status != .enabled else { return }
+        try? SMAppService.mainApp.register()
+    }
+
     func start() {
         observeAccessibilityGrant()
         guard !isRunning else { return }
@@ -215,6 +223,7 @@ final class AppModel {
 
         wireNotifier()
         openStore()
+        syncLaunchAtLogin()
         if !settings.statusLineEnabled { StatusLineFile.remove() }
         append(.start(at: time.now))
 

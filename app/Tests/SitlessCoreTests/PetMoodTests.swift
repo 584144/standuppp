@@ -49,4 +49,20 @@ struct PetMoodTests {
         let justNow = now.addingTimeInterval(-10)
         #expect(mood(.breakDue, 1, last: .init(counted: false, endedAt: justNow)) == .nudging)
     }
+
+    @Test("it says nothing unless there is a reminder")
+    func quietUnlessReminding() {
+        for quiet in [PetMood.fresh, .focused, .tired, .resting, .away] {
+            #expect(!PetMood.speaks(quiet, lastBreak: nil, now: now))
+        }
+        #expect(PetMood.speaks(.nudging, lastBreak: nil, now: now))
+    }
+
+    @Test("after a break it speaks for a few seconds, then goes quiet")
+    func afterBreakLineFades() {
+        let fresh = PetMood.LastBreak(counted: false, endedAt: now.addingTimeInterval(-2))
+        let stale = PetMood.LastBreak(counted: false, endedAt: now.addingTimeInterval(-PetMood.afterBreakLineWindow - 1))
+        #expect(PetMood.speaks(.sulking, lastBreak: fresh, now: now))
+        #expect(!PetMood.speaks(.sulking, lastBreak: stale, now: now))
+    }
 }

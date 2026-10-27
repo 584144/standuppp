@@ -440,6 +440,9 @@ enum Localizer {
 
         "sitless Settings": "久坐工具提醒 设置",
         "Hide pet": "隐藏宠物",
+        "Pet sounds": "宠物音效",
+        "A soft pop when you click the pet and a quiet note when a break did not count. Silent while a microphone or camera is on.":
+            "单击宠物时轻轻\"啵\"一声，休息不算数时发出一声轻轻的提示。麦克风或摄像头在用时自动静音。",
         "Show pet": "显示宠物",
         "Hide the pet": "隐藏宠物",
         "Show the desktop pet": "显示桌面宠物",

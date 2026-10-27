@@ -128,6 +128,7 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
     public var statusLineEnabled: Bool
     public var language: AppLanguage
     public var showDesktopPet: Bool
+    public var petSounds: Bool
 
     public init(
         workIntervalMinutes: Int = 45,
@@ -155,7 +156,8 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         holdBreaksDuringCalls: Bool = true,
         statusLineEnabled: Bool = false,
         language: AppLanguage = .system,
-        showDesktopPet: Bool = true
+        showDesktopPet: Bool = true,
+        petSounds: Bool = true
     ) {
         self.workIntervalMinutes = workIntervalMinutes
         self.breakDurationMinutes = breakDurationMinutes
@@ -183,6 +185,7 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         self.statusLineEnabled = statusLineEnabled
         self.language = language
         self.showDesktopPet = showDesktopPet
+        self.petSounds = petSounds
     }
 
     public static let `default` = SitlessSettings()
@@ -225,5 +228,6 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         statusLineEnabled = try c.decodeIfPresent(Bool.self, forKey: .statusLineEnabled) ?? d.statusLineEnabled
         language = (try? c.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? d.language
         showDesktopPet = try c.decodeIfPresent(Bool.self, forKey: .showDesktopPet) ?? d.showDesktopPet
+        petSounds = try c.decodeIfPresent(Bool.self, forKey: .petSounds) ?? d.petSounds
     }
 }

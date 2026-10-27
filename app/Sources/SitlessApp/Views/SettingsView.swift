@@ -189,6 +189,12 @@ struct SettingsView: View {
                 ) {
                     TerminalSwitch(isOn: settings.showDesktopPet)
                 }
+                SettingRow(
+                    "Pet sounds",
+                    detail: "A soft pop when you click the pet and a quiet note when a break did not count. Silent while a microphone or camera is on."
+                ) {
+                    TerminalSwitch(isOn: settings.petSounds)
+                }
                 SettingRow("Suggest something to do", detail: "A small, finishable nudge to leave the chair.") {
                     TerminalSwitch(isOn: settings.breakQuestsEnabled)
                 }
