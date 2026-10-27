@@ -18,3 +18,18 @@ Third-party code shipped in the binary:
 
   Sparkle 2.10.0, MIT License, https://github.com/sparkle-project/Sparkle
   Compatible with the GPL and linked into the app target only.
+
+----------------------------------------------------------------------------------------
+
+久坐工具提醒 (sitless)
+Modifications copyright 2026 584144 (https://github.com/584144), same licence (GPL-3.0).
+
+This is a modified fork of sigstop, renamed as TRADEMARK.md asks. Changes from
+upstream commit 651a6d8, made in October 2026:
+
+  - A break during which the keyboard or mouse was in use for more than
+    maxActiveDuringBreakSeconds (default 60) is not honored and does not reset the
+    work clock; break_end logs active_s and void.
+  - Renamed: bundle id io.github.584144.sitless, executable sitless, modules
+    SitlessCore / SitlessSensors / SitlessApp, new icon, menu bar mark and colours.
+  - The upstream update feed was emptied.

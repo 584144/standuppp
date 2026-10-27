@@ -1,25 +1,25 @@
 blank_issues_enabled: false
 contact_links:
   - name: The Accessibility grant will not stick
-    url: https://github.com/Mohamed-Elshesheny/sigstop/blob/main/CONTRIBUTING.md
+    url: https://github.com/584144/sitless/blob/main/CONTRIBUTING.md
     about: >-
       macOS ties the grant to the binary's cdhash and swift build changes it on every compile.
       Read the first section before filing this as a bug. It is the most common false report.
   - name: Adding support for an app, or writing a joke
-    url: https://github.com/Mohamed-Elshesheny/sigstop/blob/main/CONTRIBUTING.md
+    url: https://github.com/584144/sitless/blob/main/CONTRIBUTING.md
     about: >-
       Both need zero core changes. A provider is a pure function and a joke is a line of JSON.
       Open a pull request rather than an issue.
   - name: Something about the landing page
-    url: https://github.com/Mohamed-Elshesheny/sigstop-web/issues
+    url: https://github.com/Mohamed-Elshesheny/sitless-web/issues
     about: >-
       The site is a separate repository with its own tracker. Copy, layout, a broken link, the
       download button: all of it belongs there, none of it is built from this repository.
   - name: Found a security problem
-    url: https://github.com/Mohamed-Elshesheny/sigstop/security/advisories/new
+    url: https://github.com/584144/sitless/security/advisories/new
     about: >-
       Report it privately, not here. The tracker is public and so is the exploit.
       SECURITY.md says what is worth reporting and what is already known.
   - name: Naming, logo, and forks
-    url: https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md
+    url: https://github.com/584144/sitless/blob/main/TRADEMARK.md
     about: The code is GPL-3.0. The name and the mark are not part of that grant.

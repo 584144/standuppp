@@ -17,7 +17,7 @@ needs in front of them.
 - [ ] `make test`, `make verify` and `swift run -c release Scenarios` all pass locally.
 - [ ] `docs/` updated in this PR if behaviour changed. Design docs are normative.
 - [ ] No rule in the table in
-      [`CONTRIBUTING.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/CONTRIBUTING.md#the-rules-a-pr-cannot-break)
+      [`CONTRIBUTING.md`](https://github.com/584144/sitless/blob/main/CONTRIBUTING.md#the-rules-a-pr-cannot-break)
       is weakened. If one has to change, that is its own PR with the argument written out,
       landing before the code.
 - [ ] Commit messages are Conventional Commits, imperative, and short.

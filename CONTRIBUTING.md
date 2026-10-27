@@ -1,10 +1,10 @@
-# Contributing to sigstop
+# Contributing to sitless
 
 ## Read this first, it will save you an afternoon
 
 **macOS keys the Accessibility grant to the binary's cdhash, and `swift build` ad-hoc signs,
 so the cdhash changes on every compile.** The grant you just gave can vanish the next time
-you build, System Settings fills with stale `sigstop` entries, and you will be certain the
+you build, System Settings fills with stale `sitless` entries, and you will be certain the
 permission code is broken.
 
 Create one stable identity and sign with it:
@@ -12,7 +12,7 @@ Create one stable identity and sign with it:
 ```sh
 cd app
 make dev-cert                      # prints the one-time Keychain Access steps
-SIGN_IDENTITY=sigstop-dev make run
+SIGN_IDENTITY=sitless-dev make run
 ```
 
 Never debug this by re-granting the permission. Check with `make doctor`, which reports the
@@ -21,8 +21,8 @@ window title as `readable` only when the process is genuinely trusted.
 ## Setup
 
 ```sh
-git clone https://github.com/Mohamed-Elshesheny/sigstop
-cd sigstop/app
+git clone https://github.com/584144/sitless
+cd sitless/app
 make run      # build, bundle, launch
 make test     # the badge export check, then the suites; no GUI session required
 make doctor   # exactly what the app can observe right now
@@ -35,7 +35,7 @@ There is **no Xcode project and no Xcode requirement**. `open app/Package.swift`
 the editor. Do not add a `.xcodeproj`.
 
 The landing site is a separate repository,
-[`sigstop-web`](https://github.com/Mohamed-Elshesheny/sigstop-web).
+the upstream [`sigstop-web`](https://github.com/Mohamed-Elshesheny/sigstop-web).
 
 ### Rendering views to PNG
 
@@ -45,7 +45,7 @@ each path and exits. None of them opens the event log or writes anything of your
 
 ```sh
 swift build
-.build/debug/sigstop --render-prompt out/prompt streak.gentle.first-skip   # stem, then a corpus id
+.build/debug/sitless --render-prompt out/prompt streak.gentle.first-skip   # stem, then a corpus id
 ```
 
 | Flag | Draws | Reads |
@@ -69,14 +69,14 @@ Changing a row is its own PR, with the argument written out, landing before the 
 
 | | |
 |---|---|
-| **Layering is one way** | `App -> Sensors -> Core`. `SigstopCore` never imports AppKit. The target graph in [`app/Package.swift`](app/Package.swift) holds the direction. |
+| **Layering is one way** | `App -> Sensors -> Core`. `SitlessCore` never imports AppKit. The target graph in [`app/Package.swift`](app/Package.swift) holds the direction. |
 | **Core never reads the clock** | It takes an injected `TimeSource`. That is why the engine is testable without a window server. Elapsed time is diffed from real timestamps, never counted in ticks: [BREAK-DECISION §3.2](docs/BREAK-DECISION.md). |
 | **Never overclaim** | When two activities cannot be told apart, degrade to their shared parent. Never guess between siblings. [ACTIVITY-DETECTION §0, §6](docs/ACTIVITY-DETECTION.md). |
 | **Zero permissions works** | Accessibility and git context are upgrades. A feature that requires a permission is a design error. [PRIVACY §3](docs/PRIVACY.md). |
 | **Never read content** | Tier 1 reads window titles and `kAXDocument` file paths. The strings stay in memory; only the activity decided from them is logged. A web page's host, never its path or query, only behind its own switch, off by default. Never bodies, keystrokes, clipboard, screen or messages. [PRIVACY §1.5, §2](docs/PRIVACY.md). |
 | **One network call** | The update check, only when you press it. `make verify` enforces it. A second one changes this table and `docs/PRIVACY.md` first, in its own PR. [PRIVACY §2.7](docs/PRIVACY.md). |
 | **Humour has rails** | Never about body weight, appearance, medical conditions, mental health, competence or job security. No medical claims. CI lints the corpus: [MESSAGE-ENGINE §4](docs/MESSAGE-ENGINE.md). |
-| **One dependency** | Sparkle, pinned exactly, linked into `SigstopApp` only. `SigstopCore` and `SigstopSensors` stay dependency-free. A second one needs an argument as strong as Sparkle's: [PRIVACY §2.8](docs/PRIVACY.md). |
+| **One dependency** | Sparkle, pinned exactly, linked into `SitlessApp` only. `SitlessCore` and `SitlessSensors` stay dependency-free. A second one needs an argument as strong as Sparkle's: [PRIVACY §2.8](docs/PRIVACY.md). |
 
 ## Adding support for an app
 
@@ -86,7 +86,7 @@ extension point is wrong and fixing that is the better PR.
 A provider is a pure function from signals to an observation: no state, no I/O, `Sendable`.
 To test one, construct a `SignalContext` literal.
 
-1. Add it in `app/Sources/SigstopSensors/Providers/`.
+1. Add it in `app/Sources/SitlessSensors/Providers/`.
 2. Declare its `AppClaim`s. Resolution ranks exact bundle id > prefix > executable name, so
    `com.jetbrains.` covers the family.
 3. Confirm the bundle id rather than inventing it: `osascript -e 'id of app "Zed"'`. If you
@@ -96,7 +96,7 @@ To test one, construct a `SignalContext` literal.
 
 ## Writing a joke
 
-The 215 lines live in `app/Sources/SigstopCore/Message/corpus.json` with structured
+The 215 lines live in `app/Sources/SitlessCore/Message/corpus.json` with structured
 preconditions, so a line can fire only in the situation it is about:
 
 ```json
@@ -138,7 +138,7 @@ that it has to.
 [Conventional Commits](https://www.conventionalcommits.org). Types: `feat` `fix` `refactor`
 `perf` `docs` `test` `build` `ci` `chore`. Scopes: `core` `sensors` `app` `docs` `ui`.
 `ui` files a `feat`, `fix` or `perf` under 🎨 UI in the release notes, as does any such change
-whose shipped files are all under `SigstopApp/Views/` or are `Scripts/dmg.sh`. The subject is the
+whose shipped files are all under `SitlessApp/Views/` or are `Scripts/dmg.sh`. The subject is the
 bullet, so write it for a stranger and without an em dash; the notes write one as a comma
 ([`docs/RELEASING.md`](docs/RELEASING.md) §0.5), and it reads like the repair it is.
 

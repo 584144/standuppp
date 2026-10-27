@@ -54,7 +54,7 @@ FORBIDDEN = {
 
 # Where a flagged call is known and reviewed. The corpus is read from the app's own bundle.
 ALLOWED = {
-    "contentsOf:": {"app/Sources/SigstopCore/Message/MessageTemplate.swift"},
+    "contentsOf:": {"app/Sources/SitlessCore/Message/MessageTemplate.swift"},
 }
 
 MONITOR = re.compile(r"addGlobalMonitorForEvents\s*\(\s*matching:\s*(\[[^\]]*\]|\.\w+)")

@@ -12,10 +12,10 @@ SECTIONS = [
 ]
 SUBJECT = re.compile(r"^(?P<type>\w+)(?:\((?P<scope>[^)]*)\))?(?P<breaking>!)?: (?P<subject>.+)$")
 SHIPS = re.compile(
-    r"^app/(Sources/(?!Scenarios/)|Resources/(Info\.plist|sigstop\.icns|sigstop\.entitlements)$"
+    r"^app/(Sources/(?!Scenarios/)|Resources/(Info\.plist|sitless\.icns|sitless\.entitlements)$"
     r"|Package\.swift$|Scripts/(bundle|dmg)\.sh$)"
 )
-UI = re.compile(r"^app/(Sources/SigstopApp/Views/|Scripts/dmg\.sh$)")
+UI = re.compile(r"^app/(Sources/SitlessApp/Views/|Scripts/dmg\.sh$)")
 
 # The one change a subject gets on its way into the notes. Nothing a user reads carries an em dash,
 # and release.sh refuses notes that do, but a subject is already on origin/main by then and cannot

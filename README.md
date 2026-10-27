@@ -1,236 +1,90 @@
 <div align="center">
 
-<img src="docs/images/icon.png" width="112" alt="sigstop icon">
+<img src="docs/images/icon.png" width="112" alt="久坐工具提醒图标">
 
-# sigstop
+# 久坐工具提醒 · sitless
 
-**You're a developer. Not a server.**
+**一个只在你真的起身时才算数的 macOS 久坐提醒。**
 
-Break reminders that know what you're doing, and when not to interrupt.
-
-[![Download for macOS](https://img.shields.io/badge/Download_for_macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/Mohamed-Elshesheny/sigstop/releases/latest/download/sigstop.dmg)
-
-macOS 14+ · Apple Silicon and Intel · Free and open source · [Website](https://sigstop-app.vercel.app)
-
-[![CI](https://github.com/Mohamed-Elshesheny/sigstop/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohamed-Elshesheny/sigstop/actions/workflows/ci.yml)
-[![587 tests](https://img.shields.io/badge/tests-587%20passing-3fb950?style=flat-square)](#build)
+[![CI](https://github.com/584144/sitless/actions/workflows/ci.yml/badge.svg)](https://github.com/584144/sitless/actions/workflows/ci.yml)
+[![593 tests](https://img.shields.io/badge/tests-593%20passing-3fb950?style=flat-square)](#build)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-<img src="docs/images/prompt.png" width="100%" alt="A sigstop prompt on a MacBook screen, dimming the Cursor window behind it, under a small amber face: SIGTSTP L1, 47m continuous. Tab. Tab. Tab. Tab. You are 200 lines into a file you have never read. Take five minutes and go meet your new codebase. Buttons: Take it, Snooze (SIGALRM), Skip, quiet for 20m, Ignore it.">
+macOS 14+ · Apple Silicon / Intel · 开源免费
 
 </div>
 
-## ✨ Not another timer
+> 本项目是 [sitless](https://github.com/584144/sitless)，fork 自 Mohamed Elshesheny 的 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop)（GPL-3.0）。原作者的版权和许可证保留在 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 中。按照原项目的 [TRADEMARK.md](TRADEMARK.md)，本 fork 换了名字、bundle id、图标和菜单栏标记，**它不是官方 sigstop**。
 
-A timer fires in the middle of your standup. sigstop doesn't.
+## 它和普通计时器有什么不同
 
-<img src="docs/images/compare.png" width="100%" alt="A timer versus sigstop. Fires during your standup: a timer does, sigstop waits for the call to end. Cuts you off mid-thought: a timer does, sigstop picks a pause. Knows Xcode from YouTube: a timer doesn't, sigstop does. Counts time you were away: a timer does, sigstop counts only real work. Tells you why it's quiet: a timer doesn't, sigstop has --doctor.">
+普通计时器只会到点响一下，你看到了、点掉了，它就当你休息过了。可是"看到了"不代表"做了"，这样的记录没有参考价值。
 
-- 😏 **Speaks your language.** 215 lines for editors, terminals, browsers, AI tools and Xcode, in four tones from friendly to nuclear.
-- 📊 **Shows your day.** Active time, your longest unbroken stretch, how many breaks you took and how long they ran on average, and the ones you kept.
-- 🔋 **Barely there.** It sleeps between checks, so you won't notice it on your battery or in your Mac's speed.
-- 🔒 **Private by design.** Zero permissions required, and nothing about you leaves your Mac.
+久坐工具提醒只认你**真的离开了键盘**：
 
-<a id="install"></a>
+- ⏱️ **只算真正的工作时间**：按键盘鼠标的活跃度计时，离开的时间不算进去。默认连续工作 45 分钟提醒一次，可以在设置里改。
+- 🚶 **休息期间敲键盘就不算**：本 fork 新增的规则。休息倒计时期间，如果键盘鼠标累计活跃超过 **1 分钟**，这次休息作废：工作计时不清零，提醒很快会再来，当天统计里算"放弃的休息"。
+- 🤫 **不打断你**：开会（麦克风或摄像头在用）、全屏、专注模式下会等一等，挑一个停顿的时机再提醒。
+- 📊 **看得见的一天**：活跃时长、最长连续工作、休息次数，以及真正做到的有几次。
+- 🔒 **数据不出本机**：不需要任何权限，不联网（只有你手动点"检查更新"时才会发一次请求），不读取窗口内容、按键内容和剪贴板。
 
-## 📦 Install
+## 设置
 
-**Homebrew**
+设置在菜单栏图标 → Settings。也可以直接编辑配置文件：
 
-```sh
-brew install --cask mohamed-elshesheny/sigstop/sigstop
 ```
-
-**Or the disk image**
-
-1. [Download `sigstop.dmg`](https://github.com/Mohamed-Elshesheny/sigstop/releases/latest/download/sigstop.dmg)
-2. Open it and drag **sigstop** into **Applications**
-
-**Or build it yourself.** Command Line Tools only, no Xcode, about a minute. An app you build on your own Mac is never quarantined, so the step below does not apply to it. See [Build from source](#build).
-
-Either download needs the quarantine cleared once, then open it:
-
-> [!IMPORTANT]
-> sigstop isn't signed with a paid Apple Developer ID, so macOS blocks it the first time. That's expected, not a malware warning, and you only do it once. Notarization needs Apple's Developer Program at 99 USD a year, which this project does not have.
-
-**Recommended: Terminal**
-
-```sh
-xattr -dr com.apple.quarantine /Applications/sigstop.app
+~/Library/Application Support/io.github.584144.sitless/settings.json
 ```
-
-Then open sigstop as usual. It lives in your menu bar.
-
-**Or: System Settings**
-
-1. Open sigstop and close the warning
-2. Go to **System Settings → Privacy & Security** and scroll down
-3. Click **Open Anyway** and confirm (needs an admin account)
-
-If **Open Anyway** isn't there, which happens when macOS calls the app "damaged", use the Terminal command.
-
-To check the download wasn't corrupted, compare its checksum with the `sha256` on the [release page](https://github.com/Mohamed-Elshesheny/sigstop/releases/latest):
-
-```sh
-shasum -a 256 ~/Downloads/sigstop.dmg
-```
-
-That proves the file matches what GitHub serves, not who built it. For that, [build it yourself](#build).
-
-**Updates:** Settings → About → **Check for updates**. Every update is checked against a signing key built into the app, from 0.1.8 on before it is even unpacked.
-
-**Where to get it:** the only official downloads are this repository's [releases](https://github.com/Mohamed-Elshesheny/sigstop/releases), the Homebrew tap above and [sigstop-app.vercel.app](https://sigstop-app.vercel.app). Any other site offering sigstop is not ours.
-
-## 🔒 Privacy
-
-- 👀 Reads **which** app is in front, never what's in it. No code, keystrokes, clipboard or screen.
-- 🙅 **Needs zero permissions.** Accessibility (window titles and file paths) and your git branch are optional upgrades.
-- 📡 **One request when you press Check for updates**, plus the download if you choose to install. No analytics, no account, no ID.
-- 💾 **Stays on your Mac.** Raw events are deleted after 7 days; the daily totals per app stay until you delete them.
-
-Don't take our word for it: `make verify` checks the network and privacy claims against an app you build yourself, and [PRIVACY.md](docs/PRIVACY.md) lists everything it stores.
-
-## ❓ FAQ
-
-<details>
-<summary><b>macOS says sigstop "can't be opened", "could not verify" it, or that it's "damaged"</b></summary>
-<br>
-
-All three are the quarantine on an app without a paid Apple signature, not a malware warning. Run the Terminal command in [Install](#install) once.
-
-</details>
-
-<details>
-<summary><b>It hasn't reminded me in a while. Is it broken?</b></summary>
-<br>
-
-Probably not. Ask it, and it tells you exactly why it's holding back:
-
-```sh
-/Applications/sigstop.app/Contents/MacOS/sigstop --doctor
-```
-
-</details>
-
-<details>
-<summary><b>It interrupted a call. How do I stop that?</b></summary>
-<br>
-
-Click **I'm in a meeting** in the menu bar. It holds breaks for up to two hours, or until you click **Not in a meeting**. The button is there while **Settings → Rhythm → Hold my break during calls** is on, which it is by default.
-
-</details>
-
-<details>
-<summary><b>Does it respect Focus or Do Not Disturb?</b></summary>
-<br>
-
-Not by default, and it never reads your Focus state. Out of the box sigstop draws every prompt itself, `SIGTSTP` to `SIGSTOP`, as a dimmed panel over every display. Focus governs notifications, not an app's own windows, so a Focus silences neither. What keeps it quiet is its own switches: **Settings → Rhythm → Stay quiet on a schedule**, the **I'm in a meeting** hold, and a live microphone or camera.
-
-There is a switch to let Focus decide, **Settings → Rhythm → Use macOS notifications instead**, and on the build you download it cannot do what it says. The download is ad-hoc signed, with no Developer ID, and the caption under the switch records what macOS does with a notification from such a build: it accepts it, reports it as delivered, and never draws it. sigstop draws its own panel in place of a notification only when macOS does not report it as delivered, so on this build the switch loses the first three rungs: no banner, no panel, only the menu bar mark, until `SIGSTOP` arrives as the panel. Leave it off, which is the default, unless you built and signed the app yourself. On a build whose notifications macOS draws, `SIGTSTP`, `SIGINT` and `SIGTERM` go through Notification Center as ordinary notifications, which a Focus silences like any other app's, macOS asks once whether sigstop may notify you, and `SIGSTOP` is still drawn by the app and lands whatever Focus is on, except in Low Power Mode, where it goes through Notification Center too.
-
-Two limits, stated plainly. sigstop can't see Focus, so it can't tell that a notification was silenced: the ladder climbs on its own clock and `SIGSTOP` lands when it would have anyway, and the menu bar mark shows a break is due the whole time. And if you decline the notification permission, or turn it off later in System Settings, sigstop goes back to drawing its own panel for every rung and says so in the menu bar. Which rung takes which channel is in [BREAK-DECISION.md](docs/BREAK-DECISION.md) §7.5.
-
-</details>
-
-<details>
-<summary><b>Does it read my code or what I type?</b></summary>
-<br>
-
-No. Out of the box it sees which app is in front, whether you're idle, and whether your mic or camera is on. Never keystrokes, clipboard or what's on screen. Window titles, file paths and your git branch are optional upgrades, and [PRIVACY.md](docs/PRIVACY.md) lists everything it stores.
-
-</details>
-
-<details>
-<summary><b>How do I check the app I installed, not the source?</b></summary>
-<br>
-
-Against the copy in `/Applications`. `codesign`, `plutil`, `defaults` and `ls` ship with macOS; `otool` and `nm` come with the Command Line Tools (`xcode-select --install`) or Xcode, and on a Mac with neither those two lines prompt to install them instead of printing. Every command here only reads; none changes the app, its settings or your data.
-
-```sh
-APP=/Applications/sigstop.app
-otool -L "$APP/Contents/MacOS/sigstop"                    # links Sparkle, Apple's frameworks and the Swift runtime, nothing else
-ls "$APP/Contents/Frameworks"                             # exactly: Sparkle.framework
-nm -u -arch all "$APP/Contents/MacOS/sigstop" | grep -E 'NSURLSession|NWConnection|^_(socket|connect|getaddrinfo)$'   # nothing
-codesign -d --entitlements - --xml "$APP" | plutil -p -   # two keys, and no network.server
-codesign -dvv "$APP"                                      # Signature=adhoc, TeamIdentifier=not set, flags=...(adhoc,runtime)
-plutil -p "$APP/Contents/Info.plist" | grep '"SU'         # no automatic checks, no profile, signature checked before unpacking
-defaults read dev.sigstop.app                             # what it writes off at every launch: SUEnableAutomaticChecks = 0
-```
-
-What each line should show, what the keys mean and what none of it can prove is in [PRIVACY.md §6.6](docs/PRIVACY.md#66-check-the-app-you-installed). With a clone, `BUNDLE=/Applications/sigstop.app app/Scripts/verify.sh` runs the whole set against the installed copy.
-
-</details>
-
-<details>
-<summary><b>Can it show up in tmux or my prompt?</b></summary>
-<br>
-
-Yes. Turn on **Settings → Data → Write a status line for tmux or your prompt**. sigstop then keeps one line in `~/Library/Application Support/dev.sigstop.app/status.txt`, the same state word and waiting line the menu shows, rewritten only when it changes and removed when you turn the switch off or quit. sigstop spawns nothing and polls nothing; your status bar reads one file.
-
-In `~/.tmux.conf`, with the 40-column default for `status-right` lifted, since every line sigstop writes is longer:
-
-```sh
-set -g status-right-length 120
-set -g status-right '#(cat "$HOME/Library/Application Support/dev.sigstop.app/status.txt")'
-```
-
-In `~/.claude/settings.json`, as a Claude Code status line:
 
 ```json
 {
-  "statusLine": {
-    "type": "command",
-    "command": "cat \"$HOME/Library/Application Support/dev.sigstop.app/status.txt\""
-  }
+  "workIntervalMinutes": 50,
+  "breakDurationMinutes": 5,
+  "maxActiveDuringBreakSeconds": 60
 }
 ```
 
-The line looks like `running · next break in 12m of work.` It never holds a project, a branch, a file or a title.
+| 键 | 含义 | 默认 |
+|---|---|---|
+| `workIntervalMinutes` | 连续工作多少分钟后提醒 | 45 |
+| `breakDurationMinutes` | 一次休息多少分钟 | 5 |
+| `maxActiveDuringBreakSeconds` | 休息期间键盘鼠标最多可以用多少秒，超过就不算休息（10–600） | 60 |
 
-</details>
-
-<details>
-<summary><b>Where is my data, and how do I delete it?</b></summary>
-<br>
-
-In `~/Library/Application Support/dev.sigstop.app`. **Settings → Data → Delete my data…** removes everything in that folder except its empty `.lock`, which sigstop holds while it runs, and removes the login item. What the update check leaves behind is in the uninstall steps below.
-
-</details>
-
-<details>
-<summary><b>How do I uninstall it?</b></summary>
-<br>
-
-If **Launch at login** is on, press **Settings → Data → Delete my data…** first, which also removes the login item. Then quit sigstop from the menu bar, drag it to the Trash, and remove what the update check left behind and any Accessibility permission you granted:
+改完退出再打开 App 就会生效。用 `--doctor` 可以看到当前生效的值：
 
 ```sh
-rm -rf ~/Library/Application\ Support/dev.sigstop.app
-rm -rf ~/Library/Caches/dev.sigstop.app ~/Library/Caches/dev.sigstop.app.sparkle
-rm -rf ~/Library/HTTPStorages/dev.sigstop.app ~/Library/HTTPStorages/dev.sigstop.app.binarycookies
-defaults delete dev.sigstop.app
-tccutil reset Accessibility dev.sigstop.app
+/Applications/sitless.app/Contents/MacOS/sitless --doctor
 ```
-
-</details>
 
 <a id="build"></a>
 
-## 🛠️ Build from source
+## 从源码构建
 
-Command Line Tools are enough. No Xcode.
+装好 Command Line Tools 就够了，不需要 Xcode。
 
 ```sh
-git clone https://github.com/Mohamed-Elshesheny/sigstop
-cd sigstop/app
-make bundle  # dist/sigstop.app, built and signed on your Mac
-make run     # build and launch
-make test    # the test suite, no GUI needed
+git clone https://github.com/584144/sitless
+cd sitless/app
+make bundle  # 生成 dist/sitless.app，在你本机签名
+make run     # 构建并启动
+make test    # 跑测试，不需要图形界面
+make verify  # 对构建出的 App 检查网络和隐私方面的承诺
 ```
 
-Drag `dist/sigstop.app` into Applications if you want to keep it. It never had the quarantine attribute, because nothing downloaded it, so macOS opens it without the step in [Install](#install).
+把 `dist/sitless.app` 拖进"应用程序"就能长期使用。自己构建的 App 没有隔离属性，打开时不会被 macOS 拦下。
 
-How it works is in [`docs/`](docs). Want to help? Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+实现细节在 [`docs/`](docs)（英文，来自上游项目，已按本 fork 更新）。休息判定见 [BREAK-DECISION.md](docs/BREAK-DECISION.md)，本机存储了哪些数据见 [PRIVACY.md](docs/PRIVACY.md)。
 
-## 📄 License
+## 发布与自动更新
 
-[GPL-3.0](LICENSE). The name and logo are not covered; see [TRADEMARK.md](TRADEMARK.md).
+本 fork 目前还没有发布安装包，也没有启用自动更新。`Info.plist` 里的 `SUPublicEDKey` 仍是上游的公钥。如果你要发布自己的版本，请先用 Sparkle 的 `generate_keys` 生成自己的密钥并替换它，再按 [RELEASING.md](docs/RELEASING.md) 操作。
+
+## 相对 sigstop 的改动
+
+- 新增：休息期间键盘鼠标累计活跃超过上限（默认 60 秒）时，这次休息不算数。日志的 `break_end` 行新增 `active_s` 和 `void` 字段。
+- 改名为"久坐工具提醒 / sitless"，换了 bundle id、模块名、图标、菜单栏标记和配色。
+- 清空了上游的更新源。
+
+## 许可证
+
+[GPL-3.0](LICENSE)。原作者 Mohamed Elshesheny 的版权声明见 [NOTICE](NOTICE)。

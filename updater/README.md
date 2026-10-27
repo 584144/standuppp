@@ -4,7 +4,7 @@ Two files live here: `appcast.xml`, the update feed, and this README. The direct
 of what GitHub Pages serves for this repository, so both are served.
 
 `SUFeedURL` in `app/Resources/Info.plist` is
-`https://mohamed-elshesheny.github.io/sigstop/appcast.xml`. That is this folder's
+`https://584144.github.io/sitless/appcast.xml`. That is this folder's
 `appcast.xml`, deployed by `.github/workflows/pages.yml` when a push to `main` changes something
 under `updater/` or the workflow itself, or when the workflow is run by hand.
 

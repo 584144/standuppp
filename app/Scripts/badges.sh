@@ -7,7 +7,7 @@
 # badge the app does not have is exactly the kind of small lie this project is
 # built to avoid. So:
 #
-#   1. Sources/SigstopCore/Badges/Badge.swift stays the single definition. It is
+#   1. Sources/SitlessCore/Badges/Badge.swift stays the single definition. It is
 #      read here, never hand-transcribed.
 #   2. Exports/badges.json is the machine-readable copy of it, committed, so the
 #      site can vendor a file at a commit it can name instead of a paragraph it
@@ -28,7 +28,7 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.."
 
-SOURCE="Sources/SigstopCore/Badges/Badge.swift"
+SOURCE="Sources/SitlessCore/Badges/Badge.swift"
 EXPORT="Exports/badges.json"
 
 [ -f "${SOURCE}" ] || { echo "error: ${SOURCE} not found" >&2; exit 1; }
@@ -104,7 +104,7 @@ generate() {
       if (n == 0) { print "badges.sh: no badges found in the catalogue" > "/dev/stderr"; exit 1 }
       print "{"
       print "  \"schemaVersion\": 1,"
-      print "  \"source\": \"app/Sources/SigstopCore/Badges/Badge.swift\","
+      print "  \"source\": \"app/Sources/SitlessCore/Badges/Badge.swift\","
       print "  \"badges\": ["
       for (i = 1; i <= n; i++) {
         printf "    { \"id\": \"%s\", \"name\": \"%s\", \"motif\": \"%s\" }%s\n", \

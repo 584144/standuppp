@@ -68,7 +68,7 @@ three is the single most common bug in this class of app, so the model keeps the
 
 This section used to sketch `ActivityType`, `ClassificationSource` and `ActivityClassification`, and
 none of them was built. The session carries `Activity`, the detector's enum in
-`app/Sources/SigstopCore/Model/Activity.swift` (quoted in `docs/ACTIVITY-DETECTION.md` §3), with a
+`app/Sources/SitlessCore/Model/Activity.swift` (quoted in `docs/ACTIVITY-DETECTION.md` §3), with a
 `Confidence` beside it, and the app as an `AppIdentity` (`bundleID`, `localizedName`, `pid`) from
 `Model/Identity.swift`.
 
@@ -95,7 +95,7 @@ meeting" and "the microphone is on".
 
 ### 2.2 `DeveloperSession`
 
-The pause, clock and reset vocabulary, from `app/Sources/SigstopCore/Session/SessionTypes.swift`:
+The pause, clock and reset vocabulary, from `app/Sources/SitlessCore/Session/SessionTypes.swift`:
 
 ```swift
 public enum PauseCause: String, Sendable, Codable, Hashable {
@@ -124,7 +124,7 @@ public enum ResetReason: String, Sendable, Codable, Hashable {
 }
 ```
 
-The session's stored properties, from `app/Sources/SigstopCore/Session/DeveloperSession.swift`:
+The session's stored properties, from `app/Sources/SitlessCore/Session/DeveloperSession.swift`:
 
 ```swift
 public struct DeveloperSession: Sendable, Codable, Hashable, Identifiable {
@@ -175,9 +175,9 @@ public func focusScore(now: Date, window: TimeInterval = 600) -> Double {
 ```
 
 That is `DeveloperSession.focusScore(now:window:)`, in
-`app/Sources/SigstopCore/Session/DeveloperSession.swift`, which `SessionTracker.focusScore` hands to
+`app/Sources/SitlessCore/Session/DeveloperSession.swift`, which `SessionTracker.focusScore` hands to
 the engine. The test the engine applies is `InterruptionPolicy.isDeepFocus(_:)`, in
-`app/Sources/SigstopCore/Decision/InterruptionPolicy.swift`:
+`app/Sources/SitlessCore/Decision/InterruptionPolicy.swift`:
 
 ```swift
 public func isDeepFocus(_ input: EngineInput) -> Bool {
@@ -246,7 +246,7 @@ session.note(application: sample.application, activity: sample.activity, confide
 let discontinuity = delta > policy.tickInterval + policy.tickTolerance
 ```
 
-That is the top of `SessionTracker.tick(_:)` in `app/Sources/SigstopCore/Session/SessionTracker.swift`.
+That is the top of `SessionTracker.tick(_:)` in `app/Sources/SitlessCore/Session/SessionTracker.swift`.
 Credit is measured on the monotonic clock only. The wall clock is compared against it, and a
 disagreement larger than `wallClockSkewTolerance` (5 s) is logged as `wallClockSkewIgnored` rather
 than credited. A monotonic step longer than `tickInterval + tickTolerance` (10 s in the app, §3.1) is
@@ -309,7 +309,7 @@ two directions.
 Every non-credited stretch of time is a **gap**. A gap is classified once, when it ends (or when it
 crosses a threshold, whichever comes first), by duration and context. This is the authoritative table.
 
-`GapClassification`, in `app/Sources/SigstopCore/Session/SessionTypes.swift`:
+`GapClassification`, in `app/Sources/SitlessCore/Session/SessionTypes.swift`:
 
 ```swift
 public enum GapClassification: Sendable, Hashable {
@@ -321,7 +321,7 @@ public enum GapClassification: Sendable, Hashable {
 ```
 
 and the function that assigns it, `classify(duration:cause:)` in
-`app/Sources/SigstopCore/Session/SessionTracker.swift`:
+`app/Sources/SitlessCore/Session/SessionTracker.swift`:
 
 ```swift
 public func classify(duration: TimeInterval, cause: PauseCause) -> GapClassification {
@@ -437,7 +437,7 @@ Rows worth defending:
 
 ### 4.2 Reference thresholds
 
-`BreakPolicy`, in `app/Sources/SigstopCore/Decision/InterruptionPolicy.swift`, down to the ladder.
+`BreakPolicy`, in `app/Sources/SitlessCore/Decision/InterruptionPolicy.swift`, down to the ladder.
 The audio ceiling and the call-latch constants follow in the same struct and are listed in §7.1.1 and
 §7.8.
 
@@ -488,7 +488,7 @@ These are the defaults of `BreakPolicy()`. The app builds its policy with `init(
 same `InterruptionPolicy.swift`, which takes several of them from `settings.json`:
 
 ```swift
-public init(settings: SigstopSettings) {
+public init(settings: SitlessSettings) {
     self.init()
     targetContinuousWork = settings.workInterval
     breakDurationTarget = settings.breakDuration
@@ -528,7 +528,7 @@ public enum EngineState: Sendable, Codable, Hashable {
     case quiet(QuietState)
 ```
 
-`EngineState`, in `app/Sources/SigstopCore/Decision/EngineState.swift`, where the payload types sit
+`EngineState`, in `app/Sources/SitlessCore/Decision/EngineState.swift`, where the payload types sit
 too. The one the transition table leans on most is `BreakDue`:
 
 ```swift
@@ -681,7 +681,7 @@ public struct EngineInput: Sendable {
     public var monotonic: Double
     public var context: DeveloperContext
     public var signals: SystemSignals
-    public var settings: SigstopSettings
+    public var settings: SitlessSettings
     public var calendarSystem: Calendar
     public var calendar: CalendarSignals?
     public var seams: [Seam]
@@ -695,7 +695,7 @@ public struct EngineInput: Sendable {
     public var sessionEvents: [SessionEvent]
 ```
 
-That is `EngineInput`, in `app/Sources/SigstopCore/Decision/BreakDecisionEngine.swift`. Its `signals`
+That is `EngineInput`, in `app/Sources/SitlessCore/Decision/BreakDecisionEngine.swift`. Its `signals`
 are:
 
 ```swift
@@ -787,7 +787,7 @@ public enum RateLimit: String, Sendable, Codable, Hashable {
 }
 ```
 
-These are in `app/Sources/SigstopCore/Decision/InterruptionPolicy.swift`, just below
+These are in `app/Sources/SitlessCore/Decision/InterruptionPolicy.swift`, just below
 `InterruptionVerdict`, whose four cases are `.deliver`, `.hardBlocked(HardBlock)`,
 `.softDeferred(SoftDeferReason)` and `.rateLimited(RateLimit)`.
 
@@ -800,7 +800,7 @@ These are in `app/Sources/SigstopCore/Decision/InterruptionPolicy.swift`, just b
 | `recentCallContinuing` | The call latch: a capture device ran continuously for >= 45 s and stopped less than the hold budget ago | See §7.7. Named after what it asserts, not after what you might conclude from it. |
 | `screenBeingShared` | **Nothing. This block cannot fire.** | `CGDisplayIsCaptured`, which this row used to name, is annotated `API_DEPRECATED("No longer supported", macos(10.0,10.9))` and does not compile from Swift. CoreMediaIO enumerates no display-capture device. ScreenCaptureKit needs the Screen Recording grant `docs/PRIVACY.md` §3.1 forbids hard-requiring. The weaker and honest claim: someone looked for a permission-free signal and did not find one. The mitigation this row promised was a manual toggle, and it never shipped; it does now, as "I am in a meeting" in the menu, time-boxed to two hours. `--doctor` prints this block as UNOBSERVABLE with the reason and says out loud that it never fires. |
 | `presentationFullscreen` | **Nothing reaches it. This block cannot fire.** | The design was AX `kAXFullscreenAttribute` on the focused window **AND** (presentation-capable app **OR** camera/mic live), and nothing reads that attribute. `frontmostIsFullscreen` comes from window geometry instead: `AppModel` sets it from `ConcurrentStates.fullscreen`, true when any on-screen layer-0 window, from any app, matches a display's size (`SystemStateCollector.windowGeometry`). The other half never holds: `frontmostIsPresentationApp` is always `false` (§6), and `cameraRunning` has already returned `.cameraInUse` one line above. Fullscreen **alone is not a block** — developers work fullscreen all day, and blocking on it would mean never firing for half the user base. |
-| `focusModeActive` | Not read. `SensorStack` passes `nil`, because there is no permission-free API (`INFocusStatusCenter` is public but asks for its own authorization, which this app declines) and the Focus database is not something this app opens | **Honest limitation:** Focus is not detected. What still holds: notifications go out at `.passive` for L1 and `.active` for L2 and L3 (`Notifier.interruptionLevel(for:)`), so a Focus mode silences them. L4 requests `.timeSensitive`, but the build does not carry the Time Sensitive entitlement (`com.apple.developer.usernotifications.time-sensitive` is absent from `app/Resources/sigstop.entitlements`, and a build signed ad hoc with no Team ID cannot carry a `com.apple.developer` entitlement), so macOS delivers it as an ordinary notification and a Focus silences it like any other. When Focus swallows a notification the engine cannot tell; the menu bar indicator is the safety net. |
+| `focusModeActive` | Not read. `SensorStack` passes `nil`, because there is no permission-free API (`INFocusStatusCenter` is public but asks for its own authorization, which this app declines) and the Focus database is not something this app opens | **Honest limitation:** Focus is not detected. What still holds: notifications go out at `.passive` for L1 and `.active` for L2 and L3 (`Notifier.interruptionLevel(for:)`), so a Focus mode silences them. L4 requests `.timeSensitive`, but the build does not carry the Time Sensitive entitlement (`com.apple.developer.usernotifications.time-sensitive` is absent from `app/Resources/sitless.entitlements`, and a build signed ad hoc with no Team ID cannot carry a `com.apple.developer` entitlement), so macOS delivers it as an ordinary notification and a Focus silences it like any other. When Focus swallows a notification the engine cannot tell; the menu bar indicator is the safety net. |
 | `screenLocked` / `systemSleeping` / `fastUserSwitched` | Workspace + distributed notifications | Nobody is there. |
 | `settleInAfterBreak` | `now - lastBreakEndedAt < 5 min`. **Nothing reaches it in the shipping app.** | You do not tell someone who just sat back down to get up. But every path that sets `lastBreakEndedAt` also resets the work clock, work is credited no faster than wall time, and the shortest work interval (5 min) equals the window, so no cycle can open inside it. Only an early prompt could (`opportunisticEarlyPrompt`, §7.7), and that needs calendar signals the app does not read. The block stays as the guard for that path; `--doctor` no longer describes a window that never applies. |
 | `imminentMeeting` | `minutesUntilNextBusyEvent <= 2` | The two minutes before a call are not free time. |
@@ -919,7 +919,7 @@ row stays in the table so the next person does not re-invent it.
 `precmd`/`preexec` hook writing one byte to a Unix domain socket in the app's container. That was
 never built, and `terminalCommandRunning` is still always `false` (§6). What produces the seam
 instead is a diff of two scans the app was already making. `CommandWatch`, in
-`app/Sources/SigstopSensors/CommandWatch.swift`, keeps the previous Tier 2 process snapshot and
+`app/Sources/SitlessSensors/CommandWatch.swift`, keeps the previous Tier 2 process snapshot and
 compares it with the current one: a tool on the allowlist that was a **child of the app in front**
 at the previous two scans and is gone at this one is a command that has just returned, and so is
 the kernel's `P_TRACED` flag clearing under the same app, which is a debug session ending. The
@@ -1079,8 +1079,8 @@ Nothing about it moves. Only the eyes differ, and they are set once per panel by
 | break screen, `SIGCONT` | `welcomeBack` | two upward arcs | welcome back, stack intact |
 | menu bar mark and panel mark while `.held` (§11.1) | `resting` | two flat dashes, the closed eyes. `MenuBarIcon` and `BrandMark` draw them in their own geometry; `FaceMark` draws this mood only on the contact sheet | a break is due and a call is holding it |
 
-`FaceMood(level:tone:)` in `SigstopCore/Message/FaceMood.swift` is the mapping, `FaceMoodTests` pins
-it, and `FaceMark` in `SigstopApp/Views/FaceMark.swift` draws it. The **rendered** tone caps the
+`FaceMood(level:tone:)` in `SitlessCore/Message/FaceMood.swift` is the mapping, `FaceMoodTests` pins
+it, and `FaceMark` in `SitlessApp/Views/FaceMark.swift` draws it. The **rendered** tone caps the
 face the way the user's tone setting caps the line (`docs/MESSAGE-ENGINE.md` §4): a friendly line at
 L3 gets the eyebrow, never the lowered lids, because the eyes and the words are one voice and the
 lids under a gentle sentence would read as a warden. The rails, which are the tone rule in
@@ -1310,7 +1310,7 @@ public func hardBlock(_ input: EngineInput, budget: CycleBudget = CycleBudget())
 ```
 
 `InterruptionPolicy.verdict(_:budget:)` and `hardBlock(_:budget:)`, in
-`app/Sources/SigstopCore/Decision/InterruptionPolicy.swift`. `rateLimit` checks quiet hours, the
+`app/Sources/SitlessCore/Decision/InterruptionPolicy.swift`. `rateLimit` checks quiet hours, the
 daily cap, the per-cycle cap, minimum spacing and the ignore backoff, in that order. `softDefer`
 checks typing, a running terminal command, a recent app switch, unattributed live capture, a
 suspected call, an inferred meeting, the pre-meeting window, a calendar event in progress and deep
@@ -1584,7 +1584,7 @@ microphone while the header said STOPPED, PAUSED or snoozed. It now sits inside 
 stand-downs — a cooldown is the reason the app is quiet, an ignored input device is not the reason for
 anything, it is a button answering back.
 
-It lives in `SigstopCore` for the reason `QuietCause.title` already gives: `SigstopApp` has no test
+It lives in `SitlessCore` for the reason `QuietCause.title` already gives: `SitlessApp` has no test
 target, so a vocabulary kept there is unchecked. It is deliberately **not** fed by `PromptOutlook`,
 which reads the event log because `--doctor` is a separate process that cannot see the running
 engine; in-process `continuousWork`, `armThreshold` and `cooldownUntilMono` are free and no
@@ -1607,7 +1607,7 @@ reset, and it used to be read as one.
 The same sentence leaves the process in exactly one other way: with the status line switch on
 (Settings → Data, off by default), `AppModel` writes the header's state word and the waiting line
 to `status.txt` for a tmux status bar or a prompt to `cat`. The word comes from `StatusWord.read`
-and the line from `StatusLine.render`, both in `SigstopCore/Decision/StatusLine.swift`, and the
+and the line from `StatusLine.render`, both in `SitlessCore/Decision/StatusLine.swift`, and the
 menu bar header reads the same `StatusWord`, so the file cannot say something the panel does not.
 `StatusLineLedger` decides when the file is touched: on a change of the line, never per tick, once
 more after a minute when a write failed, and once to remove it when the switch goes off, whether
@@ -1656,7 +1656,7 @@ public struct QuietHours: Sendable, Codable, Hashable {
 }
 ```
 
-`QuietHours`, in `app/Sources/SigstopCore/Model/Settings.swift`: one window for every day, 22:00 to
+`QuietHours`, in `app/Sources/SitlessCore/Model/Settings.swift`: one window for every day, 22:00 to
 08:00, off by default.
 
 - There are no computed boundaries. `contains` reads the hour and minute of the moment it is given,
@@ -1712,7 +1712,7 @@ public struct QuietHours: Sendable, Codable, Hashable {
   `idle_begin` for the hour, or for the rest of the day, that a pause covers. The rollup learns idle
   only from those lines, and the focus heartbeats kept coming, so an evening spent away with the
   app paused was credited as work until a lock or a sleep event. `IdleLedger`, in
-  `app/Sources/SigstopCore/Storage/IdleLedger.swift`, now writes every idle line the app logs: the
+  `app/Sources/SitlessCore/Storage/IdleLedger.swift`, now writes every idle line the app logs: the
   tracker's `clockPaused` and `clockResumed` as before, and, while the app is paused, the raw idle
   reading against `microIdleGrace`, opening the span at the last input and closing it when input
   returns. An absence that outlives the pause is one span, from the last input inside it to the
@@ -1754,7 +1754,7 @@ public struct DailySummary: Sendable, Codable, Hashable {
     public let malformedLines: Int
 ```
 
-The stored fields of `DailySummary`, in `app/Sources/SigstopCore/Summary/DailyRollup.swift`.
+The stored fields of `DailySummary`, in `app/Sources/SitlessCore/Summary/DailyRollup.swift`.
 `activeWorkByActivity` is keyed by the
 `Activity` raw value, and compliance is computed rather than stored, as is the average break
 length (`totalBreakTime / breakCount`, `nil` when there is no break to average):
@@ -1888,7 +1888,7 @@ long form keeps it a description of a day.
 - The daily summary reports; it does not grade. No streaks, no red numbers, and nothing in
   the summary that could be read as a score.
 - **There are badges, and this is where the line between them and a streak is drawn.** Ten
-  of them, defined in `SigstopCore/Badges/Badge.swift` and shown only in Settings, never in
+  of them, defined in `SitlessCore/Badges/Badge.swift` and shown only in Settings, never in
   the summary and never in the prompt. Three properties make them compatible with the rule
   above rather than an exception to it: **nothing expires** — a badge records something that
   happened and cannot be taken back, so there is no number to protect and missing a day

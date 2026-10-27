@@ -13,7 +13,7 @@
 # that silently loses items because a file was not on somebody's laptop is worse than a
 # feed that never claimed to have them.
 #
-# The key is in the login keychain under the account `sigstop`, NOT the `ed25519` that
+# The key is in the login keychain under the account `sitless`, NOT the `ed25519` that
 # Sparkle's tools default to, which is why --account is passed. Without it the tools say
 # "Private key for account ed25519 not found in the Keychain" and exit, and that reads
 # like the key is missing when it is only named something else.
@@ -28,9 +28,9 @@ if [ -z "${SIGSTOP_RELEASING:-}" ] || [ "${SIGSTOP_RELEASING}" != "$(git rev-par
   exit 1
 fi
 
-APP_NAME="sigstop"
-KEY_ACCOUNT="${SPARKLE_KEY_ACCOUNT:-sigstop}"
-REPO="Mohamed-Elshesheny/sigstop"
+APP_NAME="sitless"
+KEY_ACCOUNT="${SPARKLE_KEY_ACCOUNT:-sitless}"
+REPO="584144/sitless"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Resources/Info.plist)"
 FEED="../updater/appcast.xml"
 
@@ -96,4 +96,4 @@ echo "wrote updater/appcast.xml for ${VERSION}"
 grep -oE 'sparkle:shortVersionString>[^<]*|url="[^"]*"' "${FEED}" | sed 's/^/  /'
 echo
 echo "  make release commits it. Pushing main publishes it: .github/workflows/pages.yml deploys"
-echo "  updater/ to https://mohamed-elshesheny.github.io/sigstop/appcast.xml, which is SUFeedURL."
+echo "  updater/ to https://584144.github.io/sitless/appcast.xml, which is SUFeedURL."

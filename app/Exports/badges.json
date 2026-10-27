@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "app/Sources/SigstopCore/Badges/Badge.swift",
+  "source": "app/Sources/SitlessCore/Badges/Badge.swift",
   "badges": [
     { "id": "stopped-1", "name": "[1]+ Stopped", "motif": "job-line" },
     { "id": "nice-n-10", "name": "ten down", "motif": "descent" },

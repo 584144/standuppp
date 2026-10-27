@@ -20,7 +20,7 @@ cd "$(dirname "$0")/.."
 : "${VERSION:?set VERSION, for example VERSION=0.2.0}"
 : "${NAME:?set NAME, for example NAME=\"Wood Frog 🐸\"}"
 
-REPO="Mohamed-Elshesheny/sigstop"
+REPO="584144/sitless"
 TAG="v${VERSION}"
 PLIST_VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Resources/Info.plist)"
 PLIST_NAME="$(/usr/libexec/PlistBuddy -c 'Print SGReleaseName' Resources/Info.plist 2>/dev/null || true)"
@@ -225,13 +225,13 @@ quiet make test
 quiet make verify-shipped
 # The artifact, not the code. Everything above this line passed for every release that
 # shipped broken, because all of it runs on the machine that built the thing.
-quiet env BUNDLE=dist/sigstop.app ./Scripts/smoke.sh
-X86_BY="$(BUNDLE=dist/sigstop.app ./Scripts/intel-slice.sh)"
+quiet env BUNDLE=dist/sitless.app ./Scripts/smoke.sh
+X86_BY="$(BUNDLE=dist/sitless.app ./Scripts/intel-slice.sh)"
 quiet swift run -c release Scenarios
 echo "    tests, verify, smoke and scenarios all pass"
 echo "    ${X86_BY}"
 
-SIGNATURE="$(codesign -dv dist/sigstop.app 2>&1 | sed -n 's/^Signature=//p')"
+SIGNATURE="$(codesign -dv dist/sitless.app 2>&1 | sed -n 's/^Signature=//p')"
 if [ "${SIGN_IDENTITY}" = "-" ] && [ "${SIGNATURE}" != "adhoc" ]; then
   echo "error: the tested bundle is signed '${SIGNATURE}', not ad-hoc." >&2
   exit 1
@@ -239,7 +239,7 @@ fi
 
 echo "==> packing the bundle just tested into the image"
 quiet env STRICT_LAYOUT=1 ./Scripts/dmg.sh
-SHA="$(shasum -a 256 dist/sigstop.dmg | cut -d' ' -f1)"
+SHA="$(shasum -a 256 dist/sitless.dmg | cut -d' ' -f1)"
 
 # The step 0.1.0 shipped without. Doing it before the tag means a release that cannot be
 # signed fails here, with nothing published, rather than after the announcement.
@@ -269,7 +269,7 @@ fi
 
 # appcast.sh signed exactly one versioned image, and these are the files the feed names.
 shopt -s nullglob
-ASSETS=(dist/sigstop.dmg dist/sigstop-"${VERSION}"*.dmg)
+ASSETS=(dist/sitless.dmg dist/sitless-"${VERSION}"*.dmg)
 shopt -u nullglob
 FEED_URL="$(sed -n '/url="[^"]*\.dmg"/{s/.*url="\([^"]*\.dmg\)".*/\1/p;q;}' ../updater/appcast.xml)"
 
@@ -383,5 +383,5 @@ echo "    git push"
 echo "    gh run watch --exit-status -R ${REPO} \\"
 echo "      \"\$(gh run list -R ${REPO} --workflow Pages --commit \"\$(git rev-parse HEAD)\" --json databaseId --jq '.[0].databaseId')\""
 echo "  Then the feed it serves has to be this release, not the last one. This has to end in ${VERSION}:"
-echo "    curl -s https://mohamed-elshesheny.github.io/sigstop/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'"
+echo "    curl -s https://584144.github.io/sitless/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'"
 echo "  docs/RELEASING.md 3.5 has the rest of the check."

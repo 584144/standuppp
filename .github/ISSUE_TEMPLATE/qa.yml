@@ -9,18 +9,18 @@ body:
         Most "why does it do that" questions already have a written answer, and the written one is
         better than anything typed into an issue at speed:
 
-        - [`docs/ACTIVITY-DETECTION.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/docs/ACTIVITY-DETECTION.md), what the app can
+        - [`docs/ACTIVITY-DETECTION.md`](https://github.com/584144/sitless/blob/main/docs/ACTIVITY-DETECTION.md), what the app can
           see at each tier, how evidence is combined, and why confidence degrades to a parent
           activity instead of guessing between siblings.
-        - [`docs/BREAK-DECISION.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/docs/BREAK-DECISION.md), the states, what moves
+        - [`docs/BREAK-DECISION.md`](https://github.com/584144/sitless/blob/main/docs/BREAK-DECISION.md), the states, what moves
           between them, and why a break is not a timer.
-        - [`docs/MESSAGE-ENGINE.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/docs/MESSAGE-ENGINE.md), how a line is chosen,
+        - [`docs/MESSAGE-ENGINE.md`](https://github.com/584144/sitless/blob/main/docs/MESSAGE-ENGINE.md), how a line is chosen,
           repetition avoidance, escalation, and the rails on tone.
-        - [`docs/PRIVACY.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/docs/PRIVACY.md), what leaves the machine, which is the
+        - [`docs/PRIVACY.md`](https://github.com/584144/sitless/blob/main/docs/PRIVACY.md), what leaves the machine, which is the
           update check and nothing else.
-        - [`TRADEMARK.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md), what a fork may keep and what it must rename.
+        - [`TRADEMARK.md`](https://github.com/584144/sitless/blob/main/TRADEMARK.md), what a fork may keep and what it must rename.
 
-        `sigstop --doctor` answers most of "what does it think I am doing right now" on its own.
+        `sitless --doctor` answers most of "what does it think I am doing right now" on its own.
 
         Ask anyway if the answer is not there, or if it is there and it is wrong.
 

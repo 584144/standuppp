@@ -1,4 +1,4 @@
-# Releasing sigstop
+# Releasing sitless
 
 How a build gets from this repository onto somebody's machine, and what makes that safe.
 
@@ -98,7 +98,7 @@ after the rewrite can only be in the heading, from `NAME`, or be `changelog.py` 
 
 ## 1. What makes this safe, in one paragraph
 
-sigstop is distributed outside the App Store and is **ad-hoc signed: no Apple Developer ID, no Team
+sitless is distributed outside the App Store and is **ad-hoc signed: no Apple Developer ID, no Team
 ID, no notarization.** Apple's code signature therefore proves nothing about who produced a build —
 Gatekeeper would be checking a signature against nobody. What makes the update channel safe is
 **EdDSA (Ed25519)**: every release archive is signed with a private key that exists only in the
@@ -123,13 +123,13 @@ Everything below exists to keep that sentence true.
 | Location | macOS **login keychain** on the maintainer's machine |
 | Item type | Generic password |
 | Service | `https://sparkle-project.org` |
-| Account | `sigstop` |
+| Account | `sitless` |
 | Description | `private key` |
 
 Inspect the item (this prints metadata, not the key):
 
 ```sh
-security find-generic-password -a sigstop -s "https://sparkle-project.org"
+security find-generic-password -a sitless -s "https://sparkle-project.org"
 ```
 
 **It is not in this repository, not in CI, and not on any build server, and it must never be.**
@@ -148,7 +148,7 @@ v0rY/NWn8izKVHcZl7vVyqRCsrV929pkGNyJpThhv6s=
 Read it back out of any installed build:
 
 ```sh
-plutil -extract SUPublicEDKey raw /Applications/sigstop.app/Contents/Info.plist
+plutil -extract SUPublicEDKey raw /Applications/sitless.app/Contents/Info.plist
 ```
 
 ### 2.3 If you need to recreate the pair
@@ -160,8 +160,8 @@ cd app
 swift package resolve                                  # puts the Sparkle tools in .build
 SPARKLE_BIN=.build/artifacts/sparkle/Sparkle/bin
 
-"$SPARKLE_BIN"/generate_keys --account sigstop         # creates the pair, prints the PUBLIC key
-"$SPARKLE_BIN"/generate_keys --account sigstop -p      # print the public key again, any time
+"$SPARKLE_BIN"/generate_keys --account sitless         # creates the pair, prints the PUBLIC key
+"$SPARKLE_BIN"/generate_keys --account sitless -p      # print the public key again, any time
 ```
 
 `generate_keys` will **not** overwrite an existing key: if one is already in the keychain it reuses
@@ -175,7 +175,7 @@ and no amount of repository access fixes that. Export it once, to somewhere offl
 
 ```sh
 cd app
-(umask 077; .build/artifacts/sparkle/Sparkle/bin/generate_keys --account sigstop -x /Volumes/<encrypted>/sigstop-ed25519.key)
+(umask 077; .build/artifacts/sparkle/Sparkle/bin/generate_keys --account sitless -x /Volumes/<encrypted>/sitless-ed25519.key)
 ```
 
 Write it straight to an encrypted volume, or paste its one line into a password manager and write
@@ -188,7 +188,7 @@ APFS, and a snapshot or Time Machine backup taken while the file existed keeps i
 To restore it on a new machine:
 
 ```sh
-.build/artifacts/sparkle/Sparkle/bin/generate_keys --account sigstop -f /path/to/sigstop-ed25519.key
+.build/artifacts/sparkle/Sparkle/bin/generate_keys --account sitless -f /path/to/sitless-ed25519.key
 ```
 
 ---
@@ -205,7 +205,7 @@ softwareupdate --install-rosetta   # optional: lets this Mac run the x86_64 slic
 
 Somebody has to run an x86_64 slice before a release goes out. `Scripts/intel-slice.sh` decides
 who, and the two answers do not prove the same thing. Under Rosetta, this Mac launches the slice
-in `dist/sigstop.app`, the bundle `dmg.sh` then packs, and asks `--doctor` which slice answered:
+in `dist/sitless.app`, the bundle `dmg.sh` then packs, and asks `--doctor` which slice answered:
 the slice that runs is the slice that ships. Without Rosetta it falls back to CI's run on the
 exact commit being released, and only if its `The Intel slice runs too` step passed. That shows
 an x86_64 build of the same commit ran, built by CI's own runner, not the bytes in the image
@@ -213,7 +213,7 @@ being released; two builds of the same commit are not byte-identical (§3.4). Wi
 release refuses. macOS 28 removes Rosetta, so from then on a release waits for CI, and carries
 only the weaker proof: push, let it go green, then release. Running
 the slice under Rosetta on macOS 27 makes macOS show an "App Update Required" notice for
-sigstop; that is the test, not a defect, and users on Apple Silicon run the arm64 slice.
+sitless; that is the test, not a defect, and users on Apple Silicon run the arm64 slice.
 
 Nothing else. `Scripts/appcast.sh` locates `generate_appcast` inside `.build/artifacts` itself,
 because the path carries Sparkle's version in it and an exported variable goes stale the first time
@@ -298,7 +298,7 @@ In order, it:
    then commits it. **This happens before the tag**, so a release whose feed cannot be signed fails
    with nothing published rather than after the announcement;
 5. tags the commit it built and tested, the bump, not the feed commit on top of it, pushes the
-   tag, and creates the GitHub release with both disk image names: the stable `sigstop.dmg` the
+   tag, and creates the GitHub release with both disk image names: the stable `sitless.dmg` the
    site links to, and the versioned one a human can read a year later.
 
 If anything changes while it runs, a file, a commit, or which branch is checked out, it stops before
@@ -324,13 +324,13 @@ Then push `main`, which is what publishes the feed, wait for that deploy, and ch
 
 ```sh
 git push
-gh run watch --exit-status -R Mohamed-Elshesheny/sigstop \
-  "$(gh run list -R Mohamed-Elshesheny/sigstop --workflow Pages --commit "$(git rev-parse HEAD)" --json databaseId --jq '.[0].databaseId')"
-curl -s https://mohamed-elshesheny.github.io/sigstop/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'
+gh run watch --exit-status -R 584144/sitless \
+  "$(gh run list -R 584144/sitless --workflow Pages --commit "$(git rev-parse HEAD)" --json databaseId --jq '.[0].databaseId')"
+curl -s https://584144.github.io/sitless/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'
 ```
 
 `.github/workflows/pages.yml` deploys `updater/` to
-`https://mohamed-elshesheny.github.io/sigstop/`, which is `SUFeedURL`. It refuses to deploy a feed
+`https://584144.github.io/sitless/`, which is `SUFeedURL`. It refuses to deploy a feed
 whose enclosure carries no `sparkle:edSignature`. The last line has to end in the version you just
 released. A 200 from the feed URL is not the check: the previous release's feed answers 200 before
 the push, and still does if the deploy fails or the validator refuses the new one. The Pages run
@@ -351,14 +351,14 @@ cd app
 export SPARKLE_BIN="$(find .build/artifacts -type d -name bin -path '*Sparkle*' | head -1)"
 
 "$SPARKLE_BIN"/generate_appcast \
-  --account sigstop \
-  --download-url-prefix "https://github.com/Mohamed-Elshesheny/sigstop/releases/download/v${VERSION}/" \
-  --link "https://github.com/Mohamed-Elshesheny/sigstop" \
+  --account sitless \
+  --download-url-prefix "https://github.com/584144/sitless/releases/download/v${VERSION}/" \
+  --link "https://github.com/584144/sitless" \
   -o ../updater/appcast.xml <directory holding the .dmg>
 ```
 
-`--account sigstop` is not optional. The private key is in the login keychain under the account
-`sigstop`, and Sparkle's tools default to `ed25519`. Without the flag they print *"Private key for
+`--account sitless` is not optional. The private key is in the login keychain under the account
+`sitless`, and Sparkle's tools default to `ed25519`. Without the flag they print *"Private key for
 account ed25519 not found in the Keychain"* and stop, which reads like the key is gone when it is
 only named something else.
 
@@ -375,7 +375,7 @@ update never installs." `appcast.sh` refuses to write a feed without one for exa
 To sign or check a single file:
 
 ```sh
-"$SPARKLE_BIN"/sign_update --account sigstop "dist/sigstop-${VERSION}-<codename>.dmg"
+"$SPARKLE_BIN"/sign_update --account sitless "dist/sitless-${VERSION}-<codename>.dmg"
 ```
 
 **The signature is over the bytes of the file that is published.** Sign the image you upload, not a
@@ -388,18 +388,18 @@ Do not skip this. The feed is the one artifact no local command can prove.
 
 ```sh
 # 1. The feed is reachable, is XML, and is this release rather than the last one
-curl -sSI https://mohamed-elshesheny.github.io/sigstop/appcast.xml | head -3
-curl -s https://mohamed-elshesheny.github.io/sigstop/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'
+curl -sSI https://584144.github.io/sitless/appcast.xml | head -3
+curl -s https://584144.github.io/sitless/appcast.xml | grep -o '<sparkle:shortVersionString>[^<]*'
 
 # 2. The download URL in the feed resolves, and is the size the feed claims
-URL=$(curl -s https://mohamed-elshesheny.github.io/sigstop/appcast.xml \
+URL=$(curl -s https://584144.github.io/sitless/appcast.xml \
   | grep -o 'url="[^"]*\.dmg"' | head -1 | cut -d'"' -f2)
 curl -sSIL "$URL" | grep -iE '^(HTTP|content-length)'
 
 # 3. The published image really does carry both architectures
 curl -sSL "$URL" -o /tmp/check.dmg
 hdiutil attach /tmp/check.dmg -nobrowse -quiet -mountpoint /tmp/checkmnt
-lipo -archs /tmp/checkmnt/sigstop.app/Contents/MacOS/sigstop   # expect: x86_64 arm64
+lipo -archs /tmp/checkmnt/sitless.app/Contents/MacOS/sitless   # expect: x86_64 arm64
 hdiutil detach /tmp/checkmnt -quiet
 
 # 4. An older build actually offers, downloads, verifies and installs the update
@@ -416,23 +416,23 @@ All three of those have happened here.
 
 ### 3.6 Update the Homebrew tap
 
-`brew install --cask mohamed-elshesheny/sigstop/sigstop` reads
-[`homebrew-sigstop`](https://github.com/Mohamed-Elshesheny/homebrew-sigstop), a personal tap, because
+`brew install --cask 584144/sitless/sitless` reads
+[`homebrew-sitless`](https://github.com/584144/homebrew-sitless), a personal tap, because
 the official `homebrew/cask` tap audits for a notarized app and this build is ad-hoc signed. The cask
 pins one version and one checksum, so a release is not finished until it points at the new image.
 Sparkle updates the people who already installed; the tap is what new people get.
 
 ```sh
-cd ../homebrew-sigstop
+cd ../homebrew-sitless
 V=0.2.2
-SHA=$(shasum -a 256 ../sigstop/app/dist/sigstop-$V-*.dmg | cut -d' ' -f1)
-sed -i '' "s/^  version \".*\"/  version \"$V\"/; s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/sigstop.rb
-brew style Casks/sigstop.rb
-git commit -am "sigstop $V" && git push
-brew update && brew fetch --cask mohamed-elshesheny/sigstop/sigstop   # must print the new version
+SHA=$(shasum -a 256 ../sitless/app/dist/sitless-$V-*.dmg | cut -d' ' -f1)
+sed -i '' "s/^  version \".*\"/  version \"$V\"/; s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/sitless.rb
+brew style Casks/sitless.rb
+git commit -am "sitless $V" && git push
+brew update && brew fetch --cask 584144/sitless/sitless   # must print the new version
 ```
 
-The `url` stanza carries the codename (`sigstop-#{version}-wood-frog.dmg`), so a release that changes
+The `url` stanza carries the codename (`sitless-#{version}-wood-frog.dmg`), so a release that changes
 the codename changes that line too. `brew audit` needs Command Line Tools that match the current
 Xcode; when it refuses to run, `brew style` plus a `brew fetch` of the new version is the check.
 
@@ -510,7 +510,7 @@ not after. `Scripts/bundle.sh` does exactly that when asked, and `make verify-sh
 ```sh
 cd app
 UNIVERSAL=1 CONFIG=release ./Scripts/bundle.sh
-lipo -archs dist/sigstop.app/Contents/MacOS/sigstop   # expect: x86_64 arm64
+lipo -archs dist/sitless.app/Contents/MacOS/sitless   # expect: x86_64 arm64
 ./Scripts/verify.sh                                   # every check, against each slice
 ```
 
@@ -523,7 +523,7 @@ working: a plain `codesign --force` with the entitlements file drops the Hardene
 `disable-library-validation` entitlement an ad-hoc build needs, and the binary straight out of
 `swift build` still carries SwiftPM's `@loader_path` rpath rather than the one `bundle.sh` sets, so
 `verify.sh` fails and the app dies in dyld before it opens. Nor run a plain `make bundle` after a
-universal one: it builds the native slice only and replaces `dist/sigstop.app` with it. There is no
+universal one: it builds the native slice only and replaces `dist/sitless.app` with it. There is no
 arm64-only release to fall back on: `dmg.sh` refuses a single-slice bundle, and the notes hold no
 prose that could say so. Shipping arm64-only by accident, while the appcast quietly tells every
 Intel user there is no update, is the outcome this paragraph exists to prevent.

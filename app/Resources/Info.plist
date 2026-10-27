@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>sigstop</string>
+	<string>久坐工具提醒</string>
 	<key>CFBundleExecutable</key>
-	<string>sigstop</string>
+	<string>sitless</string>
 	<key>CFBundleIconFile</key>
-	<string>sigstop</string>
+	<string>sitless</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.sigstop.app</string>
+	<string>io.github.584144.sitless</string>
 	<key>CFBundleName</key>
-	<string>sigstop</string>
+	<string>sitless</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.2.2</string>
+	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
-	<string>12</string>
+	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>
@@ -29,7 +29,7 @@
 	<key>NSSupportsSuddenTermination</key>
 	<false/>
 	<key>SGReleaseName</key>
-	<string>Wood Frog 🐸</string>
+	<string>初版</string>
 	<key>SUAutomaticallyUpdate</key>
 	<false/>
 	<key>SUEnableAutomaticChecks</key>
@@ -39,7 +39,7 @@
 	<key>SUEnableSystemProfiling</key>
 	<false/>
 	<key>SUFeedURL</key>
-	<string>https://mohamed-elshesheny.github.io/sigstop/appcast.xml</string>
+	<string>https://584144.github.io/sitless/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>v0rY/NWn8izKVHcZl7vVyqRCsrV929pkGNyJpThhv6s=</string>
 	<key>SUVerifyUpdateBeforeExtraction</key>

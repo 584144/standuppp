@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-// sigstop — an open-source macOS menu bar app.
+// sitless — an open-source macOS menu bar app.
 //
 // Deliberately a plain SwiftPM package with NO .xcodeproj:
 //   * builds with Command Line Tools alone (no Xcode install required, works in CI)
@@ -9,10 +9,10 @@ import PackageDescription
 //   * `open Package.swift` still gives a full Xcode experience to anyone who wants one
 //
 // Layering is enforced by the dependency graph below and must stay one-way:
-//     SigstopApp -> SigstopSensors -> SigstopCore
+//     SitlessApp -> SitlessSensors -> SitlessCore
 //
-// THE ONE DEPENDENCY. Sparkle is attached to SigstopApp and to nothing else. SigstopCore
-// and SigstopSensors stay dependency-free and must never import it, so the engines still
+// THE ONE DEPENDENCY. Sparkle is attached to SitlessApp and to nothing else. SitlessCore
+// and SitlessSensors stay dependency-free and must never import it, so the engines still
 // build and test with no third-party code anywhere near them.
 //
 // Why a dependency at all, in a repo whose rule was zero: shipping outside the App Store
@@ -25,10 +25,10 @@ import PackageDescription
 // nobody should hand-roll. See docs/RELEASING.md.
 
 let package = Package(
-    name: "sigstop",
+    name: "sitless",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "sigstop", targets: ["SigstopApp"]),
+        .executable(name: "sitless", targets: ["SitlessApp"]),
     ],
     dependencies: [
         // Pinned exactly, not by range. An updater that quietly changes version underneath
@@ -38,23 +38,23 @@ let package = Package(
     targets: [
         // Pure domain. No AppKit, no I/O, no clock reads. Fully unit-testable.
         .target(
-            name: "SigstopCore",
+            name: "SitlessCore",
             resources: [.copy("Message/corpus.json")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         // The only target permitted to touch macOS APIs. Still dependency-free.
         .target(
-            name: "SigstopSensors",
-            dependencies: ["SigstopCore"],
+            name: "SitlessSensors",
+            dependencies: ["SitlessCore"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         // The only target that links anything third-party, and the only one that links
         // anything that can open a socket.
         .executableTarget(
-            name: "SigstopApp",
+            name: "SitlessApp",
             dependencies: [
-                "SigstopCore",
-                "SigstopSensors",
+                "SitlessCore",
+                "SitlessSensors",
                 .product(name: "Sparkle", package: "Sparkle"),
             ],
             swiftSettings: [.swiftLanguageMode(.v6)]
@@ -64,12 +64,12 @@ let package = Package(
         // question is "when does this actually prompt", which no assertion answers well.
         .executableTarget(
             name: "Scenarios",
-            dependencies: ["SigstopCore"],
+            dependencies: ["SitlessCore"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
-            name: "SigstopCoreTests",
-            dependencies: ["SigstopCore"],
+            name: "SitlessCoreTests",
+            dependencies: ["SitlessCore"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         // Providers are pure functions of a SignalContext and the Tier 2 collectors are
@@ -78,8 +78,8 @@ let package = Package(
         // because DEBUGGING lives entirely in this layer and an activity that cannot be
         // tested is an activity nobody can trust.
         .testTarget(
-            name: "SigstopSensorsTests",
-            dependencies: ["SigstopSensors"],
+            name: "SitlessSensorsTests",
+            dependencies: ["SitlessSensors"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
     ]

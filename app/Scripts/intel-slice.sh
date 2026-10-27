@@ -4,14 +4,14 @@
 # When it cannot (no Rosetta, or a macOS that no longer has it), CI's run on this exact commit,
 # and only if its Intel step passed. Anything else refuses.
 #
-#   BUNDLE=dist/sigstop.app ./Scripts/intel-slice.sh [commit]
+#   BUNDLE=dist/sitless.app ./Scripts/intel-slice.sh [commit]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REPO="Mohamed-Elshesheny/sigstop"
+REPO="584144/sitless"
 STEP="The Intel slice runs too"
 SHA="$(git rev-parse "${1:-HEAD}")"
-BUNDLE="${BUNDLE:-dist/sigstop.app}"
+BUNDLE="${BUNDLE:-dist/sitless.app}"
 
 if arch -x86_64 /usr/bin/true 2>/dev/null; then
   if ! OUT="$(BUNDLE="${BUNDLE}" REQUIRE_X86=1 ./Scripts/smoke.sh 2>&1)"; then

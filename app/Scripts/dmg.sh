@@ -22,7 +22,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP_NAME="sigstop"
+APP_NAME="sitless"
 BUNDLE="dist/${APP_NAME}.app"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Resources/Info.plist)"
 RELEASE_NAME="$(/usr/libexec/PlistBuddy -c 'Print SGReleaseName' Resources/Info.plist 2>/dev/null || true)"
@@ -37,7 +37,7 @@ VOLUME="${APP_NAME} ${VERSION}"
 #
 # The site's download button uses GitHub's /releases/latest/download/<name> redirect,
 # which needs a filename that is identical in every release, so one asset has to be
-# plain `sigstop.dmg`. But a file called that sitting in someone's Downloads folder says
+# plain `sitless.dmg`. But a file called that sitting in someone's Downloads folder says
 # nothing about which build it is, so the other carries the version and the codename.
 # Upload both: the button takes the stable one, a person browsing the release takes the
 # one whose name they can read a year from now.
@@ -55,7 +55,7 @@ ICON_Y=195
 WINDOW_W=600
 WINDOW_H=320
 
-BACKDROP_SWIFT="Sources/SigstopApp/Views/InstallerBackdrop.swift"
+BACKDROP_SWIFT="Sources/SitlessApp/Views/InstallerBackdrop.swift"
 swift_pair() {
   sed -nE "s/^[[:space:]]*static let $1 = $2\($3: ([0-9]+), $4: ([0-9]+)\)\$/\1 \2/p" "${BACKDROP_SWIFT}"
 }

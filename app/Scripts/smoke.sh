@@ -14,7 +14,7 @@
 #   1. a copy of the .app somewhere with no relationship to the source tree
 #   2. .build moved aside, so a baked build path resolves to nothing
 #   3. a pristine HOME, so no settings, no counters and no badges. Not the defaults: cfprefsd
-#      ignores HOME, so the GUI launch reads and writes the real dev.sigstop.app domain, which
+#      ignores HOME, so the GUI launch reads and writes the real io.github.584144.sitless domain, which
 #      holds only Sparkle's own keys and the menu bar icon's position
 #   4. launched as the GUI, not as --doctor, because --doctor never touched the corpus and
 #      that is exactly why the first version of this check passed while the bug was live
@@ -26,8 +26,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP="${BUNDLE:-dist/sigstop.app}"
-BIN="${APP}/Contents/MacOS/sigstop"
+APP="${BUNDLE:-dist/sitless.app}"
+BIN="${APP}/Contents/MacOS/sitless"
 BUILD_DIR="$(pwd)/.build"
 
 [ -d "${APP}" ] || { echo "error: ${APP} not found, run make bundle first" >&2; exit 1; }
@@ -39,7 +39,7 @@ X86_HOME=""
 FAILURES=0
 
 cleanup() {
-  pkill -f "${STAGE}/sigstop.app" 2>/dev/null || true
+  pkill -f "${STAGE}/sitless.app" 2>/dev/null || true
   if [ "${HIDDEN}" -eq 1 ]; then
     if [ -e "${BUILD_DIR}" ]; then
       echo "warning: ${BUILD_DIR} was recreated while hidden; the original is still at ${BUILD_DIR}-smoke-hidden" >&2
@@ -55,7 +55,7 @@ pass() { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 fail() { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 
 echo "==> staging a copy with no relationship to this tree"
-cp -R "${APP}" "${STAGE}/sigstop.app"
+cp -R "${APP}" "${STAGE}/sitless.app"
 mkdir -p "${PROBE_HOME}/Library/Application Support"
 
 if [ -d "${BUILD_DIR}" ]; then
@@ -73,8 +73,8 @@ fi
 
 echo "==> asking it what it sees before it has ever run"
 FIRST="$(CFFIXED_USER_HOME="${PROBE_HOME}" HOME="${PROBE_HOME}" \
-  "${STAGE}/sigstop.app/Contents/MacOS/sigstop" --doctor 2>&1 || true)"
-if [ -d "${PROBE_HOME}/Library/Application Support/dev.sigstop.app" ]; then
+  "${STAGE}/sitless.app/Contents/MacOS/sitless" --doctor 2>&1 || true)"
+if [ -d "${PROBE_HOME}/Library/Application Support/io.github.584144.sitless" ]; then
   fail "--doctor created the data directory, so a diagnostic wrote to disk"
 else
   pass "--doctor read without writing anything"
@@ -88,7 +88,7 @@ fi
 echo "==> launching it the way a person does"
 set +m   # so terminating it at the end does not print a job notice over the result
 CFFIXED_USER_HOME="${PROBE_HOME}" HOME="${PROBE_HOME}" \
-  "${STAGE}/sigstop.app/Contents/MacOS/sigstop" >"${STAGE}/run.log" 2>&1 &
+  "${STAGE}/sitless.app/Contents/MacOS/sitless" >"${STAGE}/run.log" 2>&1 &
 LAUNCHED=$!
 sleep 6
 
@@ -108,7 +108,7 @@ fi
 
 echo "==> asking it what it can see"
 DOCTOR="$(CFFIXED_USER_HOME="${PROBE_HOME}" HOME="${PROBE_HOME}" \
-  "${STAGE}/sigstop.app/Contents/MacOS/sigstop" --doctor 2>&1 || true)"
+  "${STAGE}/sitless.app/Contents/MacOS/sitless" --doctor 2>&1 || true)"
 
 CORPUS_N="$(printf '%s' "${DOCTOR}" | grep -oE '[0-9]+ messages loaded' | head -1 | cut -d' ' -f1 || true)"
 if [ -n "${CORPUS_N}" ] && [ "${CORPUS_N}" -gt 0 ] 2>/dev/null; then
@@ -132,14 +132,14 @@ else
 fi
 
 echo "==> checking it left nothing behind it could not create"
-if [ -d "${PROBE_HOME}/Library/Application Support/dev.sigstop.app" ]; then
+if [ -d "${PROBE_HOME}/Library/Application Support/io.github.584144.sitless" ]; then
   pass "created its own data directory from nothing"
 else
   fail "no data directory, so a first run cannot persist anything"
 fi
 
 echo "==> the Intel slice"
-BIN="${STAGE}/sigstop.app/Contents/MacOS/sigstop"
+BIN="${STAGE}/sitless.app/Contents/MacOS/sitless"
 kill "${LAUNCHED}" 2>/dev/null || true
 wait "${LAUNCHED}" 2>/dev/null || true
 if ! lipo -archs "${BIN}" | grep -qw x86_64; then

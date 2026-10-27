@@ -1,8 +1,8 @@
-# sigstop, build with Command Line Tools only. No Xcode required.
+# sitless, build with Command Line Tools only. No Xcode required.
 .DEFAULT_GOAL := help
 .PHONY: help build bundle run test bench smoke doctor clean dev-cert verify verify-shipped dmg release badges badges-check
 
-APP     := sigstop
+APP     := sitless
 CONFIG  ?= release
 BUNDLE  := dist/$(APP).app
 
@@ -76,8 +76,8 @@ verify-shipped: ## Same checks, against the universal bundle that actually ships
 	@BUNDLE=$(BUNDLE) ./Scripts/verify.sh
 
 dev-cert: ## One-time: create a stable self-signed identity so TCC grants survive rebuilds
-	@if security find-identity -v -p codesigning | grep -q "sigstop-dev"; then \
-		echo "identity 'sigstop-dev' already exists"; \
+	@if security find-identity -v -p codesigning | grep -q "sitless-dev"; then \
+		echo "identity 'sitless-dev' already exists"; \
 	else \
 		echo "macOS keys the Accessibility grant to the binary's cdhash."; \
 		echo "swift build ad-hoc-signs, so the cdhash changes every build and the"; \
@@ -85,9 +85,9 @@ dev-cert: ## One-time: create a stable self-signed identity so TCC grants surviv
 		echo ""; \
 		echo "  1. Open Keychain Access"; \
 		echo "  2. Keychain Access > Certificate Assistant > Create a Certificate…"; \
-		echo "  3. Name: sigstop-dev   Identity Type: Self Signed Root"; \
+		echo "  3. Name: sitless-dev   Identity Type: Self Signed Root"; \
 		echo "     Certificate Type: Code Signing"; \
-		echo "  4. Then build with:  SIGN_IDENTITY=sigstop-dev make bundle"; \
+		echo "  4. Then build with:  SIGN_IDENTITY=sitless-dev make bundle"; \
 		echo ""; \
 		echo "(This needs Keychain UI, so it is not scripted, a half-working"; \
 		echo " automation here would be worse than a clear instruction.)"; \

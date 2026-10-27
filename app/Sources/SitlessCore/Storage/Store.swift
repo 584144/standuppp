@@ -1,0 +1,313 @@
+import Foundation
+
+public enum StoreError: Error, Sendable, Hashable {
+    case unsupportedSchemaVersion(Int)
+    case notWritable(path: String, reason: String)
+    case unreadable(days: [CalendarDay])
+    case wouldNotOpen(path: String)
+    case wouldNotDecode(path: String)
+}
+
+public struct DayLoad: Sendable, Hashable {
+    public let day: CalendarDay
+    public let events: [LoggedEvent]
+    public let malformedLines: Int
+    public let unreadable: Bool
+
+    public init(
+        day: CalendarDay,
+        events: [LoggedEvent],
+        malformedLines: Int = 0,
+        unreadable: Bool = false
+    ) {
+        self.day = day
+        self.events = events.sorted { $0.at < $1.at }
+        self.malformedLines = malformedLines
+        self.unreadable = unreadable
+    }
+
+    public static func empty(_ day: CalendarDay) -> DayLoad {
+        DayLoad(day: day, events: [], malformedLines: 0)
+    }
+}
+
+public struct PruneReport: Sendable, Hashable {
+    public let removedDays: [CalendarDay]
+    public let removedEvents: Int
+    public let retentionDays: Int
+
+    public init(removedDays: [CalendarDay], removedEvents: Int, retentionDays: Int) {
+        self.removedDays = removedDays
+        self.removedEvents = removedEvents
+        self.retentionDays = retentionDays
+    }
+
+    public var isEmpty: Bool { removedDays.isEmpty }
+
+    public var userFacingSummary: String {
+        guard !removedDays.isEmpty else {
+            return "Nothing to prune. Retention is \(retentionDays) days."
+        }
+        let range = removedDays.count == 1
+            ? "\(removedDays[0])"
+            : "\(removedDays[0]) – \(removedDays[removedDays.count - 1])"
+        return "Pruned \(removedDays.count) day(s) (\(range)), \(removedEvents) events, "
+            + "older than the \(retentionDays)-day retention window."
+    }
+}
+
+public struct DeletionReport: Sendable, Hashable {
+    public let location: String
+    public let removedFiles: Int
+    public let removedBytes: Int
+    public let removedDays: [CalendarDay]
+    public let removedEvents: Int
+    public let keptLock: Bool
+
+    public init(
+        location: String,
+        removedFiles: Int,
+        removedBytes: Int,
+        removedDays: [CalendarDay],
+        removedEvents: Int,
+        keptLock: Bool = false
+    ) {
+        self.location = location
+        self.removedFiles = removedFiles
+        self.removedBytes = removedBytes
+        self.removedDays = removedDays
+        self.removedEvents = removedEvents
+        self.keptLock = keptLock
+    }
+
+    public var userFacingSummary: String {
+        let size = DeletionReport.humanBytes(removedBytes)
+        let kept = keptLock
+            ? "\nKept: its .lock, which is empty and held while sitless runs, so a second copy leaves."
+            : ""
+        return """
+        Deleted: \(location)  (\(removedFiles) files, \(size))\(kept)
+        Removed \(removedEvents) events across \(removedDays.count) day(s).
+        sitless is still running, so a new, empty log starts from now.
+
+        Two things this app cannot remove for you:
+          • The Accessibility permission you granted. Remove it in
+            System Settings → Privacy & Security → Accessibility,
+            or run:  tccutil reset Accessibility io.github.584144.sitless
+          • What the system log holds about the app: what macOS logged, such as
+            launches and permission checks, and what the updater logged. None of
+            it comes from sitless's own code, which writes nothing there.
+
+        There is no archive, no tombstone, no soft delete, and no copy kept anywhere.
+        """
+    }
+
+    static func humanBytes(_ n: Int) -> String {
+        if n < 1024 { return "\(n) B" }
+        let kb = Double(n) / 1024
+        if kb < 1024 { return "\(Int(kb.rounded())) KB" }
+        return String(format: "%.1f MB", kb / 1024)
+    }
+}
+
+public protocol EventStore: Sendable {
+    func append(_ event: LoggedEvent) throws
+    func append(contentsOf events: [LoggedEvent]) throws
+
+    func availableDays() throws -> [CalendarDay]
+
+    func load(day: CalendarDay) throws -> DayLoad
+
+    func exportText() throws -> String
+
+    @discardableResult
+    func prune(retentionDays: Int, asOf now: Date) throws -> PruneReport
+
+    @discardableResult
+    func deleteEverything() throws -> DeletionReport
+}
+
+extension EventStore {
+    public func append(contentsOf events: [LoggedEvent]) throws {
+        for event in events { try append(event) }
+    }
+
+    public func load(days: [CalendarDay]) throws -> [DayLoad] {
+        try days.map { try load(day: $0) }
+    }
+
+    public func events(
+        forLogicalDay day: CalendarDay,
+        calendar: Calendar = .current,
+        policy: RollupPolicy = .default
+    ) throws -> (events: [LoggedEvent], malformedLines: Int) {
+        let loads = try [day.adding(days: -1), day, day.adding(days: 1)].map {
+            try load(day: $0)
+        }
+        let unreadable = loads.filter(\.unreadable).map(\.day)
+        if !unreadable.isEmpty { throw StoreError.unreadable(days: unreadable) }
+        let merged = loads.flatMap(\.events).sorted { $0.at < $1.at }
+        let malformed = loads.reduce(0) { $0 + $1.malformedLines }
+        guard let interval = day.interval(boundaryHour: policy.dayBoundaryHour, calendar: calendar)
+        else { return (merged, malformed) }
+        let inWindow = merged.filter { $0.at >= interval.start && $0.at < interval.end }
+        let before = merged.last { $0.at < interval.start }
+        let after = merged.filter { $0.at >= interval.end }
+        return ((before.map { [$0] } ?? []) + inWindow + after, malformed)
+    }
+}
+
+public enum Retention {
+    public static let defaultEventDays = 7
+}
+
+public final class InMemoryEventStore: EventStore, @unchecked Sendable {
+    private let lock = NSLock()
+    private var days: [CalendarDay: [LoggedEvent]] = [:]
+    private var injectedMalformed: [CalendarDay: Int] = [:]
+
+    public init(events: [LoggedEvent] = []) {
+        for event in events { days[event.fileDay, default: []].append(event) }
+        for key in days.keys { days[key]?.sort { $0.at < $1.at } }
+    }
+
+    public func append(_ event: LoggedEvent) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        days[event.fileDay, default: []].append(event)
+        days[event.fileDay]?.sort { $0.at < $1.at }
+    }
+
+    public func availableDays() throws -> [CalendarDay] {
+        lock.lock()
+        defer { lock.unlock() }
+        return days.keys.sorted()
+    }
+
+    public func load(day: CalendarDay) throws -> DayLoad {
+        lock.lock()
+        defer { lock.unlock() }
+        return DayLoad(
+            day: day,
+            events: days[day] ?? [],
+            malformedLines: injectedMalformed[day] ?? 0
+        )
+    }
+
+    public func injectMalformedLines(_ count: Int, on day: CalendarDay) {
+        lock.lock()
+        defer { lock.unlock() }
+        injectedMalformed[day] = count
+    }
+
+    public func exportText() throws -> String {
+        lock.lock()
+        let snapshot = days
+        let skipped = injectedMalformed
+        lock.unlock()
+        return try ExportWriter.render(
+            location: "(memory)", days: snapshot.keys.sorted(), skipped: skipped
+        ) { day in
+            snapshot[day] ?? []
+        }
+    }
+
+    @discardableResult
+    public func prune(retentionDays: Int, asOf now: Date) throws -> PruneReport {
+        lock.lock()
+        defer { lock.unlock() }
+        let cutoff = PruneMath.cutoffDay(retentionDays: retentionDays, asOf: now)
+        var removedDays: [CalendarDay] = []
+        var removedEvents = 0
+        for day in days.keys.sorted() where PruneMath.shouldDrop(day, cutoff: cutoff) {
+            removedEvents += days[day]?.count ?? 0
+            days[day] = nil
+            injectedMalformed[day] = nil
+            removedDays.append(day)
+        }
+        return PruneReport(
+            removedDays: removedDays, removedEvents: removedEvents, retentionDays: retentionDays
+        )
+    }
+
+    @discardableResult
+    public func deleteEverything() throws -> DeletionReport {
+        lock.lock()
+        defer { lock.unlock() }
+        let removedDays = days.keys.sorted()
+        let removedEvents = days.values.reduce(0) { $0 + $1.count }
+        let bytes = (try? EventLogCodec.encodeLines(days.values.flatMap { $0 }).utf8.count) ?? 0
+        days.removeAll()
+        injectedMalformed.removeAll()
+        return DeletionReport(
+            location: "(memory)",
+            removedFiles: removedDays.count,
+            removedBytes: bytes,
+            removedDays: removedDays,
+            removedEvents: removedEvents
+        )
+    }
+}
+
+public enum PruneMath {
+    public static func cutoffDay(retentionDays: Int, asOf now: Date) -> CalendarDay? {
+        guard retentionDays > 0 else { return nil }
+        let today = CalendarDay.utc(of: now)
+        return today.adding(days: -(retentionDays - 1))
+    }
+
+    public static func shouldDrop(_ day: CalendarDay, cutoff: CalendarDay?) -> Bool {
+        guard let cutoff else { return true }
+        return day < cutoff
+    }
+
+    public static func futureDated(_ days: [CalendarDay], asOf now: Date) -> [CalendarDay] {
+        let today = CalendarDay.utc(of: now)
+        return days.filter { $0 > today }
+    }
+}
+
+enum ExportWriter {
+    static func render(
+        location: String,
+        days: [CalendarDay],
+        skipped: [CalendarDay: Int],
+        events: (CalendarDay) -> [LoggedEvent]
+    ) throws -> String {
+        var out = ""
+        var total = 0
+        var body = ""
+        for day in days {
+            let dayEvents = events(day)
+            total += dayEvents.count
+            body += "\n# --- \(day) ---\n"
+            body += try EventLogCodec.encodeLines(dayEvents)
+        }
+        out += "# sitless event log export\n"
+        out += "# schema v\(EventSchema.version), one JSON object per line, see docs/PRIVACY.md §4.3\n"
+        out += "# source: \(location)\n"
+        if let first = days.first, let last = days.last {
+            out += "# days: \(first) .. \(last)  (\(days.count))\n"
+        } else {
+            out += "# days: none\n"
+        }
+        out += "# events: \(total)\n"
+        for (i, line) in LoggedEvent.fieldGuide().enumerated() {
+            out += i == 0 ? "# fields: \(line)\n" : "#         \(line)\n"
+        }
+        out += "# this is the log as sitless reads it, not a byte copy: every line that parses,\n"
+        out += "# written back out and put in time order within its day. A line that does not parse\n"
+        out += "# is left out and counted below, and a field this version does not know is dropped.\n"
+        out += "# The files in events/ are the bytes themselves.\n"
+        let lost = skipped.filter { $0.value > 0 }
+        if lost.isEmpty {
+            out += "# skipped: none\n"
+        } else {
+            let lines = lost.values.reduce(0, +)
+            let on = lost.keys.sorted().map(\.description).joined(separator: ", ")
+            out += "# skipped: \(lines) line(s) that would not parse, on \(on)\n"
+        }
+        out += body
+        return out
+    }
+}
