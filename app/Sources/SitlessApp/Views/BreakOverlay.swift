@@ -252,7 +252,7 @@ struct BreakScreen: View {
                 FaceMark(mood: .welcomeBack)
                     .equatable()
 
-                Text("STATE T · SIGSTOP")
+                Text(L("STATE T · SIGSTOP"))
                     .font(Brand.mono(12, weight: .semibold))
                     .tracking(3)
                     .foregroundStyle(Brand.Dark.amber)
@@ -261,14 +261,14 @@ struct BreakScreen: View {
                 countdown
                     .padding(.top, 30)
 
-                Text(content?.prompt ?? "Stand up.")
+                Text(L(content?.prompt ?? "Stand up."))
                     .font(Brand.sans(34, weight: .medium))
                     .foregroundStyle(Brand.Dark.fg)
                     .multilineTextAlignment(.center)
                     .padding(.top, 44)
 
                 if let quest = content?.quest {
-                    Text(quest)
+                    Text(L(quest))
                         .font(Brand.sans(17))
                         .foregroundStyle(Brand.Dark.fgMuted)
                         .multilineTextAlignment(.center)
@@ -278,7 +278,7 @@ struct BreakScreen: View {
                 resume
                     .padding(.top, 44)
 
-                Text("Your process is stopped, not killed. SIGCONT resumes.")
+                Text(L("Your process is stopped, not killed. SIGCONT resumes."))
                     .font(Brand.mono(12))
                     .foregroundStyle(Brand.Dark.fgMuted)
                     .padding(.top, 20)
@@ -302,9 +302,9 @@ struct BreakScreen: View {
                     )
             }
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("remaining")
-                Text("·")
-                Text("of \(Format.clock(total))")
+                Text(L("remaining"))
+                Text(L("·"))
+                Text(L("of \(Format.clock(total))"))
             }
             .font(Brand.mono(12))
             .foregroundStyle(Brand.Dark.fgMuted)
@@ -329,7 +329,7 @@ struct BreakScreen: View {
 
     private var resume: some View {
         Button(action: onResume) {
-            Text("SIGCONT")
+            Text(L("SIGCONT"))
                 .font(Brand.mono(13, weight: .semibold))
                 .tracking(2.5)
                 .padding(.horizontal, 32)
@@ -380,28 +380,28 @@ struct FallbackPromptView: View {
 
                 HStack(spacing: 10) {
                     StateDot(state: isIncident ? .alert : .suspend)
-                    Text(request.signal)
+                    Text(L(request.signal))
                         .font(Brand.mono(13, weight: .semibold))
                         .tracking(3)
                         .foregroundStyle(isIncident ? Brand.alert : Brand.Dark.amber)
-                    Text("L\(request.level.rawValue)")
+                    Text(L("L\(request.level.rawValue)"))
                         .font(Brand.mono(12))
                         .foregroundStyle(Brand.Dark.fgMuted)
                 }
 
-                Text("\(DurationText.short(request.continuousWork)) continuous")
+                Text(L("\(DurationText.short(request.continuousWork)) continuous"))
                     .font(Brand.mono(12))
                     .foregroundStyle(Brand.Dark.fgMuted)
                     .padding(.top, 10)
 
                 if let title = message.title {
-                    Text(title)
+                    Text(L(title))
                         .font(Brand.sans(20, weight: .semibold))
                         .foregroundStyle(Brand.Dark.fgMuted)
                         .padding(.top, 34)
                 }
 
-                Text(message.text)
+                Text(L(message.text))
                     .font(Brand.sans(38, weight: .medium))
                     .foregroundStyle(Brand.Dark.fg)
                     .multilineTextAlignment(.center)
@@ -431,7 +431,7 @@ struct FallbackPromptView: View {
                 }
                 .padding(.top, 44)
 
-                Text(PromptFooter.text(for: request, quietAfterLast: quietAfterLast))
+                Text(L(PromptFooter.text(for: request, quietAfterLast: quietAfterLast)))
                     .font(Brand.mono(11))
                     .foregroundStyle(Brand.Dark.fgMuted)
                     .padding(.top, 18)

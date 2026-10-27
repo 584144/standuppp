@@ -7,7 +7,7 @@
 **一个只在你真的起身时才算数的 macOS 久坐提醒。**
 
 [![CI](https://github.com/584144/sitless/actions/workflows/ci.yml/badge.svg)](https://github.com/584144/sitless/actions/workflows/ci.yml)
-[![593 tests](https://img.shields.io/badge/tests-593%20passing-3fb950?style=flat-square)](#build)
+[![595 tests](https://img.shields.io/badge/tests-595%20passing-3fb950?style=flat-square)](#build)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
 macOS 14+ · Apple Silicon / Intel · 开源免费
@@ -26,6 +26,7 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 - 🚶 **休息期间敲键盘就不算**：本 fork 新增的规则。休息倒计时期间，如果键盘鼠标累计活跃超过 **1 分钟**，这次休息作废：工作计时不清零，提醒很快会再来，当天统计里算"放弃的休息"。
 - 🤫 **不打断你**：开会（麦克风或摄像头在用）、全屏、专注模式下会等一等，挑一个停顿的时机再提醒。
 - 📊 **看得见的一天**：活跃时长、最长连续工作、休息次数，以及真正做到的有几次。
+- 🇨🇳 **中文界面**：菜单栏、设置、提醒弹窗、休息页都是中文，提醒语是一套温和语气的中文文案。系统语言是中文时默认显示中文，也可以在设置 → 节奏 → 界面语言里切换中文 / English。
 - 🔒 **数据不出本机**：不需要任何权限，不联网（只有你手动点"检查更新"时才会发一次请求），不读取窗口内容、按键内容和剪贴板。
 
 ## 设置
@@ -40,7 +41,8 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 {
   "workIntervalMinutes": 50,
   "breakDurationMinutes": 5,
-  "maxActiveDuringBreakSeconds": 60
+  "maxActiveDuringBreakSeconds": 60,
+  "language": "zh-Hans"
 }
 ```
 
@@ -48,6 +50,7 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 |---|---|---|
 | `workIntervalMinutes` | 连续工作多少分钟后提醒 | 45 |
 | `breakDurationMinutes` | 一次休息多少分钟 | 5 |
+| `language` | 界面语言：`system`（跟随系统）、`zh-Hans`、`en` | system |
 | `maxActiveDuringBreakSeconds` | 休息期间键盘鼠标最多可以用多少秒，超过就不算休息（10–600） | 60 |
 
 改完退出再打开 App 就会生效。用 `--doctor` 可以看到当前生效的值：
@@ -83,6 +86,7 @@ make verify  # 对构建出的 App 检查网络和隐私方面的承诺
 
 - 新增：休息期间键盘鼠标累计活跃超过上限（默认 60 秒）时，这次休息不算数。日志的 `break_end` 行新增 `active_s` 和 `void` 字段。
 - 改名为"久坐工具提醒 / sitless"，换了 bundle id、模块名、图标、菜单栏标记和配色。
+- 新增中文界面和一套温和的中文提醒语，可在设置里切换语言。
 - 清空了上游的更新源。
 
 ## 许可证

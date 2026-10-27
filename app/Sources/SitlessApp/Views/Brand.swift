@@ -110,39 +110,27 @@ struct BrandMark: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: size * 0.22) {
-            eye
-            eye
-        }
-        .frame(width: size * 0.92, height: size)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.5), value: fill)
-        .accessibilityHidden(true)
-    }
-
-    @ViewBuilder
-    private var eye: some View {
-        if resting {
-            GeometryReader { geometry in
+        ZStack {
+            Circle()
+                .stroke(Brand.amber.opacity(0.3), lineWidth: max(1.5, size * 0.08))
+            if resting {
                 Capsule(style: .continuous)
                     .fill(Brand.amber)
-                    .frame(width: geometry.size.width + size * 0.08, height: max(2, size * 0.09))
-                    .position(x: geometry.size.width / 2, y: geometry.size.height * 0.62)
-            }
-        } else {
-            bar
-        }
-    }
-
-    private var bar: some View {
-        GeometryReader { geometry in
-            let shape = RoundedRectangle(cornerRadius: size * 0.09, style: .continuous)
-            ZStack(alignment: .bottom) {
-                shape
+                    .frame(width: size * 0.5, height: max(2, size * 0.1))
+            } else {
+                Circle()
+                    .trim(from: 0, to: min(1, max(0, fill)))
+                    .stroke(Brand.amber, style: StrokeStyle(lineWidth: max(2, size * 0.14), lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Circle()
                     .fill(Brand.amberFill)
-                    .frame(height: geometry.size.height * min(1, max(0, fill)))
-                shape.strokeBorder(Brand.amber, lineWidth: max(1.5, size * 0.045))
+                    .frame(width: size * 0.2, height: size * 0.2)
             }
         }
+        .padding(size * 0.08)
+        .frame(width: size, height: size)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.5), value: fill)
+        .accessibilityHidden(true)
     }
 }
 
@@ -151,7 +139,7 @@ struct Kicker: View {
     init(_ text: String) { self.text = text }
 
     var body: some View {
-        Text(text)
+        Text(L(text))
             .font(Brand.mono(10, weight: .medium))
             .tracking(1.6)
             .textCase(.uppercase)
@@ -222,7 +210,7 @@ struct TerminalButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(L(title))
                 .font(Brand.mono(11, weight: style.weight))
         }
         .buttonStyle(
@@ -305,7 +293,7 @@ private struct TerminalButtonStyle: ButtonStyle {
         private var content: some View {
             if let mark {
                 HStack(spacing: 0) {
-                    Text(mark)
+                    Text(L(mark))
                         .font(Brand.mono(11, weight: .medium))
                         .foregroundStyle(markInk)
                         .frame(width: TerminalButton.markGutter, alignment: .leading)
@@ -411,12 +399,12 @@ struct TerminalStepper: View {
             }
             Rectangle().fill(Brand.lineHi).frame(width: 1, height: 24)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(value)")
+                Text(L("\(value)"))
                     .font(Brand.mono(13, weight: .semibold))
                     .foregroundStyle(Brand.fg)
                     .monospacedDigit()
                 if !unit.isEmpty {
-                    Text(unit)
+                    Text(L(unit))
                         .font(Brand.mono(10))
                         .foregroundStyle(Brand.fgMuted)
                 }
@@ -434,13 +422,13 @@ struct TerminalStepper: View {
                 .strokeBorder(Brand.lineHi, lineWidth: 1)
         )
         .accessibilityRepresentation {
-            Stepper(value: $value, in: range, step: step) { Text("\(value) \(unit)") }
+            Stepper(value: $value, in: range, step: step) { Text(L("\(value) \(unit)")) }
         }
     }
 
     private func control(_ glyph: String, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(glyph)
+            Text(L(glyph))
                 .font(Brand.mono(13, weight: .medium))
                 .foregroundStyle(enabled ? Brand.fg : Brand.fgFaint.opacity(0.5))
                 .frame(width: 26, height: 24)
@@ -474,7 +462,7 @@ struct TerminalSegmented<Value: Hashable>: View {
     private func cell(_ value: Value, _ label: String) -> some View {
         let on = value == selection
         return Button { selection = value } label: {
-            Text(label)
+            Text(L(label))
                 .font(Brand.mono(12, weight: on ? .semibold : .regular))
                 .foregroundStyle(on ? Brand.fg : Brand.fgMuted)
                 .frame(minWidth: 58)

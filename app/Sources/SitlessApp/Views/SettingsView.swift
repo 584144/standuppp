@@ -22,7 +22,7 @@ struct SettingsView: View {
         case rhythm, voice, badges, access, data, about
 
         var id: String { rawValue }
-        var title: String { rawValue.capitalized }
+        var title: String { L(rawValue.capitalized) }
 
         var lede: String {
             switch self {
@@ -56,7 +56,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 BrandMark(size: 16, fill: 0.5)
-                Text("sitless")
+                Text(L("sitless"))
                     .font(Brand.mono(13, weight: .semibold))
                     .foregroundStyle(Brand.fg)
             }
@@ -81,11 +81,11 @@ struct SettingsView: View {
                 if pane == .about {
                     identity
                 } else {
-                    Text(pane.title)
+                    Text(L(pane.title))
                         .font(Brand.mono(22, weight: .bold))
                         .tracking(-0.6)
                         .foregroundStyle(Brand.fg)
-                    Text(pane.lede)
+                    Text(L(pane.lede))
                         .font(Brand.sans(12.5))
                         .foregroundStyle(Brand.fgMuted)
                         .lineSpacing(2)
@@ -141,7 +141,7 @@ struct SettingsView: View {
                     HStack(spacing: 8) {
                         TimeField(minutes: settings.quietHours.startMinute, enabled: model.settings.quietHours.enabled)
                             .accessibilityLabel("Quiet from")
-                        Text("→")
+                        Text(L("→"))
                             .font(Brand.mono(11))
                             .foregroundStyle(Brand.fgFaint)
                             .accessibilityHidden(true)
@@ -177,6 +177,12 @@ struct SettingsView: View {
                 SettingRow("Show the full-screen overlay", detail: "Dimmed, not opaque. The work is still there.") {
                     TerminalSwitch(isOn: settings.showBreakOverlay)
                 }
+                SettingRow(
+                    "Break counts only if you leave",
+                    detail: "If the keyboard or mouse is in use for longer than this during a break, the break does not count and the work clock keeps running."
+                ) {
+                    TerminalStepper(value: settings.maxActiveDuringBreakSeconds, range: 10...600, step: 10, unit: "sec")
+                }
                 SettingRow("Suggest something to do", detail: "A small, finishable nudge to leave the chair.") {
                     TerminalSwitch(isOn: settings.breakQuestsEnabled)
                 }
@@ -196,6 +202,15 @@ struct SettingsView: View {
                     TerminalSegmented(
                         selection: appearance,
                         options: AppearancePreference.allCases.map { ($0, $0.displayName) }
+                    )
+                }
+                SettingRow(
+                    "Language",
+                    detail: "Chinese for menus, settings and prompts, or follow macOS. Prompts in Chinese use a calm voice."
+                ) {
+                    TerminalSegmented(
+                        selection: language,
+                        options: [(AppLanguage.system, "System"), (.chinese, "中文"), (.english, "English")]
                     )
                 }
                 SettingRow("Show in the Dock", detail: "On by default, so the app is still findable when the menu bar hides its mark. Turn it off for menu bar only.") {
@@ -228,6 +243,17 @@ struct SettingsView: View {
             set: { choice in
                 var updated = model.settings
                 updated.appearance = choice
+                model.update(settings: updated)
+            }
+        )
+    }
+
+    private var language: Binding<AppLanguage> {
+        Binding(
+            get: { model.settings.language },
+            set: { choice in
+                var updated = model.settings
+                updated.language = choice
                 model.update(settings: updated)
             }
         )
@@ -273,7 +299,7 @@ struct SettingsView: View {
                 }
                 .padding(.top, 14)
 
-                Text(model.settings.tone.blurb)
+                Text(L(model.settings.tone.blurb))
                     .font(Brand.sans(14))
                     .foregroundStyle(Brand.fg)
                     .padding(.top, 16)
@@ -406,8 +432,8 @@ struct SettingsView: View {
             }
 
             SettingsSection("check it") {
-                (Text("sitless --doctor").font(Brand.mono(11))
-                    + Text(" prints every row on this page with the macOS call behind it.")
+                (Text(L("sitless --doctor")).font(Brand.mono(11))
+                    + Text(L(" prints every row on this page with the macOS call behind it."))
                         .font(Brand.sans(11)))
                     .foregroundStyle(Brand.fgMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -463,17 +489,17 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Kicker("read")
-                        Text(reading.branchText)
+                        Text(L(reading.branchText))
                             .font(Brand.mono(11))
                             .foregroundStyle(Brand.fg)
                             .textSelection(.enabled)
                         if let state = reading.stateText {
-                            Text(state)
+                            Text(L(state))
                                 .font(Brand.mono(11))
                                 .foregroundStyle(Brand.fgMuted)
                         }
                     }
-                    Text("in \(reading.folder), matched by \(reading.route)")
+                    Text(L("in \(reading.folder), matched by \(reading.route)"))
                         .font(Brand.mono(10.5))
                         .foregroundStyle(Brand.fgMuted)
                         .fixedSize(horizontal: false, vertical: true)
@@ -482,7 +508,7 @@ struct SettingsView: View {
             } else {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Kicker("read")
-                    Text(Self.gitOutcome(model.gitStatusLine))
+                    Text(L(Self.gitOutcome(model.gitStatusLine)))
                         .font(Brand.mono(10.5))
                         .foregroundStyle(Brand.fgMuted)
                         .fixedSize(horizontal: false, vertical: true)
@@ -651,21 +677,21 @@ struct SettingsView: View {
         HStack(alignment: .top, spacing: 18) {
             BrandMark(size: 48, fill: 0.5)
             VStack(alignment: .leading, spacing: 5) {
-                Text("sitless")
+                Text(L("sitless"))
                     .font(Brand.mono(22, weight: .bold))
                     .tracking(-0.6)
                     .foregroundStyle(Brand.fg)
                 if releaseName != nil {
-                    Text(version)
+                    Text(L(version))
                         .font(Brand.mono(10.5))
                         .foregroundStyle(Brand.fgFaint)
                         .textSelection(.enabled)
                 }
-                Text("\(releaseName ?? version) · GPL-3.0 · macOS 14+ · swift 6")
+                Text(L("\(releaseName ?? version) · GPL-3.0 · macOS 14+ · swift 6"))
                     .font(Brand.mono(10.5))
                     .foregroundStyle(Brand.fgMuted)
                     .textSelection(.enabled)
-                Text("A stopped process keeps everything and continues at the exact instruction.")
+                Text(L("A stopped process keeps everything and continues at the exact instruction."))
                     .font(Brand.sans(12.5))
                     .foregroundStyle(Brand.fgMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -718,10 +744,10 @@ struct SettingsView: View {
 
     private var madeBy: some View {
         HStack(spacing: 5) {
-            Text("A fork of sigstop by")
-            Text("Mohamed Elshesheny")
+            Text(L("A fork of sigstop by"))
+            Text(L("Mohamed Elshesheny"))
                 .foregroundStyle(Brand.fgMuted)
-            Text("· GPL-3.0")
+            Text(L("· GPL-3.0"))
         }
         .font(Brand.mono(10.5))
         .foregroundStyle(Brand.fgFaint)
@@ -738,13 +764,13 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     StateDot(state: Self.dot(for: updater.state))
-                    Text(Self.statusLine(for: updater.state))
+                    Text(L(Self.statusLine(for: updater.state)))
                         .font(Brand.mono(11))
                         .foregroundStyle(Self.isError(updater.state) ? Brand.fg : Brand.fgMuted)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
                     if case .downloading(let received, let expected) = updater.state, expected > 0 {
-                        Text(Self.bytes(received, of: expected))
+                        Text(L(Self.bytes(received, of: expected)))
                             .font(Brand.mono(10))
                             .foregroundStyle(Brand.fgMuted)
                             .monospacedDigit()
@@ -895,7 +921,7 @@ private struct NavRow: View {
                 Rectangle()
                     .fill(selected ? Brand.amberFill : Color.clear)
                     .frame(width: 2)
-                Text(title)
+                Text(L(title))
                     .font(Brand.mono(12, weight: selected ? .medium : .regular))
                     .foregroundStyle(selected ? Brand.fg : Brand.fgMuted)
                     .padding(.leading, 16)
@@ -930,16 +956,16 @@ private struct LinkRow: View {
             } label: {
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(title)
+                        Text(L(title))
                             .font(Brand.mono(12, weight: .medium))
                             .foregroundStyle(hovering ? Brand.fg : Brand.fgMuted)
-                        Text(detail)
+                        Text(L(detail))
                             .font(Brand.sans(11.5))
                             .foregroundStyle(Brand.fgFaint)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 8)
-                    Text("\u{2197}")
+                    Text(L("\u{2197}"))
                         .font(Brand.mono(11))
                         .foregroundStyle(hovering ? Brand.amber : Brand.fgFaint)
                 }
@@ -969,10 +995,10 @@ private struct CreditRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(name)
+            Text(L(name))
                 .font(Brand.mono(11.5, weight: .medium))
                 .foregroundStyle(Brand.fgMuted)
-            Text(role)
+            Text(L(role))
                 .font(Brand.sans(11.5))
                 .foregroundStyle(Brand.fgFaint)
                 .fixedSize(horizontal: false, vertical: true)
@@ -991,11 +1017,11 @@ private struct FileRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(name)
+            Text(L(name))
                 .font(Brand.mono(11))
                 .foregroundStyle(Brand.fgMuted)
                 .frame(width: 112, alignment: .leading)
-            Text(role)
+            Text(L(role))
                 .font(Brand.sans(11.5))
                 .foregroundStyle(Brand.fgFaint)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1039,11 +1065,11 @@ private struct SettingRow<Control: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 20) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(L(title))
                         .font(Brand.sans(13))
                         .foregroundStyle(Brand.fg)
                     if let detail, !detail.isEmpty {
-                        Text(detail)
+                        Text(L(detail))
                             .font(Brand.sans(11))
                             .foregroundStyle(Brand.fgMuted)
                             .lineSpacing(2)
@@ -1066,7 +1092,7 @@ private struct Note: View {
     init(_ text: String) { self.text = text }
 
     var body: some View {
-        Text(text)
+        Text(L(text))
             .font(Brand.sans(11))
             .foregroundStyle(Brand.fgMuted)
             .lineSpacing(2)
@@ -1080,7 +1106,7 @@ private struct CodeBlock: View {
     init(_ text: String) { self.text = text }
 
     var body: some View {
-        Text(text)
+        Text(L(text))
             .font(Brand.mono(11))
             .foregroundStyle(Brand.fg)
             .textSelection(.enabled)
@@ -1114,10 +1140,10 @@ struct BadgeRow: View {
             HStack(alignment: .top, spacing: 14) {
                 BadgeMark(motif: badge.motif, unlocked: unlocked, size: 28)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(badge.title)
+                    Text(L(badge.title))
                         .font(Brand.mono(12, weight: .medium))
                         .foregroundStyle(unlocked ? Brand.fg : Brand.fgMuted)
-                    Text(unlocked ? badge.blurb : badge.lockedHint)
+                    Text(L(unlocked ? badge.blurb : badge.lockedHint))
                         .font(Brand.sans(11))
                         .foregroundStyle(Brand.fgMuted)
                         .lineSpacing(2)
@@ -1128,7 +1154,7 @@ struct BadgeRow: View {
                     }
                 }
                 Spacer(minLength: 16)
-                Text(trailing)
+                Text(L(trailing))
                     .font(Brand.mono(10))
                     .foregroundStyle(unlocked ? Brand.fgMuted : Brand.fgFaint)
                     .monospacedDigit()
@@ -1175,11 +1201,11 @@ private struct ToneCard: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(tone.displayName.uppercased())
+                Text(Localizer.chinese ? L(tone.displayName) : tone.displayName.uppercased())
                     .font(Brand.mono(11, weight: .semibold))
                     .tracking(1)
                     .foregroundStyle(selected ? Brand.amber : Brand.fg)
-                Text(gloss)
+                Text(L(gloss))
                     .font(Brand.mono(10))
                     .foregroundStyle(Brand.fgMuted)
             }
@@ -1236,10 +1262,10 @@ private struct SignalRow<Control: View, Extra: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 20) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(L(title))
                         .font(Brand.sans(13))
                         .foregroundStyle(Brand.fg)
-                    Text(reads)
+                    Text(L(reads))
                         .font(Brand.sans(11))
                         .foregroundStyle(Brand.fgMuted)
                         .lineSpacing(2)
@@ -1300,7 +1326,7 @@ private struct StateLabel: View {
             if let dot {
                 StateDot(state: dot)
             }
-            Text(text)
+            Text(L(text))
                 .font(Brand.mono(10.5))
                 .foregroundStyle(Brand.fgMuted)
         }

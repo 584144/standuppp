@@ -766,3 +766,27 @@ struct AppKeyTests {
         #expect(Weekday(calendarWeekday: 7) == .sat)
     }
 }
+
+@Suite("the Chinese calm corpus")
+struct ChineseCorpusTests {
+    @Test("every rung and every tone ceiling gets a Chinese line, never an English fallback")
+    func alwaysChinese() {
+        let engine = MessageEngine(corpus: .chineseCalm)
+        for level in [EscalationLevel.first, .second, .third, .incident] {
+            for tone in Tone.allCases {
+                let message = engine.select(for: makeContext(escalation: level, tone: tone)).message
+                #expect(message.text.unicodeScalars.contains { $0.value >= 0x4E00 && $0.value <= 0x9FFF },
+                        "\(level) \(tone): \(message.text)")
+                #expect(message.title?.isEmpty == false)
+            }
+        }
+    }
+
+    @Test("ids are unique and every line names itself as zh-Hans")
+    func wellFormed() {
+        let ids = Corpus.chineseCalm.templates.map(\.id)
+        #expect(Set(ids).count == ids.count)
+        #expect(ids.count >= 20)
+        #expect(Corpus.chineseCalm.packs.allSatisfy { $0.locale == "zh-Hans" })
+    }
+}

@@ -82,6 +82,21 @@ public struct QuietHours: Sendable, Codable, Hashable {
     }
 }
 
+public enum AppLanguage: String, Sendable, Codable, CaseIterable, Hashable {
+    case system
+    case chinese = "zh-Hans"
+    case english = "en"
+
+    /// Whether this choice shows Chinese, following macOS when it is `.system`.
+    public var isChinese: Bool {
+        switch self {
+        case .chinese: return true
+        case .english: return false
+        case .system: return Locale.preferredLanguages.first?.hasPrefix("zh") ?? false
+        }
+    }
+}
+
 public struct SitlessSettings: Sendable, Codable, Hashable {
     public var workIntervalMinutes: Int
     public var breakDurationMinutes: Int
@@ -111,6 +126,7 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
     public var breakQuestsEnabled: Bool
     public var holdBreaksDuringCalls: Bool
     public var statusLineEnabled: Bool
+    public var language: AppLanguage
 
     public init(
         workIntervalMinutes: Int = 45,
@@ -136,7 +152,8 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         showBreakOverlay: Bool = true,
         breakQuestsEnabled: Bool = true,
         holdBreaksDuringCalls: Bool = true,
-        statusLineEnabled: Bool = false
+        statusLineEnabled: Bool = false,
+        language: AppLanguage = .system
     ) {
         self.workIntervalMinutes = workIntervalMinutes
         self.breakDurationMinutes = breakDurationMinutes
@@ -162,6 +179,7 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         self.breakQuestsEnabled = breakQuestsEnabled
         self.holdBreaksDuringCalls = holdBreaksDuringCalls
         self.statusLineEnabled = statusLineEnabled
+        self.language = language
     }
 
     public static let `default` = SitlessSettings()
@@ -202,5 +220,6 @@ public struct SitlessSettings: Sendable, Codable, Hashable {
         breakQuestsEnabled = try c.decodeIfPresent(Bool.self, forKey: .breakQuestsEnabled) ?? d.breakQuestsEnabled
         holdBreaksDuringCalls = try c.decodeIfPresent(Bool.self, forKey: .holdBreaksDuringCalls) ?? d.holdBreaksDuringCalls
         statusLineEnabled = try c.decodeIfPresent(Bool.self, forKey: .statusLineEnabled) ?? d.statusLineEnabled
+        language = (try? c.decodeIfPresent(AppLanguage.self, forKey: .language)) ?? d.language
     }
 }

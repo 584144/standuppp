@@ -46,7 +46,9 @@ final class AppModel {
     private(set) var lastStoreError: String?
     private(set) var promptDeliveryFailure: String?
     private(set) var notificationState: NotificationAvailability = .notYetNeeded
-    private(set) var settings: SitlessSettings
+    private(set) var settings: SitlessSettings {
+        didSet { Localizer.chinese = settings.language.isChinese }
+    }
 
     var onSettingsChanged: (() -> Void)?
     var onAppearanceChanged: ((AppearancePreference) -> Void)?
@@ -112,6 +114,7 @@ final class AppModel {
     @ObservationIgnored private let time: any TimeSource = SystemTimeSource()
     @ObservationIgnored private let workClock = WorkClockBox()
     @ObservationIgnored private let messages = MessageEngine()
+    @ObservationIgnored private let chineseMessages = MessageEngine(corpus: .chineseCalm)
     @ObservationIgnored private let notifier = Notifier()
     @ObservationIgnored private let overlay = BreakOverlayController()
 
@@ -179,6 +182,7 @@ final class AppModel {
 
         self.settingsLeftAlone = read.unreadable
         self.settings = loaded
+        Localizer.chinese = loaded.language.isChinese
         self.policy = policy
         self.workTarget = policy.targetContinuousWork
         self.sensors = SensorStack(settings: loaded, time: time, workClock: workClock)
@@ -665,7 +669,8 @@ final class AppModel {
             facts: Self.facts(from: context),
             withheldSlots: goesToTheSystem ? [.branch, .project] : []
         )
-        let message = messages.select(for: messageContext).message
+        let engine = settings.language.isChinese ? chineseMessages : messages
+        let message = engine.select(for: messageContext).message
         PromptSound.play(for: request.level, enabled: settings.promptSound && !captureLive)
         if !goesToTheSystem {
             presentPanel(request, message: message)

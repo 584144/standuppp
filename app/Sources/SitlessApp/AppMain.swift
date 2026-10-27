@@ -100,7 +100,7 @@ struct SitlessScene: App {
         Settings { EmptyView() }
             .commands {
                 CommandGroup(replacing: .appSettings) {
-                    Button("Settings…") { delegate.openSettings() }
+                    Button(L("Settings…")) { delegate.openSettings() }
                         .keyboardShortcut(",")
                 }
             }
@@ -406,7 +406,7 @@ final class StatusItemController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "sitless Settings"
+        window.title = L("sitless Settings")
         window.contentViewController = settingsContent(on: pane ?? .rhythm)
         window.isReleasedWhenClosed = false
         window.delegate = self

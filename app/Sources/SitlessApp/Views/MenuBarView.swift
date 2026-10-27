@@ -87,7 +87,7 @@ struct MenuBarView: View {
             HStack(alignment: .firstTextBaseline, spacing: 7) {
                 StateDot(state: status.dot)
                     .alignmentGuide(.firstTextBaseline) { $0[.bottom] - 0.5 }
-                Text(status.title)
+                Text(L(status.title))
                     .font(Brand.mono(10, weight: .semibold))
                     .tracking(1.6)
                     .textCase(.uppercase)
@@ -108,7 +108,7 @@ struct MenuBarView: View {
                         .contentTransition(reduceMotion ? .identity : .numericText())
                 }
                 if let suffix = clockSuffix {
-                    Text(suffix)
+                    Text(L(suffix))
                         .font(Brand.mono(11))
                         .monospacedDigit()
                         .foregroundStyle(Brand.fgFaint)
@@ -128,13 +128,13 @@ struct MenuBarView: View {
 
     private var signal: some View {
         Group {
-            if status.signal.hasPrefix("state ") {
-                Text("state ").foregroundStyle(Brand.fgFaint)
-                    + Text(String(status.signal.dropFirst(6)))
+            if status.signal.hasPrefix("state "), !Localizer.chinese {
+                Text(L("state ")).foregroundStyle(Brand.fgFaint)
+                    + Text(L(String(status.signal.dropFirst(6))))
                     .font(Brand.mono(10.5, weight: .bold))
                     .foregroundStyle(status.accent ? Brand.amber : Brand.fg)
             } else {
-                Text(status.signal)
+                Text(L(status.signal))
                     .font(Brand.mono(10.5, weight: .semibold))
                     .foregroundStyle(status.accent ? Brand.amber : Brand.fgMuted)
             }
@@ -241,7 +241,7 @@ struct MenuBarView: View {
         return HStack(alignment: .center, spacing: 8) {
             CellMeter(cells: reading.cells, lit: reading.lit, tint: reading.tint, brackets: true)
                 .frame(height: 12)
-            Text(reading.label)
+            Text(L(reading.label))
                 .font(Brand.mono(10.5, weight: .semibold))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -254,12 +254,12 @@ struct MenuBarView: View {
 
     private func claim(_ line: WaitingLine) -> some View {
         let label = line.claim.prefix.isEmpty
-            ? Text("")
-            : Text("\(line.claim.prefix): ")
+            ? Text(L(""))
+            : Text(L("\(line.claim.prefix): "))
                 .font(Brand.mono(11, weight: .semibold))
                 .foregroundStyle(Self.ink(for: line.claim))
         return (label
-            + Text("\(line.body).")
+            + Text(L("\(line.body)."))
             .font(Brand.mono(11))
             .foregroundStyle(line.claim.prefix.isEmpty ? Brand.fg : Brand.fgMuted))
             .fixedSize(horizontal: false, vertical: true)
@@ -333,7 +333,7 @@ struct MenuBarView: View {
     private var table: some View {
         VStack(alignment: .leading, spacing: 7) {
             TableRow(sinceRow.key) {
-                Text(sinceRow.value)
+                Text(L(sinceRow.value))
                     .font(Brand.mono(11))
                     .foregroundStyle(Brand.fgMuted)
                     .lineLimit(1)
@@ -342,11 +342,11 @@ struct MenuBarView: View {
 
             TableRow("app") {
                 if model.applicationName.isEmpty {
-                    Text("nothing sampled yet")
+                    Text(L("nothing sampled yet"))
                         .font(Brand.mono(11))
                         .foregroundStyle(Brand.fgFaint)
                 } else {
-                    Text(model.applicationName)
+                    Text(L(model.applicationName))
                         .font(Brand.mono(11, weight: .semibold))
                         .foregroundStyle(Brand.fg)
                         .lineLimit(1)
@@ -387,7 +387,7 @@ struct MenuBarView: View {
     }
 
     private var activity: some View {
-        Text(model.activityLabel)
+        Text(L(model.activityLabel))
             .font(Brand.mono(11, weight: .medium))
             .foregroundStyle(Brand.fg)
     }
@@ -396,7 +396,7 @@ struct MenuBarView: View {
         let value = min(max(model.confidence, 0), 1)
         let confident = value >= 0.6
         return HStack(alignment: .center, spacing: 6) {
-            Text("conf")
+            Text(L("conf"))
                 .font(Brand.mono(10))
                 .foregroundStyle(Brand.fgFaint)
             Text(String(format: "%.2f", value))
@@ -418,7 +418,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 5) {
             if model.evidenceLines.isEmpty {
                 TableRow("") {
-                    Text("No evidence either way yet.")
+                    Text(L("No evidence either way yet."))
                         .font(Brand.mono(10.5))
                         .foregroundStyle(Brand.fgMuted)
                 }
@@ -441,12 +441,12 @@ struct MenuBarView: View {
 
     private func evidenceRow(_ mark: String, ink: Color, _ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
-            Text(mark)
+            Text(L(mark))
                 .font(Brand.mono(10, weight: .medium))
                 .monospacedDigit()
                 .foregroundStyle(ink)
                 .frame(width: Self.keyColumn, alignment: .leading)
-            Text(text)
+            Text(L(text))
                 .font(Brand.mono(10.5))
                 .foregroundStyle(Brand.fgMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -549,7 +549,7 @@ struct MenuBarView: View {
                     (Text(DurationText.short(summary.totalActiveWork))
                         .font(Brand.mono(11, weight: .semibold))
                         .foregroundStyle(Brand.fg)
-                        + Text(" active")
+                        + Text(L(" active"))
                         .font(Brand.mono(10.5))
                         .foregroundStyle(Brand.fgMuted))
                         .monospacedDigit()
@@ -566,7 +566,7 @@ struct MenuBarView: View {
                 }
                 .padding(.top, 2)
             } else {
-                Text("Nothing recorded yet today.")
+                Text(L("Nothing recorded yet today."))
                     .font(Brand.mono(10.5))
                     .foregroundStyle(Brand.fgMuted)
             }
@@ -615,11 +615,11 @@ struct MenuBarView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 0) {
                     ForEach(Array(row.enumerated()), id: \.offset) { index, stat in
                         HStack(alignment: .firstTextBaseline, spacing: 0) {
-                            Text(stat.label)
+                            Text(L(stat.label))
                                 .font(Brand.mono(10))
                                 .foregroundStyle(Brand.fgFaint)
                                 .frame(width: index == 0 ? Self.keyColumn : 54, alignment: .leading)
-                            Text(stat.value)
+                            Text(L(stat.value))
                                 .font(Brand.mono(11, weight: .medium))
                                 .monospacedDigit()
                                 .foregroundStyle(Brand.fg)
@@ -678,12 +678,12 @@ struct MenuBarView: View {
 
     private func footnote(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
-            Text("*")
+            Text(L("*"))
                 .font(Brand.mono(10, weight: .semibold))
                 .foregroundStyle(Brand.amber)
                 .frame(width: 12, alignment: .leading)
                 .accessibilityHidden(true)
-            Text(text)
+            Text(L(text))
                 .font(Brand.mono(10))
                 .foregroundStyle(Brand.fgMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -702,7 +702,7 @@ struct MenuBarView: View {
 
         var body: some View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
-                Text(key)
+                Text(L(key))
                     .font(Brand.mono(10))
                     .foregroundStyle(Brand.fgFaint)
                     .frame(width: MenuBarView.keyColumn, alignment: .leading)
@@ -824,7 +824,7 @@ private struct DisclosureLine: View {
             HStack(spacing: 5) {
                 Text(open ? "▾" : "▸")
                     .frame(width: 8)
-                Text(title)
+                Text(L(title))
             }
             .font(Brand.mono(10.5))
             .foregroundStyle(hovering || open ? Brand.fg : Brand.fgMuted)

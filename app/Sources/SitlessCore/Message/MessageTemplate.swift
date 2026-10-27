@@ -369,9 +369,13 @@ public enum CorpusError: Error, Sendable, Equatable {
 public struct Corpus: Sendable, Hashable {
     public let packs: [MessagePack]
     public let templates: [MessageTemplate]
+    /// What the engine falls back to once recency has used up every eligible line. Lines in
+    /// another language bring their own, so a Chinese day never ends on an English sentence.
+    public let fallbacks: [MessageTemplate]
 
-    public init(packs: [MessagePack]) {
+    public init(packs: [MessagePack], fallbacks: [MessageTemplate]? = nil) {
         self.packs = packs
+        self.fallbacks = fallbacks ?? Corpus.emergencyPool
         var seen = Set<String>()
         var flat: [MessageTemplate] = []
         for pack in packs where pack.isSupported {

@@ -168,10 +168,10 @@ public final class MessageEngine: @unchecked Sendable {
 
         if candidates.isEmpty {
             stage = .emergency
-            let pool = Corpus.emergencyPool.filter { $0.escalation.contains(ctx.escalation) }
+            let pool = corpus.fallbacks.filter { $0.escalation.contains(ctx.escalation) }
             candidates = pool.filter { $0.id != lastShownID }
             if candidates.isEmpty { candidates = pool }
-            if candidates.isEmpty { candidates = Corpus.emergencyPool }
+            if candidates.isEmpty { candidates = corpus.fallbacks }
         }
         trace.relaxation = stage
         trace.afterRecency = candidates.count
@@ -197,7 +197,7 @@ public final class MessageEngine: @unchecked Sendable {
         }
 
         if chosen == nil {
-            for t in Corpus.emergencyPool where rendered == nil {
+            for t in corpus.fallbacks where rendered == nil {
                 if let text = slots.fill(t, table: table, family: ctx.appFamily) {
                     chosen = t
                     rendered = text

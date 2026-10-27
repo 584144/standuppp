@@ -81,25 +81,35 @@ struct FaceMark: View, Equatable {
         a.mood == b.mood && a.size == b.size
     }
 
+    /// A ring on a dark tile: fuller the further a prompt has climbed, closed on a break.
+    private var fill: Double {
+        switch mood {
+        case .watching: return 0.25
+        case .eyebrow: return 0.5
+        case .level: return 0.75
+        case .wink: return 1
+        case .welcomeBack, .resting: return 0
+        }
+    }
+
     var body: some View {
-        let eye = CGSize(width: size * 0.17, height: size * 0.40)
-        let line = size * (contrast == .increased ? 0.075 : 0.055)
+        let line = size * (contrast == .increased ? 0.09 : 0.07)
         ZStack {
             RoundedRectangle(cornerRadius: size * 0.24, style: .continuous)
                 .fill(Brand.Dark.bg)
-            HStack(alignment: .bottom, spacing: size * 0.16) {
-                eyeView(mood.leftEye, line: line)
-                    .frame(width: eye.width, height: eye.height)
-                ZStack(alignment: .top) {
-                    eyeView(mood.rightEye, line: line)
-                        .frame(width: eye.width, height: eye.height)
-                    if mood == .eyebrow {
-                        BrowShape()
-                            .stroke(Brand.Dark.amber, style: StrokeStyle(lineWidth: line, lineCap: .round))
-                            .frame(width: eye.width * 1.5, height: eye.height * 0.14)
-                            .offset(y: -eye.height * 0.34)
-                    }
-                }
+            Circle()
+                .stroke(Brand.Dark.amber.opacity(0.3), lineWidth: line)
+                .frame(width: size * 0.56, height: size * 0.56)
+            if fill > 0 {
+                Circle()
+                    .trim(from: 0, to: fill)
+                    .stroke(Brand.Dark.amber, style: StrokeStyle(lineWidth: line, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: size * 0.56, height: size * 0.56)
+            } else {
+                Capsule(style: .continuous)
+                    .fill(Brand.Dark.amber)
+                    .frame(width: size * 0.26, height: line)
             }
         }
         .frame(width: size, height: size)
