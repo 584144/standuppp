@@ -7,7 +7,7 @@
 **一个只在你真的起身时才算数的 macOS 久坐提醒。**
 
 [![CI](https://github.com/584144/sitless/actions/workflows/ci.yml/badge.svg)](https://github.com/584144/sitless/actions/workflows/ci.yml)
-[![610 tests](https://img.shields.io/badge/tests-610%20passing-3fb950?style=flat-square)](#build)
+[![611 tests](https://img.shields.io/badge/tests-611%20passing-3fb950?style=flat-square)](#build)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
 macOS 14+ · Apple Silicon / Intel · 开源免费

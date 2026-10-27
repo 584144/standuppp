@@ -28,6 +28,18 @@ public enum ReminderSkit: Int, CaseIterable, Sendable {
         }
     }
 
+    /// The line as the speech synthesizer should read it. Mostly the same text; where the voice
+    /// would pick the wrong reading of a character, a same-sounding one stands in, so the
+    /// bubble still shows the right word. 长蘑菇 is zhǎng, and the voice says cháng.
+    public func spokenLine(chinese: Bool, minutes: Int = 50) -> String {
+        let text = line(chinese: chinese, minutes: minutes)
+        guard chinese else { return text }
+        return text
+            .replacingOccurrences(of: "长，蘑菇", with: "涨，蘑菇")
+            // 为他的屁股鼓掌 is wèi; 给 says the same thing with no second reading.
+            .replacingOccurrences(of: "为他的屁股", with: "给他的屁股")
+    }
+
     /// `minutes` is how long you have been sitting, for the lines that say so.
     public func line(chinese: Bool, minutes: Int = 50) -> String {
         switch (self, chinese) {

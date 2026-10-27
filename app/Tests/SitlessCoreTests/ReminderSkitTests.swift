@@ -27,6 +27,14 @@ struct ReminderSkitTests {
         }
     }
 
+    @Test("the grandpa's mushrooms are read zhǎng, but the bubble keeps 长")
+    func zhangNotChang() {
+        #expect(ReminderSkit.grandpa.line(chinese: true).contains("长"))
+        #expect(ReminderSkit.grandpa.spokenLine(chinese: true).contains("涨，蘑菇"))
+        #expect(!ReminderSkit.grandpa.spokenLine(chinese: true).contains("长"))
+        #expect(ReminderSkit.commentator.spokenLine(chinese: true).contains("给他的屁股鼓掌"))
+    }
+
     @Test("the commentator says how long you actually sat")
     func minutesInTheLine() {
         #expect(ReminderSkit.commentator.line(chinese: true, minutes: 73).contains("73分钟"))

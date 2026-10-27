@@ -64,7 +64,7 @@ enum SkitPlayer {
         let introLength = Double(skit.intro.count) / 22_050.0
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(introLength + 0.25))
-            let utterance = AVSpeechUtterance(string: skit.line(chinese: chinese, minutes: minutes))
+            let utterance = AVSpeechUtterance(string: skit.spokenLine(chinese: chinese, minutes: minutes))
             utterance.voice = voice(chinese: chinese, male: skit.prefersMaleVoice)
             utterance.pitchMultiplier = Float(skit.delivery.pitch)
             utterance.rate = AVSpeechUtteranceDefaultSpeechRate * Float(skit.delivery.rate)
