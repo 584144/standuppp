@@ -52,11 +52,12 @@ enum BrandArt {
 /// getting up off a chair.
 struct Wordmark: View {
     var size: CGFloat = 64
-    var color: Color = Color(.sRGB, red: 0.15, green: 0.13, blue: 0.10)
+    var color: Color = Color(.sRGB, red: 0.27, green: 0.17, blue: 0.10)
+    var capital = false
 
     var body: some View {
         HStack(alignment: .lastTextBaseline, spacing: 0) {
-            Text("standu").foregroundStyle(color)
+            Text(capital ? "Standu" : "standu").foregroundStyle(color)
             ForEach(0..<3, id: \.self) { i in
                 Text("p")
                     .foregroundStyle(i == 2 ? DuckFace.beak : color)
@@ -70,21 +71,33 @@ struct Wordmark: View {
     }
 }
 
+/// 方案 A: the duck peeking over a peach circle, the wordmark under it, 站站鸭 under that.
 struct Logo: View {
     let dark: Bool
 
     var body: some View {
-        HStack(spacing: 28) {
-            DuckFace(mood: .fresh, time: 1).frame(width: 150, height: 150)
-            VStack(alignment: .leading, spacing: 6) {
-                Wordmark(size: 72, color: dark ? Color(white: 0.95) : Color(.sRGB, red: 0.15, green: 0.13, blue: 0.10))
-                Text("站站鸭 · Stand up. Laugh a little. Move a lot.")
-                    .font(.system(size: 20, weight: .medium, design: .rounded))
-                    .foregroundStyle(dark ? Color(white: 0.7) : Color(white: 0.4))
+        let ink = dark ? Color(white: 0.96) : Color(.sRGB, red: 0.27, green: 0.17, blue: 0.10)
+        VStack(spacing: 4) {
+            ZStack(alignment: .bottom) {
+                Circle()
+                    .fill(RadialGradient(colors: [Color(.sRGB, red: 1, green: 0.84, blue: 0.68), Color(.sRGB, red: 1, green: 0.66, blue: 0.45)],
+                                         center: .top, startRadius: 0, endRadius: 140))
+                    .frame(width: 220, height: 220)
+                DuckFace(mood: .fresh, time: 1).frame(width: 190, height: 190).offset(y: 18)
             }
+            .frame(height: 232, alignment: .bottom)
+            Wordmark(size: 76, color: ink, capital: true)
+                .padding(.top, -24)
+            Text("- 站站鸭 -")
+                .font(.system(size: 30, weight: .heavy, design: .rounded))
+                .foregroundStyle(ink)
+            Text("Stand up. Laugh a little. Move a lot.  ·  别坐啦，起来笑一个！")
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .foregroundStyle(dark ? Color(white: 0.7) : Color(white: 0.42))
+                .padding(.top, 6)
         }
-        .padding(.horizontal, 40)
-        .padding(.vertical, 28)
+        .padding(.horizontal, 48)
+        .padding(.vertical, 30)
     }
 }
 
@@ -95,7 +108,7 @@ struct AppIcon: View {
             ZStack {
                 RoundedRectangle(cornerRadius: s * 0.225, style: .continuous)
                     .fill(LinearGradient(
-                        colors: [Color(.sRGB, red: 0.53, green: 0.82, blue: 0.98), Color(.sRGB, red: 0.33, green: 0.62, blue: 0.94)],
+                        colors: [Color(.sRGB, red: 1, green: 0.86, blue: 0.72), Color(.sRGB, red: 1, green: 0.62, blue: 0.42)],
                         startPoint: .top, endPoint: .bottom))
                     .padding(s * 0.1)
                 Ellipse()
@@ -103,8 +116,8 @@ struct AppIcon: View {
                     .frame(width: s * 0.6, height: s * 0.12)
                     .offset(y: s * 0.27)
                 DuckFace(mood: .fresh, time: 1)
-                    .frame(width: s * 0.66, height: s * 0.66)
-                    .offset(y: s * 0.02)
+                    .frame(width: s * 0.72, height: s * 0.72)
+                    .offset(y: s * 0.04)
             }
         }
     }
@@ -125,7 +138,7 @@ struct Guide: View {
 
     private let steps = [
         Step(id: 1, title: "打开就在", english: "Lives in your menu bar",
-             detail: "菜单栏一个小圆环，桌面一只站站鸭。\n不在程序坞，关掉窗口也不退出。", mood: .fresh),
+             detail: "菜单栏一个小圆环，桌面一只站站鸭（可选小号）。\n不在程序坞，关掉窗口也不退出。", mood: .fresh),
         Step(id: 2, title: "安心工作", english: "Counts real work only",
              detail: "只算键盘鼠标真正在动的时间，\n默认 50 分钟（可调）。", mood: .focused),
         Step(id: 3, title: "鸭子来催", english: "Quacks when it's time",
@@ -143,7 +156,7 @@ struct Guide: View {
             HStack(spacing: 22) {
                 DuckFace(mood: .nudging, time: 1).frame(width: 120, height: 120)
                 VStack(alignment: .leading, spacing: 8) {
-                    Wordmark(size: 58, color: ink)
+                    Wordmark(size: 58, color: ink, capital: true)
                     Text("别坐啦，起来笑一个！  Stand up. Laugh a little. Move a lot.")
                         .font(.system(size: 21, weight: .semibold, design: .rounded))
                         .foregroundStyle(muted)

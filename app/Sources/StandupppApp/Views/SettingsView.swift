@@ -201,6 +201,12 @@ struct SettingsView: View {
                         options: [(PetSkin.duck, "Duck"), (.ghost, "Ghost")]
                     )
                 }
+                SettingRow("Pet size", detail: "Small stays out of the way.") {
+                    TerminalSegmented(
+                        selection: petSize,
+                        options: [(PetSize.normal, "Normal"), (.small, "Small")]
+                    )
+                }
                 SettingRow(
                     "Pet sounds",
                     detail: "A soft pop when you click the pet and a quiet note when a break did not count. Silent while a microphone or camera is on."
@@ -267,6 +273,17 @@ struct SettingsView: View {
             set: { choice in
                 var updated = model.settings
                 updated.appearance = choice
+                model.update(settings: updated)
+            }
+        )
+    }
+
+    private var petSize: Binding<PetSize> {
+        Binding(
+            get: { model.settings.petSize },
+            set: { choice in
+                var updated = model.settings
+                updated.petSize = choice
                 model.update(settings: updated)
             }
         )

@@ -82,6 +82,11 @@ public struct QuietHours: Sendable, Codable, Hashable {
     }
 }
 
+public enum PetSize: String, Sendable, Codable, CaseIterable, Hashable {
+    case normal
+    case small
+}
+
 public enum PetSkin: String, Sendable, Codable, CaseIterable, Hashable {
     case duck
     case ghost
@@ -136,6 +141,7 @@ public struct StandupppSettings: Sendable, Codable, Hashable {
     public var petSounds: Bool
     public var reminderVoice: Bool
     public var petSkin: PetSkin
+    public var petSize: PetSize
 
     public init(
         workIntervalMinutes: Int = 45,
@@ -166,7 +172,8 @@ public struct StandupppSettings: Sendable, Codable, Hashable {
         showDesktopPet: Bool = true,
         petSounds: Bool = true,
         reminderVoice: Bool = true,
-        petSkin: PetSkin = .duck
+        petSkin: PetSkin = .duck,
+        petSize: PetSize = .normal
     ) {
         self.workIntervalMinutes = workIntervalMinutes
         self.breakDurationMinutes = breakDurationMinutes
@@ -197,6 +204,7 @@ public struct StandupppSettings: Sendable, Codable, Hashable {
         self.petSounds = petSounds
         self.reminderVoice = reminderVoice
         self.petSkin = petSkin
+        self.petSize = petSize
     }
 
     public static let `default` = StandupppSettings()
@@ -242,5 +250,6 @@ public struct StandupppSettings: Sendable, Codable, Hashable {
         petSounds = try c.decodeIfPresent(Bool.self, forKey: .petSounds) ?? d.petSounds
         reminderVoice = try c.decodeIfPresent(Bool.self, forKey: .reminderVoice) ?? d.reminderVoice
         petSkin = (try? c.decodeIfPresent(PetSkin.self, forKey: .petSkin)) ?? d.petSkin
+        petSize = (try? c.decodeIfPresent(PetSize.self, forKey: .petSize)) ?? d.petSize
     }
 }
