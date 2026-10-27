@@ -81,6 +81,9 @@ mkdir -p "${BUNDLE}/Contents/MacOS" "${BUNDLE}/Contents/Resources"
 cp "${BIN}" "${BUNDLE}/Contents/MacOS/${APP_NAME}"
 cp Resources/Info.plist "${BUNDLE}/Contents/"
 cp Resources/standuppp.icns "${BUNDLE}/Contents/Resources/"
+# The duck is drawn from the brand board, one picture per mood.
+mkdir -p "${BUNDLE}/Contents/Resources/pet"
+cp Resources/pet/*.png "${BUNDLE}/Contents/Resources/pet/"
 
 # SwiftPM emits resource bundles next to the binary; the app expects them inside
 # Contents/Resources, so copy any that exist.

@@ -134,7 +134,8 @@ struct DesktopPetView: View {
                     tilt: reduceMotion ? 0 : cursorTilt(),
                     spin: reduceMotion ? 0 : spin(at: now),
                     wiggle: dragging && !reduceMotion,
-                    skin: model.settings.petSkin
+                    skin: model.settings.petSkin,
+                    escalated: model.indicator == .escalating
                 )
                     .frame(width: petSide, height: petSide)
                     .offset(y: reduceMotion ? 0 : Self.bob(mood, t))
@@ -584,316 +585,97 @@ struct PetFace: View {
     var spin: Double = 0
     var wiggle: Bool = false
     var skin: PetSkin = .duck
+    var escalated: Bool = false
 
     var body: some View {
         switch skin {
-        case .duck: DuckFace(mood: mood, time: time, tilt: tilt, spin: spin, wiggle: wiggle)
+        case .duck: DuckFace(mood: mood, time: time, tilt: tilt, spin: spin, wiggle: wiggle, escalated: escalated)
         case .ghost: GhostFace(mood: mood, time: time, tilt: tilt, spin: spin, wiggle: wiggle)
         }
     }
 }
 
-/// 站站鸭: a round, plush little duckling, soft as clay. Head and body are one ball of fluff;
-/// a curl on top, bead eyes, a small orange bill, pink cheeks, stubby wings and orange feet.
-/// Its props tell you the mood: a laptop at work, books when it has sat too long, a red
-/// megaphone when a break is due, a pillow on a break, sunglasses when the break counted.
+/// 站站鸭, exactly as the brand board draws it: one picture per mood, cut out of the board,
+/// with the board's floating marks (?, z z, 起来!) added on top. The motion (bobbing,
+/// leaning toward the pointer, the spin, the wiggle while dragged) is applied to the picture.
 struct DuckFace: View {
     let mood: PetMood
     let time: Double
     var tilt: Double = 0
     var spin: Double = 0
     var wiggle: Bool = false
+    /// The prompt has climbed past its first rung: the cross duck replaces the shouting one.
+    var escalated: Bool = false
 
-    static let light = Color(.sRGB, red: 1.0, green: 0.97, blue: 0.70)
-    static let yellow = Color(.sRGB, red: 1.0, green: 0.86, blue: 0.30)
-    static let deep = Color(.sRGB, red: 0.96, green: 0.70, blue: 0.16)
     static let beak = Color(.sRGB, red: 1.0, green: 0.56, blue: 0.20)
     static let beakDark = Color(.sRGB, red: 0.88, green: 0.38, blue: 0.10)
-    static let ink = Color(.sRGB, red: 0.09, green: 0.07, blue: 0.06)
-    static let blush = Color(.sRGB, red: 1.0, green: 0.55, blue: 0.55)
 
-    private var props: GhostFace { GhostFace(mood: mood, time: time) }
-    private var laughing: Bool { spin > 0 }
-
-    private var blinking: Bool {
-        guard time > 0 else { return false }
-        return time.truncatingRemainder(dividingBy: 4.6) < 0.13
+    private var sprite: String {
+        if spin > 0 { return "haha" }
+        switch mood {
+        case .fresh: return "fresh"
+        case .focused: return "work"
+        case .tired: return "books"
+        case .nudging: return escalated ? "angry" : "megaphone"
+        case .resting: return "sleep"
+        case .proud: return "proud"
+        case .sulking: return "puzzled"
+        case .away: return "wink"
+        }
     }
 
     var body: some View {
         GeometryReader { geo in
             let s = geo.size.width
             ZStack {
-                floaters(s)
-                chick(s)
-                    .rotationEffect(.degrees(tilt + (mood == .sulking ? -12 : 0)), anchor: .bottom)
+                DuckSprites.image(sprite)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: s, height: s, alignment: .bottom)
+                    .rotationEffect(.degrees(tilt + (wiggle ? sin(time * 18) * 6 : 0)), anchor: .bottom)
                     .rotation3DEffect(.degrees(spin), axis: (x: 0, y: 1, z: 0))
-                if mood == .focused { props.laptop(s).offset(y: -s * 0.02) }
-                if mood == .resting { props.pillow(s).offset(y: s * 0.02) }
-                if mood == .nudging { megaphone(s) }
+                marks(s)
             }
             .frame(width: s, height: s)
         }
     }
 
-    // MARK: the body
-
-    private func chick(_ s: CGFloat) -> some View {
-        let w = s * 0.72, h = s * 0.76
-        return ZStack {
-            // shadow on the desk
-            Ellipse().fill(Color.black.opacity(0.18))
-                .frame(width: w * 0.8, height: s * 0.07).blur(radius: s * 0.025)
-                .offset(y: h * 0.5)
-            feet(s).offset(y: h * 0.45)
-            wings(s, w: w)
-            // the ball of fluff, lit from the top left
-            Ellipse()
-                .fill(RadialGradient(colors: [Self.light, Self.yellow, Self.yellow, Self.deep],
-                                     center: UnitPoint(x: 0.36, y: 0.28), startRadius: 0, endRadius: w * 0.72))
-                .frame(width: w, height: h)
-                .overlay(
-                    // the warm shade under the chin and the soft rim, which make it round
-                    Ellipse().stroke(Self.deep.opacity(0.55), lineWidth: s * 0.05).blur(radius: s * 0.03)
-                        .frame(width: w, height: h).mask(Ellipse().frame(width: w, height: h))
-                )
-                .overlay(
-                    Ellipse().fill(Color.white.opacity(0.55))
-                        .frame(width: w * 0.32, height: h * 0.16)
-                        .rotationEffect(.degrees(-28))
-                        .blur(radius: s * 0.02)
-                        .offset(x: -w * 0.2, y: -h * 0.3)
-                )
-                .shadow(color: Self.deep.opacity(0.35), radius: s * 0.015, y: s * 0.01)
-            tuft(s).offset(y: -h * 0.5)
-            if mood == .tired { books(s).offset(y: -h * 0.52) }
-            face(s).offset(y: -h * 0.06)
-            if mood == .proud { sunglasses(s).offset(y: -h * 0.1) }
-            if mood == .tired || mood == .sulking { props.sweat(s).offset(x: s * 0.03, y: s * 0.02) }
-        }
-        .saturation(mood == .away ? 0.75 : 1)
-    }
-
-    private func feet(_ s: CGFloat) -> some View {
-        HStack(spacing: s * 0.1) {
-            foot(s).rotationEffect(.degrees(-12))
-            foot(s).rotationEffect(.degrees(12))
-        }
-    }
-
-    private func foot(_ s: CGFloat) -> some View {
-        Capsule()
-            .fill(LinearGradient(colors: [Self.beak, Self.beakDark], startPoint: .top, endPoint: .bottom))
-            .frame(width: s * 0.15, height: s * 0.07)
-    }
-
-    private func wings(_ s: CGFloat, w: CGFloat) -> some View {
-        let flap = wiggle || laughing ? sin(time * 18) * 25 : 0
-        let shout = mood == .nudging ? -55.0 : 0
-        let cheer = mood == .proud ? sin(time * 6) * 15 - 20 : 0
-        return ZStack {
-            wing(s).rotationEffect(.degrees(30 + flap + cheer), anchor: .trailing).offset(x: -w * 0.5, y: s * 0.08)
-            wing(s).rotationEffect(.degrees(-30 - flap + shout - cheer), anchor: .leading).offset(x: w * 0.5, y: s * 0.08)
-        }
-    }
-
-    private func wing(_ s: CGFloat) -> some View {
-        Ellipse()
-            .fill(RadialGradient(colors: [Self.light, Self.yellow, Self.deep], center: .topLeading,
-                                 startRadius: 0, endRadius: s * 0.16))
-            .frame(width: s * 0.17, height: s * 0.12)
-            .shadow(color: Self.deep.opacity(0.4), radius: s * 0.01, y: s * 0.008)
-    }
-
-    private func tuft(_ s: CGFloat) -> some View {
-        ZStack {
-            ForEach(0..<3, id: \.self) { i in
-                Capsule()
-                    .fill(LinearGradient(colors: [Self.light, Self.yellow, Self.deep], startPoint: .top, endPoint: .bottom))
-                    .frame(width: s * 0.045, height: s * 0.11)
-                    .rotationEffect(.degrees(Double(i - 1) * 28), anchor: .bottom)
-                    .offset(y: -s * 0.03)
-            }
-        }
-    }
-
-    // MARK: the face
-
-    private func face(_ s: CGFloat) -> some View {
-        ZStack {
-            HStack(spacing: s * 0.17) {
-                eye(s, left: true)
-                eye(s, left: false)
-            }
-            if mood == .nudging { brows(s).offset(y: -s * 0.07) }
-            HStack(spacing: s * 0.32) {
-                Ellipse().fill(Self.blush.opacity(mood == .tired ? 0.35 : 0.6))
-                Ellipse().fill(Self.blush.opacity(mood == .tired ? 0.35 : 0.6))
-            }
-            .frame(width: s * 0.54, height: s * 0.06)
-            .blur(radius: s * 0.012)
-            .offset(y: s * 0.06)
-            bill(s).offset(y: s * 0.055)
-        }
-    }
-
     @ViewBuilder
-    private func eye(_ s: CGFloat, left: Bool) -> some View {
-        let w = s * 0.07, h = s * 0.085
-        let stroke = StrokeStyle(lineWidth: s * 0.022, lineCap: .round, lineJoin: .round)
-        if laughing {
-            Chevron(pointsRight: left).stroke(Self.ink, style: stroke).frame(width: w * 0.9, height: h * 0.8)
-        } else {
-            switch mood {
-            case .resting, .tired where blinking:
-                Smile(up: false).stroke(Self.ink, style: stroke).frame(width: w * 1.1, height: h * 0.32)
-            case .resting:
-                Smile(up: false).stroke(Self.ink, style: stroke).frame(width: w * 1.1, height: h * 0.32)
-            case .fresh:
-                Smile(up: true).stroke(Self.ink, style: stroke).frame(width: w * 1.1, height: h * 0.4)
-            case .away where !left:
-                Smile(up: true).stroke(Self.ink, style: stroke).frame(width: w * 1.1, height: h * 0.4)
-            case .tired:
-                // drooping: the outer corners sag, which reads as 委屈
-                Smile(up: false).stroke(Self.ink, style: stroke).frame(width: w * 1.1, height: h * 0.28)
-                    .rotationEffect(.degrees(left ? 14 : -14))
-            default:
-                let big: CGFloat = mood == .sulking && !left ? 1.35 : 1
-                ZStack(alignment: .topTrailing) {
-                    Ellipse().fill(Self.ink)
-                    Circle().fill(Color.white).frame(width: w * 0.42 * big).offset(x: -w * 0.1, y: h * 0.12)
-                }
-                .frame(width: w * big, height: blinking ? h * 0.12 : h * big)
-            }
-        }
-    }
-
-    private func brows(_ s: CGFloat) -> some View {
-        HStack(spacing: s * 0.15) {
-            Capsule().fill(Self.ink).frame(width: s * 0.08, height: s * 0.018).rotationEffect(.degrees(20))
-            Capsule().fill(Self.ink).frame(width: s * 0.08, height: s * 0.018).rotationEffect(.degrees(-20))
-        }
-    }
-
-    @ViewBuilder
-    private func bill(_ s: CGFloat) -> some View {
-        let open = mood == .nudging || mood == .fresh || mood == .proud || laughing
-        ZStack(alignment: .top) {
-            if open {
-                Ellipse().fill(Color(.sRGB, red: 0.75, green: 0.2, blue: 0.2))
-                    .frame(width: s * 0.09, height: s * 0.06)
-                    .offset(y: s * 0.03)
-            }
-            Ellipse()
-                .fill(LinearGradient(colors: [Self.beak, Self.beakDark], startPoint: .top, endPoint: .bottom))
-                .frame(width: s * 0.17, height: s * 0.08)
-                .overlay(Ellipse().fill(Color.white.opacity(0.4)).frame(width: s * 0.05, height: s * 0.018).offset(x: -s * 0.025, y: -s * 0.015))
-            if mood == .sulking || mood == .tired {
-                Ellipse().fill(Self.beakDark).frame(width: s * 0.1, height: s * 0.03).offset(y: s * 0.05)
-            }
-        }
-    }
-
-    // MARK: props
-
-    private func megaphone(_ s: CGFloat) -> some View {
-        ZStack {
-            Image(systemName: "megaphone.fill")
-                .font(.system(size: s * 0.2))
-                .foregroundStyle(Color(.sRGB, red: 0.9, green: 0.2, blue: 0.2))
-                .rotationEffect(.degrees(-10))
-                .offset(x: s * 0.36, y: -s * 0.02)
-            Text("起来!")
-                .font(.system(size: s * 0.09, weight: .black, design: .rounded))
-                .foregroundStyle(Color(.sRGB, red: 0.95, green: 0.4, blue: 0.1))
-                .rotationEffect(.degrees(-8))
-                .offset(x: s * 0.36, y: -s * 0.24)
-        }
-    }
-
-    private func sunglasses(_ s: CGFloat) -> some View {
-        HStack(spacing: s * 0.03) {
-            RoundedRectangle(cornerRadius: s * 0.03).fill(Self.ink).frame(width: s * 0.15, height: s * 0.09)
-            RoundedRectangle(cornerRadius: s * 0.03).fill(Self.ink).frame(width: s * 0.15, height: s * 0.09)
-        }
-        .overlay(Rectangle().fill(Self.ink).frame(width: s * 0.36, height: s * 0.015).offset(y: -s * 0.03))
-        .overlay(Capsule().fill(Color.white.opacity(0.5)).frame(width: s * 0.05, height: s * 0.012).offset(x: -s * 0.08, y: -s * 0.015))
-    }
-
-    private func books(_ s: CGFloat) -> some View {
-        VStack(spacing: s * 0.004) {
-            book(s, Color(.sRGB, red: 0.4, green: 0.6, blue: 0.9), -4)
-            book(s, Color(.sRGB, red: 0.95, green: 0.55, blue: 0.5), 3)
-            book(s, Color(.sRGB, red: 0.5, green: 0.8, blue: 0.6), -2)
-        }
-        .offset(y: -s * 0.02)
-    }
-
-    private func book(_ s: CGFloat, _ color: Color, _ angle: Double) -> some View {
-        RoundedRectangle(cornerRadius: s * 0.01)
-            .fill(color)
-            .overlay(Rectangle().fill(Color.white.opacity(0.85)).frame(height: s * 0.012).offset(x: s * 0.02))
-            .frame(width: s * 0.26, height: s * 0.04)
-            .rotationEffect(.degrees(angle))
-    }
-
-    @ViewBuilder
-    private func floaters(_ s: CGFloat) -> some View {
+    private func marks(_ s: CGFloat) -> some View {
         let drift = sin(time * 2) * s * 0.02
         switch mood {
-        case .fresh, .proud:
-            Image(systemName: "sparkle").font(.system(size: s * 0.09))
-                .foregroundStyle(Color(.sRGB, red: 1, green: 0.78, blue: 0.2))
-                .offset(x: -s * 0.4, y: -s * 0.28 + drift)
-            Image(systemName: "sparkle").font(.system(size: s * 0.06))
-                .foregroundStyle(Color(.sRGB, red: 1, green: 0.78, blue: 0.2))
-                .offset(x: s * 0.4, y: -s * 0.3 - drift)
         case .sulking:
-            Text("?").font(.system(size: s * 0.17, weight: .black, design: .rounded))
-                .foregroundStyle(Self.ink.opacity(0.8))
-                .offset(x: s * 0.36, y: -s * 0.34 + drift)
+            Text("?").font(.system(size: s * 0.2, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(white: 0.25))
+                .offset(x: s * 0.36, y: -s * 0.4 + drift)
         case .resting:
-            Text("z z").font(.system(size: s * 0.11, weight: .bold, design: .rounded))
-                .foregroundStyle(Color(.sRGB, red: 0.45, green: 0.45, blue: 0.75))
-                .offset(x: s * 0.32, y: -s * 0.36 + drift)
-        case .nudging:
-            Text("💢").font(.system(size: s * 0.1)).offset(x: -s * 0.36, y: -s * 0.3)
+            Text("z z").font(.system(size: s * 0.14, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color(white: 0.2))
+                .offset(x: s * 0.36, y: -s * 0.4 + drift)
+        case .nudging where escalated:
+            Text("起来!").font(.system(size: s * 0.12, weight: .black, design: .rounded))
+                .foregroundStyle(Color(.sRGB, red: 0.95, green: 0.4, blue: 0.1))
+                .padding(.horizontal, s * 0.04).padding(.vertical, s * 0.02)
+                .background(Capsule().fill(Color.white))
+                .offset(x: s * 0.28, y: -s * 0.45)
         default:
             EmptyView()
         }
-        if laughing {
-            Image(systemName: "music.note").font(.system(size: s * 0.09))
-                .foregroundStyle(Self.deep)
-                .offset(x: s * 0.38, y: -s * 0.3 - drift)
-        }
     }
 }
 
-private struct Smile: Shape {
-    let up: Bool
+/// The cut-out pictures in Contents/Resources/pet, loaded once.
+@MainActor
+enum DuckSprites {
+    private static var cache: [String: NSImage] = [:]
 
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        p.move(to: CGPoint(x: rect.minX, y: up ? rect.maxY : rect.minY))
-        p.addQuadCurve(
-            to: CGPoint(x: rect.maxX, y: up ? rect.maxY : rect.minY),
-            control: CGPoint(x: rect.midX, y: up ? rect.minY - rect.height : rect.maxY + rect.height)
-        )
-        return p
-    }
-}
-
-private struct Chevron: Shape {
-    let pointsRight: Bool
-
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let tip = pointsRight ? rect.maxX : rect.minX
-        let back = pointsRight ? rect.minX : rect.maxX
-        p.move(to: CGPoint(x: back, y: rect.minY))
-        p.addLine(to: CGPoint(x: tip, y: rect.midY))
-        p.addLine(to: CGPoint(x: back, y: rect.maxY))
-        return p
+    static func image(_ name: String) -> Image {
+        if let cached = cache[name] { return Image(nsImage: cached) }
+        let url = Bundle.main.url(forResource: name, withExtension: "png", subdirectory: "pet")
+        let image = url.flatMap(NSImage.init(contentsOf:)) ?? NSImage()
+        cache[name] = image
+        return Image(nsImage: image)
     }
 }
 
