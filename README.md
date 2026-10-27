@@ -19,6 +19,12 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 
 <img src="docs/images/guide.png" width="100%" alt="站站鸭使用说明：1 打开就在：菜单栏小圆环加桌面一只鸭；2 安心工作：只算真正在动的时间，默认 50 分钟；3 鸭子来催：15 段搞笑小剧场随机播一段；4 真的起来：离开键盘 5 分钟才算数，休息时敲键盘超过 1 分钟作废；5 回来看看：今日统计；6 随你调：间隔、语言、宠物形象、音效、开机启动">
 
+## 品牌设定 / Brand board
+
+<img src="docs/images/brand-board.png" width="100%" alt="Standuppp 站站鸭品牌设定：表情、动作、场景状态、Logo 方案、提醒气泡和尺寸对比">
+
+这是站站鸭的品牌概念图，App 里的形象以实际为准。
+
 > Standuppp fork 自 Mohamed Elshesheny 的 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop)（GPL-3.0）。原作者的版权和许可证保留在 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 中。按照原项目的[商标说明](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md)，本 fork 换了名字、bundle id、图标和菜单栏标记，**它不是官方 sigstop**。
 
 ## 它和普通计时器有什么不同
