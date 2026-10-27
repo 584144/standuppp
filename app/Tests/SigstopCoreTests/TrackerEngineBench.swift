@@ -84,7 +84,8 @@ struct TrackerEngineBench {
         for effect in outcome.effects {
             switch effect {
             case .beginBreak(_, let origin, _): tracker.beginBreak(origin: origin)
-            case .endBreak(_, let origin, _, _, let threshold): tracker.endBreak(origin: origin, threshold: threshold)
+            case .endBreak(_, let origin, let honored, let elapsed, let threshold, _):
+                tracker.endBreak(origin: origin, threshold: threshold, counts: honored || elapsed < threshold)
             case .recordSkip: tracker.recordSkip()
             default: break
             }

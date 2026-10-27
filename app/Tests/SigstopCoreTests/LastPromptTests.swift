@@ -213,7 +213,7 @@ struct DeliverAndWithdrawPropertyTests {
                 }
             }
 
-            if effects.contains(where: { if case .endBreak(_, _, true, _, _) = $0 { return true } else { return false } }) {
+            if effects.contains(where: { if case .endBreak(_, _, true, _, _, _) = $0 { return true } else { return false } }) {
                 driver.continuousWork = 0
                 driver.lastBreakEndedAt = driver.now
                 tally.breaks += 1

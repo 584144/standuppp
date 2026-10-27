@@ -36,13 +36,16 @@ public enum EventLogWriter {
             if let cycle { out.append(.breakResponse(at: now, cycle: cycle, action: .taken)) }
             return out
 
-        case .endBreak(let cycle, let origin, _, let elapsed, let threshold):
+        case .endBreak(let cycle, let origin, let honored, let elapsed, let threshold, let busy):
+            let voided = !honored && elapsed >= threshold
             return [
                 .breakEnd(
                     at: now, origin: origin,
                     durationSeconds: Int(max(0, elapsed).rounded()),
                     thresholdSeconds: Int(max(0, threshold).rounded()),
-                    cycle: cycle
+                    cycle: cycle,
+                    activeSeconds: Int(max(0, busy).rounded()),
+                    voided: voided ? true : nil
                 )
             ]
 

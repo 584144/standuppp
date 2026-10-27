@@ -216,6 +216,10 @@ public struct BreakActive: Sendable, Codable, Hashable {
     public var plannedDuration: TimeInterval
     public var origin: BreakOrigin
     public var quietBefore: QuietState?
+    /// Seconds of keyboard or mouse use seen during the break. Optional so a state saved
+    /// before this field existed still decodes.
+    public var activeDuringBreak: TimeInterval?
+    public var lastTickMono: Double?
 
     public init(
         cycle: CycleID?,
@@ -223,7 +227,9 @@ public struct BreakActive: Sendable, Codable, Hashable {
         startedMono: Double,
         plannedDuration: TimeInterval,
         origin: BreakOrigin,
-        quietBefore: QuietState? = nil
+        quietBefore: QuietState? = nil,
+        activeDuringBreak: TimeInterval? = nil,
+        lastTickMono: Double? = nil
     ) {
         self.cycle = cycle
         self.plannedEnd = plannedEnd
@@ -231,6 +237,8 @@ public struct BreakActive: Sendable, Codable, Hashable {
         self.plannedDuration = plannedDuration
         self.origin = origin
         self.quietBefore = quietBefore
+        self.activeDuringBreak = activeDuringBreak
+        self.lastTickMono = lastTickMono
     }
 }
 
@@ -412,7 +420,7 @@ public enum Effect: Sendable, Codable, Hashable {
     case beginBreak(cycle: CycleID?, origin: BreakOrigin, plannedEnd: Date)
     case endBreak(
         cycle: CycleID?, origin: BreakOrigin, honored: Bool,
-        elapsed: TimeInterval, threshold: TimeInterval
+        elapsed: TimeInterval, threshold: TimeInterval, activeDuringBreak: TimeInterval = 0
     )
     case scheduleWake(at: Date)
     case cancelScheduledWake

@@ -138,6 +138,11 @@ if [ -d "${FRAMEWORK}" ]; then
   # an empty folder there came first: a Sparkle.framework dropped into it would load in place
   # of the real one, without changing the executable the Accessibility grant is tied to.
   install_name_tool -delete_rpath "@loader_path" "${BUNDLE}/Contents/MacOS/${APP_NAME}" 2>/dev/null || true
+  # Newer toolchains also add the toolchain's back-deploy dir and /usr/lib/swift. macOS 14+
+  # ships the Swift runtime in the OS, so neither is needed.
+  for p in $(otool -l "${BUNDLE}/Contents/MacOS/${APP_NAME}" | awk '/LC_RPATH/ { getline; getline; print $2 }' | grep -v '^@executable_path/../Frameworks$'); do
+    install_name_tool -delete_rpath "$p" "${BUNDLE}/Contents/MacOS/${APP_NAME}" 2>/dev/null || true
+  done
   RPATHS="$(otool -l "${BUNDLE}/Contents/MacOS/${APP_NAME}" | awk '/LC_RPATH/ { getline; getline; print $2 }' | sort -u)"
   if [ "${RPATHS}" != "@executable_path/../Frameworks" ]; then
     echo "error: the executable's rpaths are not exactly @executable_path/../Frameworks:" >&2

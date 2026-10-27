@@ -122,13 +122,17 @@ public struct SessionTracker: Sendable {
     }
 
     @discardableResult
-    public mutating func endBreak(origin: BreakOrigin, threshold: TimeInterval? = nil) -> [SessionEvent] {
+    /// `counts: false` is a break the engine voided because the keyboard or mouse was in use
+    /// for too much of it. It never resets the work clock, however long it lasted.
+    public mutating func endBreak(
+        origin: BreakOrigin, threshold: TimeInterval? = nil, counts: Bool = true
+    ) -> [SessionEvent] {
         let now = time.now
         let mono = time.continuousSeconds
         var events: [SessionEvent] = []
         let start = breakStart?.wall ?? gap?.startWall ?? now
         let duration = mono - (breakStart?.mono ?? gap?.startMono ?? mono)
-        if duration >= (threshold ?? policy.qualifyingBreak) {
+        if counts, duration >= (threshold ?? policy.qualifyingBreak) {
             session.reset()
             session.recordBreak(endingAt: now)
             events.append(.clockReset(reason: .qualifyingBreak))

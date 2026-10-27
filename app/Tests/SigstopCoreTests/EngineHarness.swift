@@ -33,6 +33,8 @@ enum EngineHarness {
         var micRunning = false
         var cameraRunning = false
         var idleSeconds: TimeInterval = 0
+        /// Off: whoever took the break walked away, so input is as old as the break.
+        var typingDuringBreak = false
         var sessionEvents: [SessionEvent] = []
         var lastBreakEndedAt: Date?
         var calendarSystem: Calendar = .current
@@ -60,13 +62,17 @@ enum EngineHarness {
                 )
             }
 
+            var idle = idleSeconds
+            if case .breakActive(let b) = state, !typingDuringBreak {
+                idle = max(idle, monotonic - b.startedMono)
+            }
             let context = DeveloperContext(
                 timestamp: now,
                 application: AppIdentity(bundleID: "com.apple.dt.Xcode", localizedName: "Xcode", pid: 1),
                 activity: .coding,
                 confidence: Confidence(0.8),
                 continuousWork: continuousWork,
-                idleSeconds: idleSeconds
+                idleSeconds: idle
             )
             let input = EngineInput(
                 now: now,

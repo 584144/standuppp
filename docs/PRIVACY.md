@@ -950,6 +950,8 @@ Field reference:
 | `cycle` | int? | Which break opportunity this line belongs to, so counters scope to a cycle |
 | `origin` | string? | How a break started: `accepted`, `idleInferred`, `userInitiated`. An `idleInferred` break is one nobody pressed a button for: you were away for the idle threshold, and the session model recorded it |
 | `dur_s` | int? | Measured length of a break, in seconds. For an `idleInferred` break, from your last input to your first input back, or to the moment the absence ended the session instead (thirty minutes) if you never came back inside it |
+| `active_s` | int? | Seconds of keyboard or mouse use during that break. A count, never what was typed or where the pointer went |
+| `void` | bool? | `true` when `active_s` passed the limit, so the break did not count however long it ran |
 | `plan_s` | int? | The length that break had to reach to count, in seconds. `dur_s >= plan_s` is the whole verdict, so the line can be re-judged without knowing what your settings were when it was written. For an `idleInferred` break it is the idle threshold that recorded it |
 | `outcome` | string? | On `cycle_close`, how the opportunity ended: one of the six `CycleOutcome` values |
 | `gate` | string? | On `gate`, why a prompt was or was not allowed: one of the twenty-nine `GateReason` values |

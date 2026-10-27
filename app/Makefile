@@ -35,6 +35,7 @@ TESTING_FW := $(shell test -d "$$(xcode-select -p 2>/dev/null)/Library/Developer
 TEST_FLAGS := -Xswiftc -F -Xswiftc $(TESTING_FW) \
               -Xlinker -F -Xlinker $(TESTING_FW) \
               -Xlinker -rpath -Xlinker $(TESTING_FW) \
+              -Xlinker -rpath -Xlinker $(TESTING_FW)/../usr/lib \
               -Xswiftc -Xfrontend -Xswiftc -disable-cross-import-overlay-search
 
 test: badges-check ## Run the Core test suite (no GUI session, no Xcode needed)

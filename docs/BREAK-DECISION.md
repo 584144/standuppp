@@ -595,7 +595,8 @@ engine is allowed to *say*.
 | `breakActive` | user ends early | elapsed `>= qualifyingBreak` | `working` | as above |
 | `breakActive` | user ends early | elapsed `< qualifyingBreak` | `working` | **no reset, no break recorded**, log `.abandoned` |
 | `breakActive` | the break ends, any of the three ways above | it started from `quiet` and that quiet still holds | that `quiet`, unchanged but for its parked stand-down, which a break that counts drops | as above, but the pause keeps its own end (rules 3 and 6) |
-| `breakActive` | input resumes | elapsed `< qualifyingBreak` | `breakActive` | keep the timer; do not nag; a break is not a jail |
+| `breakActive` | input resumes | elapsed `< qualifyingBreak` | `breakActive` | keep the timer; do not nag; a break is not a jail. Each tick with input under `breakInputWindow` (2 s) old adds to `activeDuringBreak` |
+| `breakActive` | timer ends | `activeDuringBreak > maxActiveDuringBreak` (60 s, setting `maxActiveDuringBreakSeconds`) | `working` | not honored however long it ran: the work clock is not reset, `break_end` carries `void: true` and the day counts it abandoned |
 | `idle` | input resumes | gap `< qualifyingBreak`, ladder parked | `ignored` | **resume the ladder at its rung**; gap ages `totalElapsed`, not `ladderElapsed` |
 | `idle` | input resumes | gap `< qualifyingBreak` | `working` or `breakDue` | resume clock; back to the parked `WorkingState`, so a skip's re-arm, a cooldown and a stale re-arm outlast a short absence; re-evaluate `W` against its threshold |
 | `idle` | input resumes | gap `>= qualifyingBreak` | `working` | reset, record break, close any open cycle honored |
@@ -1816,7 +1817,7 @@ second template table that nothing checks.
   break. Nothing writes a zero it did not measure. The
   uptime panel shows `breakCount` and the average beside *kept*; it reports and does not grade
   (§16): no streak, no comparison with yesterday, nothing to beat.
-- **`breakCount`** — the breaks that qualified, each judged by its own line: `dur_s >= plan_s`, the
+- **`breakCount`** — the breaks that qualified, each judged by its own line: `dur_s >= plan_s` and no `void: true`, the
   verdict the engine wrote, so a two minute break the user set and sat through counts here as it
   counted there, whatever the idle threshold is. A `break_end` without `plan_s` predates the field
   and is judged against `qualifyingBreak`, as it was when it was written.

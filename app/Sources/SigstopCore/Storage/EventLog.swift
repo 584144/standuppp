@@ -226,6 +226,8 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
     public var durationSeconds: Int?
     public var thresholdSeconds: Int?
     public var cycle: Int?
+    public var activeSeconds: Int?
+    public var voided: Bool?
 
     public init(
         v: Int = EventSchema.version,
@@ -245,7 +247,9 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
         origin: BreakOrigin? = nil,
         durationSeconds: Int? = nil,
         thresholdSeconds: Int? = nil,
-        cycle: Int? = nil
+        cycle: Int? = nil,
+        activeSeconds: Int? = nil,
+        voided: Bool? = nil
     ) {
         self.v = v
         self.at = at
@@ -265,6 +269,8 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
         self.durationSeconds = durationSeconds
         self.thresholdSeconds = thresholdSeconds
         self.cycle = cycle
+        self.activeSeconds = activeSeconds
+        self.voided = voided
     }
 
     public var fileDay: CalendarDay { .utc(of: at) }
@@ -290,6 +296,8 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
         case durationSeconds = "dur_s"
         case thresholdSeconds = "plan_s"
         case cycle
+        case activeSeconds = "active_s"
+        case voided = "void"
     }
 
     public init(from decoder: any Decoder) throws {
@@ -319,6 +327,8 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
         durationSeconds = try c.decodeIfPresent(Int.self, forKey: .durationSeconds)
         thresholdSeconds = try c.decodeIfPresent(Int.self, forKey: .thresholdSeconds)
         cycle = try c.decodeIfPresent(Int.self, forKey: .cycle)
+        activeSeconds = try c.decodeIfPresent(Int.self, forKey: .activeSeconds)
+        voided = try c.decodeIfPresent(Bool.self, forKey: .voided)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -341,6 +351,8 @@ public struct LoggedEvent: Sendable, Hashable, Codable {
         try c.encodeIfPresent(durationSeconds, forKey: .durationSeconds)
         try c.encodeIfPresent(thresholdSeconds, forKey: .thresholdSeconds)
         try c.encodeIfPresent(cycle, forKey: .cycle)
+        try c.encodeIfPresent(activeSeconds, forKey: .activeSeconds)
+        try c.encodeIfPresent(voided, forKey: .voided)
     }
 }
 
@@ -365,6 +377,8 @@ extension LoggedEvent.CodingKeys {
         case .durationSeconds: return "break length in seconds"
         case .thresholdSeconds: return "the length it had to reach to count"
         case .cycle:           return "which break opportunity this line belongs to"
+        case .activeSeconds:   return "seconds of keyboard or mouse use during the break"
+        case .voided:          return "true when that use was too much for it to count"
         }
     }
 }
@@ -446,12 +460,13 @@ extension LoggedEvent {
 
     public static func breakEnd(
         at: Date, origin: BreakOrigin, durationSeconds: Int,
-        thresholdSeconds: Int? = nil, cycle: CycleID? = nil
+        thresholdSeconds: Int? = nil, cycle: CycleID? = nil,
+        activeSeconds: Int? = nil, voided: Bool? = nil
     ) -> LoggedEvent {
         LoggedEvent(
             at: at, kind: .breakEnd, origin: origin,
             durationSeconds: durationSeconds, thresholdSeconds: thresholdSeconds,
-            cycle: cycle?.rawValue
+            cycle: cycle?.rawValue, activeSeconds: activeSeconds, voided: voided
         )
     }
 

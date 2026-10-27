@@ -14,6 +14,10 @@ public struct BreakPolicy: Sendable, Codable, Hashable {
     public var targetContinuousWork: TimeInterval = 45 * 60
     public var absoluteMaxWork: TimeInterval = 90 * 60
     public var breakDurationTarget: TimeInterval = 5 * 60
+    /// A break with more keyboard or mouse use than this was spent at the desk, so it does
+    /// not count. A tick counts as used when the last input is under `breakInputWindow` old.
+    public var maxActiveDuringBreak: TimeInterval = 60
+    public var breakInputWindow: TimeInterval = 2
     public var settleInAfterBreak: TimeInterval = 5 * 60
     public var deepFocusMinimumWork: TimeInterval = 20 * 60
 
@@ -61,6 +65,7 @@ public struct BreakPolicy: Sendable, Codable, Hashable {
         self.init()
         targetContinuousWork = settings.workInterval
         breakDurationTarget = settings.breakDuration
+        maxActiveDuringBreak = TimeInterval(settings.maxActiveDuringBreakSeconds)
         microIdleGrace = TimeInterval(settings.microIdleThresholdSeconds)
         qualifyingBreak = TimeInterval(settings.idleCountsAsBreakMinutes * 60)
         dailyNotificationCap = settings.maxNotificationsPerDay

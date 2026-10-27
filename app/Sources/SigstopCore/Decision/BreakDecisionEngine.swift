@@ -576,6 +576,12 @@ public struct BreakDecisionEngine: Sendable {
         day: inout DailyCounters,
         effects: inout [Effect]
     ) -> EngineState {
+        var active = active
+        let since = active.lastTickMono ?? active.startedMono
+        if input.context.idleSeconds < policy.breakInputWindow {
+            active.activeDuringBreak = (active.activeDuringBreak ?? 0) + max(0, input.monotonic - since)
+        }
+        active.lastTickMono = input.monotonic
         let elapsed = input.monotonic - active.startedMono
         guard elapsed >= active.plannedDuration else {
             effects.append(.setIndicator(.onBreak))
@@ -592,11 +598,12 @@ public struct BreakDecisionEngine: Sendable {
         effects: inout [Effect]
     ) -> EngineState {
         let threshold = min(policy.qualifyingBreak, active.plannedDuration)
-        let honored = elapsed >= threshold
+        let busy = active.activeDuringBreak ?? 0
+        let honored = elapsed >= threshold && busy <= policy.maxActiveDuringBreak
         effects.append(
             .endBreak(
                 cycle: active.cycle, origin: active.origin, honored: honored,
-                elapsed: elapsed, threshold: threshold
+                elapsed: elapsed, threshold: threshold, activeDuringBreak: busy
             )
         )
         if let cycle = active.cycle {

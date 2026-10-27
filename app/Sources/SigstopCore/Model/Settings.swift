@@ -90,6 +90,7 @@ public struct SigstopSettings: Sendable, Codable, Hashable {
 
     public var microIdleThresholdSeconds: Int
     public var idleCountsAsBreakMinutes: Int
+    public var maxActiveDuringBreakSeconds: Int
 
     public var maxNotificationsPerDay: Int
     public var snoozeMinutes: Int
@@ -118,6 +119,7 @@ public struct SigstopSettings: Sendable, Codable, Hashable {
         quietHours: QuietHours = QuietHours(),
         microIdleThresholdSeconds: Int = 90,
         idleCountsAsBreakMinutes: Int = 5,
+        maxActiveDuringBreakSeconds: Int = 60,
         maxNotificationsPerDay: Int = 14,
         snoozeMinutes: Int = 5,
         maxSnoozesPerBreak: Int = 2,
@@ -142,6 +144,7 @@ public struct SigstopSettings: Sendable, Codable, Hashable {
         self.quietHours = quietHours
         self.microIdleThresholdSeconds = microIdleThresholdSeconds
         self.idleCountsAsBreakMinutes = idleCountsAsBreakMinutes
+        self.maxActiveDuringBreakSeconds = maxActiveDuringBreakSeconds
         self.maxNotificationsPerDay = maxNotificationsPerDay
         self.snoozeMinutes = snoozeMinutes
         self.maxSnoozesPerBreak = maxSnoozesPerBreak
@@ -177,6 +180,7 @@ public struct SigstopSettings: Sendable, Codable, Hashable {
         quietHours = try c.decodeIfPresent(QuietHours.self, forKey: .quietHours) ?? d.quietHours
         microIdleThresholdSeconds = clamp(try c.decodeIfPresent(Int.self, forKey: .microIdleThresholdSeconds) ?? d.microIdleThresholdSeconds, 15, 600)
         idleCountsAsBreakMinutes = clamp(try c.decodeIfPresent(Int.self, forKey: .idleCountsAsBreakMinutes) ?? d.idleCountsAsBreakMinutes, 1, 60)
+        maxActiveDuringBreakSeconds = clamp(try c.decodeIfPresent(Int.self, forKey: .maxActiveDuringBreakSeconds) ?? d.maxActiveDuringBreakSeconds, 10, 600)
         maxNotificationsPerDay = clamp(try c.decodeIfPresent(Int.self, forKey: .maxNotificationsPerDay) ?? d.maxNotificationsPerDay, 1, 60)
         snoozeMinutes = clamp(try c.decodeIfPresent(Int.self, forKey: .snoozeMinutes) ?? d.snoozeMinutes, 1, 60)
         maxSnoozesPerBreak = clamp(try c.decodeIfPresent(Int.self, forKey: .maxSnoozesPerBreak) ?? d.maxSnoozesPerBreak, 0, 10)

@@ -482,7 +482,7 @@ public enum DailyRollup {
             start: begin.at,
             measured: duration,
             origin: begin.origin ?? .idleInferred,
-            qualifies: end != nil && duration >= cutoff
+            qualifies: end != nil && duration >= cutoff && end?.voided != true
         )
     }
 
