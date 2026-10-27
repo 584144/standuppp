@@ -34,29 +34,82 @@ enum PromptSound {
     }
 }
 
-/// The first prompt of a cycle, said out loud: two synthesized quacks, a beat, then a squeaky
-/// voice. The voice is macOS's own speech synthesizer, on this Mac, nothing fetched.
+/// The first prompt of a cycle, acted out: an opening sound, a line spoken by the Mac's own
+/// voice, a closing sound. Which of the ten comes from a shuffle bag kept in UserDefaults, so
+/// every one plays before any repeats, across restarts too.
 @MainActor
-enum DuckVoice {
-    private static let quack = NSSound(data: QuackSynth.wav())
+enum SkitPlayer {
+    private static let bagKey = "reminderSkitBag"
     private static let speaker = AVSpeechSynthesizer()
+    private static let finisher = Finisher()
+    private static var outro: NSSound?
 
-    static func play(chinese: Bool) {
-        if let quack {
-            quack.volume = 0.55
-            quack.stop()
-            quack.play()
-        }
-        let line = chinese ? "你该起来动动了！" : "Time to get up and move!"
+    /// Plays the next skit and returns the line it speaks, for the pet's bubble.
+    @discardableResult
+    static func playNext(chinese: Bool) -> String {
+        var bag = loadBag()
+        let skit = bag.draw()
+        saveBag(bag)
+        play(skit, chinese: chinese)
+        return skit.line(chinese: chinese)
+    }
+
+    static func play(_ skit: ReminderSkit, chinese: Bool) {
+        speaker.stopSpeaking(at: .immediate)
+        let intro = NSSound(data: skit.introWAV)
+        intro?.volume = 0.6
+        intro?.play()
+        outro = NSSound(data: skit.outroWAV)
+        outro?.volume = 0.6
+        let introLength = Double(skit.intro.count) / 22_050.0
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(QuackSynth.duration + 0.2))
-            let utterance = AVSpeechUtterance(string: line)
-            utterance.voice = AVSpeechSynthesisVoice(language: chinese ? "zh-CN" : "en-US")
-            utterance.pitchMultiplier = 1.9
-            utterance.rate = min(AVSpeechUtteranceMaximumSpeechRate, AVSpeechUtteranceDefaultSpeechRate * 1.15)
-            utterance.volume = 0.9
-            speaker.stopSpeaking(at: .immediate)
+            try? await Task.sleep(for: .seconds(introLength + 0.25))
+            let utterance = AVSpeechUtterance(string: skit.line(chinese: chinese))
+            utterance.voice = voice(chinese: chinese, male: skit.prefersMaleVoice)
+            utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+            utterance.volume = 0.95
+            speaker.delegate = finisher
+            finisher.then = {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(0.2))
+                    outro?.play()
+                }
+            }
             speaker.speak(utterance)
         }
     }
+
+    /// The best installed voice for the line: an enhanced or premium male voice for the roles
+    /// that want one, when the Mac has one, otherwise the clearest voice for the language.
+    static func voice(chinese: Bool, male: Bool) -> AVSpeechSynthesisVoice? {
+        let language = chinese ? "zh-CN" : "en-US"
+        let voices = AVSpeechSynthesisVoice.speechVoices()
+            .filter { $0.language == language && !$0.identifier.contains("eloquence") }
+            .sorted { $0.quality.rawValue > $1.quality.rawValue }
+        if male, let man = voices.first(where: { $0.gender == .male && $0.quality != .default }) {
+            return man
+        }
+        return voices.first ?? AVSpeechSynthesisVoice(language: language)
+    }
+
+    private static func loadBag() -> SkitBag {
+        guard let data = UserDefaults.standard.data(forKey: bagKey),
+              let bag = try? JSONDecoder().decode(SkitBag.self, from: data) else { return SkitBag() }
+        return bag
+    }
+
+    private static func saveBag(_ bag: SkitBag) {
+        if let data = try? JSONEncoder().encode(bag) { UserDefaults.standard.set(data, forKey: bagKey) }
+    }
+
+    private final class Finisher: NSObject, AVSpeechSynthesizerDelegate {
+        nonisolated(unsafe) var then: (() -> Void)?
+
+        func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+            let next = then
+            then = nil
+            next?()
+        }
+    }
 }
+

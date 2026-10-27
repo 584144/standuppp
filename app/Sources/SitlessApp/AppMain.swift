@@ -54,16 +54,15 @@ enum SitlessEntryPoint {
                 BreakRenderer.runAndExit(stem: stem)
             }
         }
-        if let index = CommandLine.arguments.firstIndex(of: "--render-quack") {
-            let stem = renderStem(at: index + 1, or: "quack")
-            let url = URL(fileURLWithPath: "\(stem).wav")
-            do {
-                try QuackSynth.wav().write(to: url)
-                FileHandle.standardOutput.write(Data("\(url.path)\n".utf8))
-                exit(0)
-            } catch {
-                exit(1)
+        if let index = CommandLine.arguments.firstIndex(of: "--play-skit") {
+            let args = CommandLine.arguments
+            let number = index + 1 < args.count ? Int(args[index + 1]) ?? 1 : 1
+            MainActor.assumeIsolated {
+                NSApplication.shared.setActivationPolicy(.prohibited)
+                SkitPlayer.play(ReminderSkit(rawValue: number) ?? .duck, chinese: AppLanguage.system.isChinese)
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 12) { exit(0) }
+            dispatchMain()
         }
         if let index = CommandLine.arguments.firstIndex(of: "--render-pet") {
             let stem = renderStem(at: index + 1, or: "pet")

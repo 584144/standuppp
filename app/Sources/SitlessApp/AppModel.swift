@@ -41,6 +41,8 @@ final class AppModel {
     private(set) var breakEndsAt: Date?
     /// How the last break ended, for the desktop pet's afterglow.
     private(set) var lastBreak: PetMood.LastBreak?
+    /// The line the last reminder skit spoke, so the pet's bubble says the same thing.
+    private(set) var reminderLine: String?
     private(set) var breakContent: BreakContent?
     private(set) var snoozeUntil: Date?
     private(set) var pausedUntil: Date?
@@ -685,7 +687,7 @@ final class AppModel {
         let message = engine.select(for: messageContext).message
         let audible = settings.promptSound && !captureLive
         if audible, settings.reminderVoice, request.level == .first {
-            DuckVoice.play(chinese: settings.language.isChinese)
+            reminderLine = SkitPlayer.playNext(chinese: settings.language.isChinese)
         } else {
             PromptSound.play(for: request.level, enabled: audible)
         }

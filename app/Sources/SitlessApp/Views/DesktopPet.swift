@@ -197,7 +197,7 @@ struct DesktopPetView: View {
     @ViewBuilder
     private func bubble(for mood: PetMood, at now: Date) -> some View {
         if PetMood.speaks(mood, lastBreak: model.lastBreak, now: now), let line = Self.line(for: mood) {
-            SpeechBubble(text: mood == .nudging ? L(line) + "\n" + sittingLine : L(line))
+            SpeechBubble(text: mood == .nudging ? (model.reminderLine ?? L(line)) + "\n" + sittingLine : L(line))
         } else if let infoUntil, now < infoUntil {
             SpeechBubble(text: infoLine)
         }

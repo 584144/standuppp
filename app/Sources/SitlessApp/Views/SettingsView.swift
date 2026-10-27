@@ -160,8 +160,8 @@ struct SettingsView: View {
                     TerminalSwitch(isOn: settings.promptSound)
                 }
                 SettingRow(
-                    "Quack and speak on the first reminder",
-                    detail: "Two quacks, then a squeaky voice says it is time to move. Only on the first prompt of a break, never on the later ones. Needs Play a sound; silent while a microphone or camera is on."
+                    "Play a funny voice on the first reminder",
+                    detail: "One of ten little sketches at random: a sound, a silly line, another sound. Every one plays before any repeats. Only on the first prompt of a break. Needs Play a sound; silent while a microphone or camera is on."
                 ) {
                     TerminalSwitch(isOn: settings.reminderVoice)
                 }
