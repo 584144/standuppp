@@ -22,7 +22,7 @@ import PackageDescription
 // app as SUPublicEDKey, and Sparkle refuses any archive whose signature does not verify.
 // A compromised GitHub account, CDN or network therefore still cannot hand this app code
 // to run. The alternative was hand-rolling download-and-verify, which is the one thing
-// nobody should hand-roll. See docs/RELEASING.md.
+// nobody should hand-roll. See upstream's docs/RELEASING.md.
 
 let package = Package(
     name: "sitless",

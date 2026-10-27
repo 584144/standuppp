@@ -1,6 +1,6 @@
 # sitless, build with Command Line Tools only. No Xcode required.
 .DEFAULT_GOAL := help
-.PHONY: help build bundle run test bench smoke doctor clean dev-cert verify verify-shipped dmg release badges badges-check
+.PHONY: help build bundle run test bench smoke doctor clean dev-cert verify verify-shipped dmg
 
 APP     := sitless
 CONFIG  ?= release
@@ -38,7 +38,7 @@ TEST_FLAGS := -Xswiftc -F -Xswiftc $(TESTING_FW) \
               -Xlinker -rpath -Xlinker $(TESTING_FW)/../usr/lib \
               -Xswiftc -Xfrontend -Xswiftc -disable-cross-import-overlay-search
 
-test: badges-check ## Run the Core test suite (no GUI session, no Xcode needed)
+test: ## Run the Core test suite (no GUI session, no Xcode needed)
 	@swift test $(TEST_FLAGS)
 
 bench: bundle ## Measure idle and break-screen cost from the kernel's counters
@@ -47,21 +47,9 @@ bench: bundle ## Measure idle and break-screen cost from the kernel's counters
 smoke: bundle ## Run the shipped app as if this were somebody else's Mac
 	@./Scripts/smoke.sh
 
-release: ## Cut a release: VERSION=0.2.0 NAME="Wood Frog 🐸"
-	@./Scripts/release.sh
-
 dmg: ## Build the disk image people download (both architectures)
 	@UNIVERSAL=1 CONFIG=$(CONFIG) ./Scripts/bundle.sh
 	@./Scripts/dmg.sh
-
-badges: ## Rewrite Exports/badges.json from the Swift catalogue
-	@./Scripts/badges.sh > Exports/badges.json && echo "wrote Exports/badges.json"
-
-# A prerequisite of `test` on purpose. The landing site is a separate repository
-# that prints the same ten names, and this is the only gate standing on the side
-# where a rename actually happens.
-badges-check: ## Fail if Exports/badges.json has drifted from the Swift catalogue
-	@./Scripts/badges.sh --check
 
 doctor: ## Print exactly what the app can observe right now
 	@swift run -c $(CONFIG) $(APP) --doctor

@@ -123,16 +123,6 @@ the engine can refuse it when confidence is low.
 Packs ship in-tree deliberately. A pack cannot execute anything, but it can carry manipulative
 *text*, and no schema catches that. A human reading it does.
 
-## Renaming a badge
-
-The ten names exist in this repository and in the site's `copy.ts`. `make test` runs
-`make badges-check` first and fails if `app/Exports/badges.json` has drifted from the Swift
-catalogue, so a rename shows up as a one-line diff that tells you the site is affected.
-
-Rename in `Badge.swift`, run `make badges`, commit the export, and open the matching PR on
-the site. The check cannot force the other repository to follow; it makes sure nobody misses
-that it has to.
-
 ## Commits and PRs
 
 [Conventional Commits](https://www.conventionalcommits.org). Types: `feat` `fix` `refactor`
@@ -140,7 +130,7 @@ that it has to.
 `ui` files a `feat`, `fix` or `perf` under 🎨 UI in the release notes, as does any such change
 whose shipped files are all under `SitlessApp/Views/` or are `Scripts/dmg.sh`. The subject is the
 bullet, so write it for a stranger and without an em dash; the notes write one as a comma
-([`docs/RELEASING.md`](docs/RELEASING.md) §0.5), and it reads like the repair it is.
+(upstream's docs/RELEASING.md §0.5), and it reads like the repair it is.
 
 **Keep them short.** Most commits are a subject line. A body is for the one thing the diff
 cannot say, two or three lines.
@@ -165,4 +155,4 @@ Anything with a security consequence goes to [`SECURITY.md`](SECURITY.md) instea
 ## Licence
 
 Contributions are under [GPL-3.0](LICENSE). The name and the logo are not part of that grant:
-see [`TRADEMARK.md`](TRADEMARK.md). Fork freely; a modified build needs its own name.
+see upstream's [trademark policy](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md). Fork freely; a modified build needs its own name.

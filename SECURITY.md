@@ -34,7 +34,7 @@ Accessibility it can read window titles. The things that would matter most:
 
 **Builds are ad-hoc signed and not notarized.** macOS refuses to open a download until the
 quarantine flag is cleared, and the README says how. This is a cost decision, not an
-oversight, and it is written down in `docs/RELEASING.md`.
+oversight, and it is written down in upstream's `docs/RELEASING.md`.
 
 **`--doctor` prints what the app can currently see**, and the bug form asks people to paste
 it. It prints no window title, but the file and project names parsed from one can appear in

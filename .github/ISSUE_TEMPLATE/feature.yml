@@ -15,10 +15,6 @@ body:
         **A joke** is a line of data in `app/Sources/SitlessCore/Message/corpus.json`, with
         preconditions so it fires only in the situation it is about. Also a PR, not an issue.
 
-        **A change to the landing page** belongs in
-        [sitless-web](https://github.com/Mohamed-Elshesheny/sitless-web/issues), not here. This
-        tracker is the macOS app.
-
         Everything else belongs here.
 
   - type: textarea

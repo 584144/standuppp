@@ -12,7 +12,8 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this
 program. If not, see <https://www.gnu.org/licenses/>.
 
-The name "sigstop" and the mark are not licensed with the code. See TRADEMARK.md.
+The name "sigstop" and the mark are not licensed with the code, and this fork does not use
+them. Upstream's trademark policy: https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md
 
 Third-party code shipped in the binary:
 
@@ -24,7 +25,7 @@ Third-party code shipped in the binary:
 久坐工具提醒 (sitless)
 Modifications copyright 2026 584144 (https://github.com/584144), same licence (GPL-3.0).
 
-This is a modified fork of sigstop, renamed as TRADEMARK.md asks. Changes from
+This is a modified fork of sigstop, renamed as upstream's trademark policy asks. Changes from
 upstream commit 651a6d8, made in October 2026:
 
   - A break during which the keyboard or mouse was in use for more than
@@ -35,3 +36,5 @@ upstream commit 651a6d8, made in October 2026:
   - The upstream update feed was emptied.
   - A Chinese (zh-Hans) interface with a calm Chinese prompt set, chosen by a
     language setting that follows macOS by default.
+  - Removed what only served upstream's releases and website: the update feed,
+    release and appcast scripts, the badge export, and the trademark file.

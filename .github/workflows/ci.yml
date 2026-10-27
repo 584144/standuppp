@@ -40,8 +40,6 @@ jobs:
         working-directory: app
         run: swift build -c release
 
-      # Runs badges-check first as a prerequisite, so a badge renamed here without the
-      # site being told fails the build rather than drifting quietly.
       - name: Test
         working-directory: app
         run: make test | tee "$RUNNER_TEMP/test.log"

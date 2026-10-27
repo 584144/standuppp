@@ -207,7 +207,7 @@ fi
 # build has a Team ID, needs neither, and keeps Library Validation on.
 #
 # What proves an update came from the maintainer is Sparkle's EdDSA signature, checked against
-# a key compiled into the app, before the image is unpacked. See docs/RELEASING.md.
+# a key compiled into the app, before the image is unpacked. See upstream's docs/RELEASING.md.
 HARDENED="${HARDENED:-1}"
 RUNTIME_FLAGS=()
 ENTITLEMENTS="Resources/sitless.entitlements"

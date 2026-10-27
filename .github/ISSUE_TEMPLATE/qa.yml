@@ -18,7 +18,7 @@ body:
           repetition avoidance, escalation, and the rails on tone.
         - [`docs/PRIVACY.md`](https://github.com/584144/sitless/blob/main/docs/PRIVACY.md), what leaves the machine, which is the
           update check and nothing else.
-        - [`TRADEMARK.md`](https://github.com/584144/sitless/blob/main/TRADEMARK.md), what a fork may keep and what it must rename.
+        - [upstream's `TRADEMARK.md`](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md), what a fork may keep and what it must rename.
 
         `sitless --doctor` answers most of "what does it think I am doing right now" on its own.
 

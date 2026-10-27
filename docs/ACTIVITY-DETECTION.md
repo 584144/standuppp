@@ -47,7 +47,7 @@ Authoring machine for this document: macOS 27.0 (26A428), Swift 6.2. Target floo
 
 So the deliverable is a **hand-bundled, ad-hoc-signed `.app`** produced by a script, not by
 `xcodebuild`. It is not notarized: there is no Developer ID (docs/PRIVACY.md §2.8,
-docs/RELEASING.md §1).
+upstream's docs/RELEASING.md §1).
 
 ### 1.2 The App Sandbox is not an option if we want Tier 1
 

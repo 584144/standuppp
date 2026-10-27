@@ -14,7 +14,7 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 
 </div>
 
-> 本项目是 [sitless](https://github.com/584144/sitless)，fork 自 Mohamed Elshesheny 的 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop)（GPL-3.0）。原作者的版权和许可证保留在 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 中。按照原项目的 [TRADEMARK.md](TRADEMARK.md)，本 fork 换了名字、bundle id、图标和菜单栏标记，**它不是官方 sigstop**。
+> 本项目是 [sitless](https://github.com/584144/sitless)，fork 自 Mohamed Elshesheny 的 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop)（GPL-3.0）。原作者的版权和许可证保留在 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 中。按照原项目的 [商标说明](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md)，本 fork 换了名字、bundle id、图标和菜单栏标记，**它不是官方 sigstop**。
 
 ## 它和普通计时器有什么不同
 
@@ -80,7 +80,7 @@ make verify  # 对构建出的 App 检查网络和隐私方面的承诺
 
 ## 发布与自动更新
 
-本 fork 目前还没有发布安装包，也没有启用自动更新。`Info.plist` 里的 `SUPublicEDKey` 仍是上游的公钥。如果你要发布自己的版本，请先用 Sparkle 的 `generate_keys` 生成自己的密钥并替换它，再按 [RELEASING.md](docs/RELEASING.md) 操作。
+本 fork 目前还没有发布安装包，也没有启用自动更新。`Info.plist` 里的 `SUPublicEDKey` 仍是上游的公钥。如果你要发布自己的版本，请先用 Sparkle 的 `generate_keys` 生成自己的密钥并替换它，再参考上游的发版文档操作。
 
 ## 相对 sigstop 的改动
 
