@@ -87,7 +87,6 @@ enum StandupppEntryPoint {
             renderBadgesAndExit(stem: renderStem(at: index + 1, or: "badges"))
         }
         MainActor.assumeIsolated {
-            AppPaths.migrateFromFormerName()
             guard InstanceLock.acquire(in: AppPaths.storageRoot) else {
                 FileHandle.standardError.write(Data("standuppp is already running, so this copy is leaving.\n".utf8))
                 exit(0)

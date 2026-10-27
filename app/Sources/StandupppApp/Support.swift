@@ -13,25 +13,6 @@ enum AppPaths {
                 .appendingPathComponent("Library/Application Support", isDirectory: true)
     }
 
-    /// Before the rename this app was io.github.584144.sitless. Its folder and the two
-    /// preferences the pet keeps move over once, the first time the new name runs, so the
-    /// interval, the history and the pet's place on the desktop all carry on.
-    static let formerBundleID = "io.github.584144.sitless"
-
-    static func migrateFromFormerName() {
-        guard isBundled, bundleID != formerBundleID else { return }
-        let fm = FileManager.default
-        let old = applicationSupport.appendingPathComponent(formerBundleID, isDirectory: true)
-        if !fm.fileExists(atPath: storageRoot.path), fm.fileExists(atPath: old.path) {
-            try? fm.moveItem(at: old, to: storageRoot)
-            try? fm.removeItem(at: storageRoot.appendingPathComponent(".lock"))
-        }
-        guard let former = UserDefaults(suiteName: formerBundleID) else { return }
-        for key in ["desktopPetOrigin", "reminderSkitBag"] where UserDefaults.standard.object(forKey: key) == nil {
-            if let value = former.object(forKey: key) { UserDefaults.standard.set(value, forKey: key) }
-        }
-    }
-
     static var storageRoot: URL {
         FileEventStore.defaultRoot(applicationSupport: applicationSupport, bundleID: bundleID)
     }

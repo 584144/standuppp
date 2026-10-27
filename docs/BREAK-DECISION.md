@@ -68,12 +68,12 @@ three is the single most common bug in this class of app, so the model keeps the
 
 This section used to sketch `ActivityType`, `ClassificationSource` and `ActivityClassification`, and
 none of them was built. The session carries `Activity`, the detector's enum in
-`app/Sources/StandupppCore/Model/Activity.swift` (quoted in `docs/ACTIVITY-DETECTION.md` §3), with a
+`app/Sources/StandupppCore/Model/Activity.swift` (quoted in upstream sigstop's `ACTIVITY-DETECTION.md` §3), with a
 `Confidence` beside it, and the app as an `AppIdentity` (`bundleID`, `localizedName`, `pid`) from
 `Model/Identity.swift`.
 
 The table below was the design for that confidence. The number the app uses is computed by
-`ConfidenceEngine` from evidence and tier ceilings (`docs/ACTIVITY-DETECTION.md` §6), not read from
+`ConfidenceEngine` from evidence and tier ceilings (upstream sigstop's `ACTIVITY-DETECTION.md` §6), not read from
 this table:
 
 | Signal | Type | Confidence |
@@ -208,7 +208,7 @@ permanent shield is an app that never fires.
   deadline a second away every tick would run the whole sample four times a second for nothing.
 - Idle is read from `CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: any)`, where
   `any` is `CGEventType(rawValue: ~0)` unwrapped with `if let`, never forced, and the IOKit reading is
-  the fallback (`ACTIVITY-DETECTION.md` §2.5). `~0` is `kCGAnyInputEventType`. This counts keyboard,
+  the fallback (upstream sigstop's `ACTIVITY-DETECTION.md` §2.5). `~0` is `kCGAnyInputEventType`. This counts keyboard,
   mouse, trackpad and tablet input across all apps and requires no permission.
 - Frontmost app from `NSWorkspace.shared.frontmostApplication` + `didActivateApplicationNotification`.
 - Lock / unlock from `DistributedNotificationCenter` names `com.apple.screenIsLocked` / `com.apple.screenIsUnlocked`.
@@ -940,10 +940,10 @@ rules, all of them tested with `ProcessSnapshot` literals in `CommandWatchTests`
   Both run their server as a daemon under launchd (`screen -dmS x sleep 20` gives `SCREEN` a
   parent pid of 1, measured here), and the walk up the parent pids stops at 1 on purpose. The scan
   still sees the tool running, in `matchedTools`, and `--doctor` says under *tool names* what it
-  cannot see. §4.3b of `ACTIVITY-DETECTION.md` has the measurement.
+  cannot see. §4.3b of upstream sigstop's `ACTIVITY-DETECTION.md` has the measurement.
 - A tool that was merely running somewhere on the Mac, never under the app in front, decides
   nothing when it goes: it was somebody else's command. The same asymmetry §7.2 of
-  `ACTIVITY-DETECTION.md` applies to naming `DEBUGGING`.
+  upstream sigstop's `ACTIVITY-DETECTION.md` applies to naming `DEBUGGING`.
 - While the app in front is unchanged, a tool is gone when it is no longer among that app's
   children, so the same tool still alive in another terminal does not hide the seam. After an app
   switch the children of the new app say nothing about the old one, so the whole machine has to
@@ -963,7 +963,7 @@ entered the activity's confidence. `--doctor` says under *tool names* that a wat
 away is a natural pause.
 
 What this still cannot see is the same as before: `swift build`, `go test`, `node`, `tsc` and every
-other tool that is named by its arguments (§4.3b of `ACTIVITY-DETECTION.md`), so a build finishing
+other tool that is named by its arguments (§4.3b of upstream sigstop's `ACTIVITY-DETECTION.md`), so a build finishing
 is not a seam and the spec does not pretend otherwise. The `idleBlip` seam covers the longer of
 those moments, because people stop typing while a command runs, but only once the pause reaches
 `microIdleGrace`.
@@ -1081,7 +1081,7 @@ Nothing about it moves. Only the eyes differ, and they are set once per panel by
 
 `FaceMood(level:tone:)` in `StandupppCore/Message/FaceMood.swift` is the mapping, `FaceMoodTests` pins
 it, and `FaceMark` in `StandupppApp/Views/FaceMark.swift` draws it. The **rendered** tone caps the
-face the way the user's tone setting caps the line (`docs/MESSAGE-ENGINE.md` §4): a friendly line at
+face the way the user's tone setting caps the line (upstream sigstop's `MESSAGE-ENGINE.md` §4): a friendly line at
 L3 gets the eyebrow, never the lowered lids, because the eyes and the words are one voice and the
 lids under a gentle sentence would read as a warden. The rails, which are the tone rule in
 geometry: it is never red, even at `SIGSTOP`; it is never sad, angry, hurt or disappointed,
@@ -1169,7 +1169,7 @@ the microphone open cannot accumulate a single second of hold.
 
 **The one exception, and why it is not a hole in that reasoning.** `audioInputRunning` and
 `cameraRunning` are `.running`-only, so on a Mac with Krisp, Loopback or BlackHole installed they
-are both false for the whole of a genuinely live call (§2.3a of ACTIVITY-DETECTION). There the two
+are both false for the whole of a genuinely live call (§2.3a of upstream sigstop's ACTIVITY-DETECTION.md). There the two
 live blocks are not covering anything, the latch is the only thing left, and staying silent in
 `.live` inverted the protection: absent during the meeting, present for twenty minutes after it. So
 the latch is handed `liveCaptureAlreadyBlocks` — precisely `audioInputRunning || cameraRunning`, not
@@ -1229,7 +1229,7 @@ without it the daily ceiling is defeated by quitting and reopening.
 
 **The circuit breakers**, in order of how visible they are:
 
-1. `.unreliable` inheritance. Attribution (§2.3a of ACTIVITY-DETECTION) is what keeps a downgraded
+1. `.unreliable` inheritance. Attribution (§2.3a of upstream sigstop's ACTIVITY-DETECTION.md) is what keeps a downgraded
    Mac protected at all, at both edges of the call — but it is per-process evidence, so it can only
    name apps the bundle-id list already knows, and it degrades visibly to the device bit when the
    process table cannot be read.
@@ -1782,7 +1782,7 @@ voice as well: `SummaryNarrator.line(for:seed:)` picked a joke about the day fro
 templates. The panel stopped showing it when the in-words disclosure was removed, and after that only tests read it,
 so it is gone, templates and all. A day summed up in a quip is the app grading you, which §16 rules
 out; the jokes belong at the break, where they are asking for something. If a line about the day
-comes back, it comes back as corpus lines under `docs/MESSAGE-ENGINE.md` §4 and its lint, not as a
+comes back, it comes back as corpus lines under upstream sigstop's `MESSAGE-ENGINE.md` §4 and its lint, not as a
 second template table that nothing checks.
 
 ### 14.1 Definitions, exactly

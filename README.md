@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.png">
-  <img src="docs/images/logo-light.png" width="560" alt="standuppp 站站鸭">
+  <img src="docs/images/logo-light.png" width="460" alt="Standuppp 站站鸭">
 </picture>
 
 **别坐啦，起来笑一个！**　·　*Stand up. Laugh a little. Move a lot.*
@@ -17,52 +17,24 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 
 **Standuppp（站站鸭）** 是一款有点欠揍、但真的关心你屁股的 Mac 桌面宠物。它会用搞怪鸭叫、离谱台词和可爱动画提醒你起身活动，让久坐提醒不再是一条无聊的系统通知。
 
-<img src="docs/images/guide.png" width="100%" alt="站站鸭使用说明：1 打开就在：菜单栏小圆环加桌面一只鸭；2 安心工作：只算真正在动的时间，默认 50 分钟；3 鸭子来催：15 段搞笑小剧场随机播一段；4 真的起来：离开键盘 5 分钟才算数，休息时敲键盘超过 1 分钟作废；5 回来看看：今日统计；6 随你调：间隔、语言、宠物形象、音效、开机启动">
+<img src="docs/images/guide.png" width="100%" alt="使用说明：打开就在、安心工作、鸭子来催、真的起来、回来看看、随你调">
 
-## 品牌设定 / Brand board
+## 特点
 
-<img src="docs/images/brand-board.png" width="100%" alt="Standuppp 站站鸭品牌设定：表情、动作、场景状态、Logo 方案、提醒气泡和尺寸对比">
+- 🦆 **桌面小黄鸭**：浮在桌面上，表情跟着你坐了多久变化；可拖动，单击看今天的数据，双击开始休息。
+- ⏱️ **只算真的在工作**：按键盘鼠标的活跃时间计时，默认 50 分钟提醒一次（可调）。
+- 📣 **15 段搞笑提醒**：每次随机一段"音效 + 离谱台词 + 音效"，轮完才重复。
+- 🚶 **真的起来才算**：休息期间键盘鼠标累计用超过 1 分钟，这次休息就不算数。
+- 🤫 **不添乱**：开会、录屏、全屏时会等一等；不在程序坞占位置，关掉窗口也不退出。
+- 🔒 **数据只在你的 Mac 上**：不需要任何权限，不联网，不读窗口内容、按键和剪贴板。
 
-这是站站鸭的品牌概念图，App 里的形象以实际为准。
+## 站站鸭
 
-> Standuppp fork 自 Mohamed Elshesheny 的 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop)（GPL-3.0）。原作者的版权和许可证保留在 [LICENSE](LICENSE) 与 [NOTICE](NOTICE) 中。按照原项目的[商标说明](https://github.com/Mohamed-Elshesheny/sigstop/blob/main/TRADEMARK.md)，本 fork 换了名字、bundle id、图标和菜单栏标记，**它不是官方 sigstop**。
+<img src="docs/images/pet/moods.png" width="100%" alt="站站鸭的八种状态">
 
-## 它和普通计时器有什么不同
+工作时敲电脑，坐久了头顶一摞书，该休息时举起红喇叭喊"起来！"，休息时抱着枕头睡觉，休息做到了就戴上墨镜，休息时偷偷敲键盘它会歪头打个问号。嫌它显眼可以换成"小号（不打扰）"，也可以换成小幽灵形象。
 
-普通计时器只会到点响一下，你看到了、点掉了，它就当你休息过了。可是"看到了"不代表"做了"，这样的记录没有参考价值。
-
-久坐工具提醒只认你**真的离开了键盘**：
-
-- ⏱️ **只算真正的工作时间**：按键盘鼠标的活跃度计时，离开的时间不算进去。默认连续工作 45 分钟提醒一次，可以在设置里改。
-- 🚶 **休息期间敲键盘就不算**：本 fork 新增的规则。休息倒计时期间，如果键盘鼠标累计活跃超过 **1 分钟**，这次休息作废：工作计时不清零，提醒很快会再来，当天统计里算"放弃的休息"。
-- 🤫 **不打断你**：开会（麦克风或摄像头在用）、全屏、专注模式下会等一等，挑一个停顿的时机再提醒。
-- 📊 **看得见的一天**：活跃时长、最长连续工作、休息次数，以及真正做到的有几次。
-- 🇨🇳 **中文界面**：菜单栏、设置、提醒弹窗、休息页都是中文，提醒语是一套温和语气的中文文案。系统语言是中文时默认显示中文，也可以在设置 → 节奏 → 界面语言里切换中文 / English。
-- 🔒 **数据不出本机**：不需要任何权限，不联网（只有你手动点"检查更新"时才会发一次请求），不读取窗口内容、按键内容和剪贴板。
-
-## 桌面宠物
-
-<img src="docs/images/pet/moods.png" width="100%" alt="站站鸭的八种状态：开心、工作、累了、催你起来、睡觉、骄傲、不开心、等你">
-
-一只圆滚滚、软乎乎的立体小黄鸭浮在桌面上，表情和道具跟着你坐了多久变化：工作时敲笔记本，坐久了头顶一摞书，该休息时举着红喇叭喊"起来！"，休息时抱枕头睡觉，休息算数时戴上墨镜。嫌它太显眼可以在 设置 → 节奏 → 宠物大小 选"小号（不打扰）"。喜欢软糯小幽灵的话，可以在 设置 → 节奏 → 宠物形象 里换成它：
-
-<img src="docs/images/pet/ghost-moods.png" width="100%" alt="小幽灵形象的八种状态">
-
-
-| 状态 | 什么时候 |
-|---|---|
-| 开心漂浮 | 刚开始工作 |
-| 戴眼镜敲电脑 | 工作中 |
-| 累了、冒汗 | 快到提醒时间 |
-| 蹦跳挥手："该起来动动啦！" | 该休息了 |
-| 抱着枕头睡觉 | 休息中 |
-| 转圈、爱心 | 刚完成一次算数的休息 |
-| 歪头、问号 | 休息期间一直敲键盘，这次不算 |
-| 眨眼等你 | 你离开了或暂停了 |
-
-平时它不说话，只有提醒时才冒出气泡（例如"该起来动动啦！已连续坐 50m"），休息结束后的几秒也会说一句。可以拖到任何位置（会记住位置）。鼠标靠近时它会歪头看你；单击时轻轻"啵"一声并转一圈，短暂显示今天的数据；双击开始休息；右键可以隐藏。音效可以在设置里用"宠物音效"关掉。
-
-每轮提醒的第一次，会从 15 段搞笑小剧场里随机播一段（15 段轮完才重复，不会连续两次同一段）：
+## 15 段搞笑提醒
 
 | # | 风格 | 开场 | 台词 | 收尾 |
 |---|---|---|---|---|
@@ -82,72 +54,48 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 | 14 | 撒娇小鸭 | 橡皮鸭吱吱 | 主人～起来陪我走两步嘛～就两步，好不好嘛～ | 闪亮"啾" |
 | 15 | 体育解说 | 呱、观众欢呼 | 各位观众！这位选手已经连续坐了 N 分钟，打破了今日纪录！让我们请他起立，为他的屁股鼓掌！ | 掌声 |
 
-所有音效都是代码现场合成的，台词用 macOS 自带的语音朗读，都在本机完成。皇帝、AI、公鸡、青蛙、老爷爷、体育解说会优先使用已安装的高质量中文男声（系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音… 下载），没有时用婷婷。可以在设置 → 节奏 → "提醒时播放搞笑语音"里关掉。它不抢焦点，也不会出现在录屏和屏幕共享里。可以在设置或菜单栏里开关。
-
-App 默认不在程序坞显示，只在菜单栏和桌面宠物上，关掉窗口也不会退出。要退出请用菜单栏面板里的"退出"。
+音效都是代码实时合成的，台词由 macOS 自带的语音朗读。如果安装了高质量的中文男声（系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音…），皇帝、AI、公鸡、青蛙、老爷爷和体育解说会自动换成男声。
 
 ## 设置
 
-设置在菜单栏图标 → Settings。也可以直接编辑配置文件：
+点菜单栏的圆环图标 → 设置…，常用的都在"节奏"页：
 
-```
-~/Library/Application Support/io.github.584144.standuppp/settings.json
-```
-
-```json
-{
-  "workIntervalMinutes": 50,
-  "breakDurationMinutes": 5,
-  "maxActiveDuringBreakSeconds": 60,
-  "language": "zh-Hans"
-}
-```
-
-| 键 | 含义 | 默认 |
-|---|---|---|
-| `workIntervalMinutes` | 连续工作多少分钟后提醒 | 45 |
-| `breakDurationMinutes` | 一次休息多少分钟 | 5 |
-| `language` | 界面语言：`system`（跟随系统）、`zh-Hans`、`en` | system |
-| `maxActiveDuringBreakSeconds` | 休息期间键盘鼠标最多可以用多少秒，超过就不算休息（10–600） | 60 |
-
-改完退出再打开 App 就会生效。用 `--doctor` 可以看到当前生效的值：
-
-```sh
-/Applications/standuppp.app/Contents/MacOS/standuppp --doctor
-```
+| 设置 | 默认 |
+|---|---|
+| 工作间隔 | 50 分钟 |
+| 休息时长 | 5 分钟 |
+| 离开键盘才算休息（休息时最多可用键鼠） | 60 秒 |
+| 界面语言 | 跟随系统（中文 / English） |
+| 宠物形象 / 宠物大小 | 站站鸭 / 正常 |
+| 提醒时播放搞笑语音、宠物音效 | 开 |
+| 开机自动启动 | 关 |
 
 <a id="build"></a>
 
-## 从源码构建
+## 安装
 
-装好 Command Line Tools 就够了，不需要 Xcode。
+用 Command Line Tools 就能构建，不需要 Xcode：
 
 ```sh
 git clone https://github.com/584144/standuppp
 cd standuppp/app
-make bundle  # 生成 dist/standuppp.app，在你本机签名
-make run     # 构建并启动
-make test    # 跑测试，不需要图形界面
-make verify  # 对构建出的 App 检查网络和隐私方面的承诺
+make bundle   # 生成 dist/standuppp.app
+make test     # 运行测试
+make verify   # 检查构建出的 App 确实不联网、不读隐私数据
 ```
 
-把 `dist/standuppp.app` 拖进"应用程序"就能长期使用。自己构建的 App 没有隔离属性，打开时不会被 macOS 拦下。
+把 `dist/standuppp.app` 拖进"应用程序"，打开后它就在菜单栏和桌面上了。
 
-实现细节在 [`docs/`](docs)（英文，来自上游项目，已按本 fork 更新）。休息判定见 [BREAK-DECISION.md](docs/BREAK-DECISION.md)，本机存储了哪些数据见 [PRIVACY.md](docs/PRIVACY.md)。
+## 隐私
 
-## 发布与自动更新
+所有数据都以明文 JSON 保存在 `~/Library/Application Support/io.github.584144.standuppp/`，原始事件只保留 7 天，可以在设置里一键导出或删除。详见 [PRIVACY.md](docs/PRIVACY.md)，休息怎样才算数见 [BREAK-DECISION.md](docs/BREAK-DECISION.md)。
 
-本 fork 目前还没有发布安装包，也没有启用自动更新。`Info.plist` 里的 `SUPublicEDKey` 仍是上游的公钥。如果你要发布自己的版本，请先用 Sparkle 的 `generate_keys` 生成自己的密钥并替换它，再参考上游的发版文档操作。
+## 品牌设定
 
-## 相对 sigstop 的改动
+<img src="docs/images/brand-board.png" width="100%" alt="Standuppp 站站鸭品牌设定">
 
-- 新增：休息期间键盘鼠标累计活跃超过上限（默认 60 秒）时，这次休息不算数。日志的 `break_end` 行新增 `active_s` 和 `void` 字段。
-- 改名为 Standuppp（站站鸭），换了 bundle id、模块名、图标、菜单栏标记和配色。
-- 新增桌面宠物站站鸭（另有小幽灵形象可选），表情跟随工作状态；提醒时随机播放 15 段搞笑小剧场。
-- 默认不在程序坞显示。
-- 新增中文界面和一套温和的中文提醒语，可在设置里切换语言。
-- 清空了上游的更新源。
+品牌概念图，App 里的形象以实际为准。
 
-## 许可证
+## 致谢与许可
 
-[GPL-3.0](LICENSE)。原作者 Mohamed Elshesheny 的版权声明见 [NOTICE](NOTICE)。
+Standuppp 基于 Mohamed Elshesheny 的开源项目 [sigstop](https://github.com/Mohamed-Elshesheny/sigstop) 修改而来，遵循 [GPL-3.0](LICENSE)。原作者的版权声明和本项目的改动说明见 [NOTICE](NOTICE)。Standuppp 不是官方 sigstop。

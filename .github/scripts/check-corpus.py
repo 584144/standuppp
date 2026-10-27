@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The corpus lint that docs/MESSAGE-ENGINE.md said existed.
+"""The corpus lint that the message rules said existed.
 
 It did not. Section 4.4 described a `swift package corpus-lint` plugin, twelve hard
 checks, four warnings and a `Lint/banned-lexicon.json`, run on every pull request
@@ -10,7 +10,7 @@ stated safety net for the one part of it that can hurt somebody was a paragraph.
 
 This is the real one, against the corpus that actually ships. It is smaller than the
 paragraph: the checks that assume a field the corpus does not have are not here, and
-MESSAGE-ENGINE.md now says which those are instead of implying they run.
+the message rules now says which those are instead of implying they run.
 
 Hard failures exit 1. Warnings print and do not, because each has a false-positive mode
 that a person has to judge.
@@ -163,7 +163,7 @@ def main() -> int:
 
         # W2  a nuclear line with no impossibility in it is just mean.
         #
-        # MESSAGE-ENGINE.md offered `"theatrical": true` as an alternative "with a named
+        # the message rules offered `"theatrical": true` as an alternative "with a named
         # reviewer". There is no reviewer field in the format, so that clause was a free
         # opt-out: every nuclear line set the flag, and the check could not fire on
         # anything. The flag is gone from the format now. It is the shouted run or nothing.
