@@ -54,6 +54,17 @@ enum SitlessEntryPoint {
                 BreakRenderer.runAndExit(stem: stem)
             }
         }
+        if let index = CommandLine.arguments.firstIndex(of: "--render-quack") {
+            let stem = renderStem(at: index + 1, or: "quack")
+            let url = URL(fileURLWithPath: "\(stem).wav")
+            do {
+                try QuackSynth.wav().write(to: url)
+                FileHandle.standardOutput.write(Data("\(url.path)\n".utf8))
+                exit(0)
+            } catch {
+                exit(1)
+            }
+        }
         if let index = CommandLine.arguments.firstIndex(of: "--render-pet") {
             let stem = renderStem(at: index + 1, or: "pet")
             MainActor.assumeIsolated {

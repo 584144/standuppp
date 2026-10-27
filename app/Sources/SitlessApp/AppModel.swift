@@ -683,7 +683,12 @@ final class AppModel {
         )
         let engine = settings.language.isChinese ? chineseMessages : messages
         let message = engine.select(for: messageContext).message
-        PromptSound.play(for: request.level, enabled: settings.promptSound && !captureLive)
+        let audible = settings.promptSound && !captureLive
+        if audible, settings.reminderVoice, request.level == .first {
+            DuckVoice.play(chinese: settings.language.isChinese)
+        } else {
+            PromptSound.play(for: request.level, enabled: audible)
+        }
         if !goesToTheSystem {
             presentPanel(request, message: message)
         } else {

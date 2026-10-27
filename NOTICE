@@ -39,3 +39,4 @@ upstream commit 651a6d8, made in October 2026:
   - Removed what only served upstream's releases and website: the update feed,
     release and appcast scripts, the badge export, and the trademark file.
   - A desktop pet whose mood follows the work clock, and the Dock icon off by default.
+  - A synthesized quack and a spoken line on the first reminder of a break.

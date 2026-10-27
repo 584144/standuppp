@@ -7,7 +7,7 @@
 **一个只在你真的起身时才算数的 macOS 久坐提醒。**
 
 [![CI](https://github.com/584144/sitless/actions/workflows/ci.yml/badge.svg)](https://github.com/584144/sitless/actions/workflows/ci.yml)
-[![602 tests](https://img.shields.io/badge/tests-602%20passing-3fb950?style=flat-square)](#build)
+[![604 tests](https://img.shields.io/badge/tests-604%20passing-3fb950?style=flat-square)](#build)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
 macOS 14+ · Apple Silicon / Intel · 开源免费
@@ -46,7 +46,9 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 | 歪头、问号 | 休息期间一直敲键盘，这次不算 |
 | 眨眼等你 | 你离开了或暂停了 |
 
-平时它不说话，只有提醒时才冒出气泡（例如"该起来动动啦！已连续坐 50m"），休息结束后的几秒也会说一句。可以拖到任何位置（会记住位置）。鼠标靠近时它会歪头看你；单击时轻轻"啵"一声并转一圈，短暂显示今天的数据；双击开始休息；右键可以隐藏。音效可以在设置里用"宠物音效"关掉。它不抢焦点，也不会出现在录屏和屏幕共享里。可以在设置或菜单栏里开关。
+平时它不说话，只有提醒时才冒出气泡（例如"该起来动动啦！已连续坐 50m"），休息结束后的几秒也会说一句。可以拖到任何位置（会记住位置）。鼠标靠近时它会歪头看你；单击时轻轻"啵"一声并转一圈，短暂显示今天的数据；双击开始休息；右键可以隐藏。音效可以在设置里用"宠物音效"关掉。
+
+每轮提醒的第一次，它会先"呱呱"两声，再用尖尖的卡通声音说"你该起来动动了！"。鸭子叫是代码现场合成的，说话用 macOS 自带的语音，都在本机完成。可以在设置 → 节奏 → "提醒时鸭子叫和说话"里关掉。它不抢焦点，也不会出现在录屏和屏幕共享里。可以在设置或菜单栏里开关。
 
 App 默认不在程序坞显示，只在菜单栏和桌面宠物上，关掉窗口也不会退出。要退出请用菜单栏面板里的"退出"。
 

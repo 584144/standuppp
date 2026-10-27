@@ -441,6 +441,9 @@ enum Localizer {
         "sitless Settings": "久坐工具提醒 设置",
         "Hide pet": "隐藏宠物",
         "Pet sounds": "宠物音效",
+        "Quack and speak on the first reminder": "提醒时鸭子叫和说话",
+        "Two quacks, then a squeaky voice says it is time to move. Only on the first prompt of a break, never on the later ones. Needs Play a sound; silent while a microphone or camera is on.":
+            "先\"呱呱\"两声，再用尖尖的声音说\"你该起来动动了！\"。只在每轮提醒的第一次出现，之后升级时不再重复。需要打开\"播放提示音\"；麦克风或摄像头在用时自动静音。",
         "A soft pop when you click the pet and a quiet note when a break did not count. Silent while a microphone or camera is on.":
             "单击宠物时轻轻\"啵\"一声，休息不算数时发出一声轻轻的提示。麦克风或摄像头在用时自动静音。",
         "Show pet": "显示宠物",
