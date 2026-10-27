@@ -11,7 +11,7 @@
 [![611 tests](https://img.shields.io/badge/tests-611%20passing-3fb950?style=flat-square)](#build)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-macOS 14+ · Apple Silicon / Intel · 开源免费
+macOS 14+ · Apple Silicon / Intel · 开源免费 · [下载](https://github.com/584144/standuppp/releases/latest)
 
 </div>
 
@@ -70,9 +70,21 @@ macOS 14+ · Apple Silicon / Intel · 开源免费
 | 提醒时播放搞笑语音、宠物音效 | 开 |
 | 开机自动启动 | 关 |
 
+## 安装
+
+1. 在 [Releases](https://github.com/584144/standuppp/releases/latest) 下载 `Standuppp-1.0.0.dmg`，打开后把站站鸭拖进"应用程序"。
+2. 第一次打开：因为没有付费的苹果开发者签名，macOS 会拦一下。右键点 App → 打开；或者到 系统设置 → 隐私与安全性，点"仍要打开"。只需要一次。
+3. 还是打不开的话，在终端运行：
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Standuppp.app
+```
+
+打开后它会出现在菜单栏和桌面上（不在程序坞）。
+
 <a id="build"></a>
 
-## 安装
+### 从源码构建
 
 用 Command Line Tools 就能构建，不需要 Xcode：
 
@@ -83,8 +95,6 @@ make bundle   # 生成 dist/standuppp.app
 make test     # 运行测试
 make verify   # 检查构建出的 App 确实不联网、不读隐私数据
 ```
-
-把 `dist/standuppp.app` 拖进"应用程序"，打开后它就在菜单栏和桌面上了。
 
 ## 隐私
 

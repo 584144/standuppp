@@ -10,7 +10,7 @@ struct InstallerBackdrop: View {
     static let paper = Color(red: 0xFB / 255, green: 0xFB / 255, blue: 0xF9 / 255)
     static let ink = Color(red: 0x17 / 255, green: 0x19 / 255, blue: 0x1C / 255)
     static let inkMuted = Color(red: 0x53 / 255, green: 0x58 / 255, blue: 0x5E / 255)
-    static let accent = Color(red: 0x8A / 255, green: 0x4E / 255, blue: 0x00 / 255)
+    static let accent = Color(red: 0xF0 / 255, green: 0x8A / 255, blue: 0x2C / 255)
 
     var body: some View {
         ZStack {
@@ -18,15 +18,15 @@ struct InstallerBackdrop: View {
 
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
-                    BrandMark(size: 18, fill: 0.5)
-                    Text("standuppp")
-                        .font(Brand.mono(15, weight: .semibold))
+                    DuckFace(mood: .fresh, time: 0).frame(width: 28, height: 28)
+                    Text("Standuppp 站站鸭")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(Self.ink)
                 }
                 .padding(.top, 44)
 
-                Text("Drag it onto Applications")
-                    .font(Brand.mono(12.5))
+                Text("拖到 Applications 里 · Drag it onto Applications")
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundStyle(Self.inkMuted)
                     .padding(.top, 12)
 
