@@ -96,4 +96,4 @@ jobs:
         working-directory: app
         run: |
           arch -x86_64 /usr/bin/true 2>/dev/null || sudo softwareupdate --install-rosetta --agree-to-license
-          REQUIRE_X86=1 BUNDLE=dist/sitless.app ./Scripts/smoke.sh
+          REQUIRE_X86=1 BUNDLE=dist/standuppp.app ./Scripts/smoke.sh

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Assemble sitless.app from the SwiftPM build product.
+# Assemble standuppp.app from the SwiftPM build product.
 #
 # There is no .xcodeproj in this repo on purpose (see CONTRIBUTING.md), so the app
 # bundle is assembled by hand. This is ~30 lines and works with Command Line
@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 CONFIG="${CONFIG:-release}"
-APP_NAME="sitless"
+APP_NAME="standuppp"
 BUNDLE="dist/${APP_NAME}.app"
 # Explicit, not `.build/${CONFIG}/`, which is a symlink to the last triple built and
 # can therefore be the Intel one.
@@ -80,7 +80,7 @@ rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}/Contents/MacOS" "${BUNDLE}/Contents/Resources"
 cp "${BIN}" "${BUNDLE}/Contents/MacOS/${APP_NAME}"
 cp Resources/Info.plist "${BUNDLE}/Contents/"
-cp Resources/sitless.icns "${BUNDLE}/Contents/Resources/"
+cp Resources/standuppp.icns "${BUNDLE}/Contents/Resources/"
 
 # SwiftPM emits resource bundles next to the binary; the app expects them inside
 # Contents/Resources, so copy any that exist.
@@ -95,20 +95,20 @@ RESOURCES_FROM=".build/$(uname -m)-apple-macosx/${CONFIG}"
 for b in "${RESOURCES_FROM}"/*.bundle; do
   [ -e "$b" ] || continue
   cp -R "$b" "${BUNDLE}/Contents/Resources/"
-  case "$b" in *SitlessCore.bundle) COPIED_CORPUS=1 ;; esac
+  case "$b" in *StandupppCore.bundle) COPIED_CORPUS=1 ;; esac
 done
-if [ "${COPIED_CORPUS}" -ne 1 ] || [ ! -f "${BUNDLE}/Contents/Resources/${APP_NAME}_SitlessCore.bundle/corpus.json" ]; then
-  echo "error: the SitlessCore resource bundle with corpus.json is not in the app." >&2
+if [ "${COPIED_CORPUS}" -ne 1 ] || [ ! -f "${BUNDLE}/Contents/Resources/${APP_NAME}_StandupppCore.bundle/corpus.json" ]; then
+  echo "error: the StandupppCore resource bundle with corpus.json is not in the app." >&2
   echo "       Without it the app dies at launch on every machine (this was the v0.1.5 bug)." >&2
   exit 1
 fi
 # SwiftPM never deletes a file it did not put in a resource bundle, so anything left there by
 # hand (an mv into it, a copy) would be copied above and shipped. The bundle holds one file.
-EXTRA="$(cd "${BUNDLE}/Contents/Resources/${APP_NAME}_SitlessCore.bundle" && find . -mindepth 1 ! -name corpus.json)"
+EXTRA="$(cd "${BUNDLE}/Contents/Resources/${APP_NAME}_StandupppCore.bundle" && find . -mindepth 1 ! -name corpus.json)"
 if [ -n "${EXTRA}" ]; then
-  echo "error: the SitlessCore resource bundle holds more than corpus.json:" >&2
+  echo "error: the StandupppCore resource bundle holds more than corpus.json:" >&2
   echo "${EXTRA}" | sed 's/^/         /' >&2
-  echo "       Remove it from ${RESOURCES_FROM}/${APP_NAME}_SitlessCore.bundle, or run make clean." >&2
+  echo "       Remove it from ${RESOURCES_FROM}/${APP_NAME}_StandupppCore.bundle, or run make clean." >&2
   exit 1
 fi
 
@@ -210,14 +210,14 @@ fi
 # a key compiled into the app, before the image is unpacked. See upstream's docs/RELEASING.md.
 HARDENED="${HARDENED:-1}"
 RUNTIME_FLAGS=()
-ENTITLEMENTS="Resources/sitless.entitlements"
+ENTITLEMENTS="Resources/standuppp.entitlements"
 SIGNING_ENTITLEMENTS="${ENTITLEMENTS}"
 if [ "${HARDENED}" = "1" ]; then
   RUNTIME_FLAGS=(--options runtime)
   case "${SIGN_IDENTITY}" in
     "Developer ID Application"*) ;;
     *)
-      SIGNING_ENTITLEMENTS="$(mktemp -d)/sitless.entitlements"
+      SIGNING_ENTITLEMENTS="$(mktemp -d)/standuppp.entitlements"
       cp "${ENTITLEMENTS}" "${SIGNING_ENTITLEMENTS}"
       /usr/libexec/PlistBuddy -c "Add :com.apple.security.cs.disable-library-validation bool true" \
         "${SIGNING_ENTITLEMENTS}" >/dev/null
@@ -264,5 +264,5 @@ if [ "${SIGN_IDENTITY}" = "-" ]; then
   echo "        An Accessibility grant is recorded against it, so a rebuild can"
   echo "        cost you the grant. If --doctor stops saying the window title is"
   echo "        readable, that is what happened. Fix it once:  make dev-cert"
-  echo "        then build:   SIGN_IDENTITY=sitless-dev make run"
+  echo "        then build:   SIGN_IDENTITY=standuppp-dev make run"
 fi

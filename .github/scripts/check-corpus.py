@@ -24,7 +24,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 # A path can be passed in so the checks can be tested against a deliberately broken
 # copy. A lint nobody has seen fail is a lint nobody should trust.
-CORPUS = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "app/Sources/SitlessCore/Message/corpus.json"
+CORPUS = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "app/Sources/StandupppCore/Message/corpus.json"
 LEXICON = ROOT / ".github/lint/banned-lexicon.json"
 
 ID = re.compile(r"^[a-z0-9]+(\.[a-z0-9-]+){2,}$")

@@ -45,8 +45,8 @@ so it can interrupt you at a sensible moment. Everything below exists to serve t
 | 16 | **Break interaction events**: prompted, taken, skipped, snoozed | UI callbacks | "You skipped 6 of 8 breaks today" and nothing more | Persisted as events | Same as #1 | Yes |
 | 17 | **Daily summaries**: the seconds of active work in each app, by **bundle identifier**, and in each activity; the day's total and its longest unbroken stretch; counts of breaks, snoozes, skips, ignored prompts, notifications, sessions and break opportunities; and the seconds spent in the breaks that counted, which the menu bar divides by the count for an average | Derived from the event log while the app runs, recomputed at most once a minute. Written only when the numbers differ from the last write, and then at most every ten minutes, except at once when the menu bar panel opens, a break ends, the day changes (a last write for the day that ended, then the first for the new one), your data is deleted, the Mac sleeps or locks, or the app quits | Badges that count days after those days' events are pruned. Nothing uses the per-app or per-activity seconds once they are on disk; they are there because the summary is written whole | Persisted, `summaries/YYYY-MM.json`, one object per day (§4.3). Never leaves the Mac | Every day, kept until you delete your data; never pruned (§4.5) | No. There is no switch for it |
 | 18 | **Preferences**: interval, threshold, quiet hours, tone, prompt channel and sound | User input | Configuration | Persisted, `settings.json` (plain JSON, human-editable) | Until you change or delete them | n/a |
-| 19 | **App category map** (`com.apple.dt.Xcode → code`) | Compiled into the binary: `AppKey` in `app/Sources/SitlessCore/Message/MessageContext.swift` names the app's family, and `AppModel.category(for:)` maps the family to one of four words | Classify #1 without heuristics | Code, not data. There is no category file in the bundle and no override in `settings.json` | Ships with the app | n/a |
-| 20 | **Break message corpus** | Static JSON shipped inside the bundle, `Contents/Resources/sitless_SitlessCore.bundle/corpus.json` | Text of the reminder | Read-only resource | Ships with the app | No. It is one pack and there is no setting to choose or disable it; the tone setting decides which of its lines can fire |
+| 19 | **App category map** (`com.apple.dt.Xcode → code`) | Compiled into the binary: `AppKey` in `app/Sources/StandupppCore/Message/MessageContext.swift` names the app's family, and `AppModel.category(for:)` maps the family to one of four words | Classify #1 without heuristics | Code, not data. There is no category file in the bundle and no override in `settings.json` | Ships with the app | n/a |
+| 20 | **Break message corpus** | Static JSON shipped inside the bundle, `Contents/Resources/standuppp_StandupppCore.bundle/corpus.json` | Text of the reminder | Read-only resource | Ships with the app | No. It is one pack and there is no setting to choose or disable it; the tone setting decides which of its lines can fire |
 | 21 | **Unlocked badges**: which of the ten marks have unlocked, and the day each did | Derived from #17 and #16, entirely — no new signal, no new event field, nothing observed that was not already in this table | So a badge earned inside the 7-day event window is not silently lost when those events are pruned | Persisted, `badges.json` (a flat map of badge id to day) | Kept until you delete your data; never expires and never decreases | n/a |
 | 22 | **Login-item registration** | `SMAppService.mainApp.register()` | Start at login, if you ask for it | A registration record owned by `launchservicesd`, outside the app's storage | Until you switch it off, or until *Delete my data…*, which unregisters it | Yes — off by default |
 | 23 | **Notification authorization status** | `UNUserNotificationCenter.notificationSettings()` | Decide whether to use a system notification or the in-app fallback window | Memory-only (the real record is TCC's) | n/a | n/a |
@@ -56,14 +56,14 @@ so it can interrupt you at a sensible moment. Everything below exists to serve t
 | 27 | **Bundle identifiers of processes running audio input** | `kAudioHardwarePropertyProcessObjectList`, then `kAudioProcessPropertyBundleID` and `kAudioProcessPropertyIsRunningInput` per process object. **No permission; none is requested** | Say *which* app has the microphone, so the call hold names a fact rather than guessing, and so Siri, dictation and a permanently-open virtual device can be discounted instead of disabling the signal | Not persisted. Each identifier is matched against a fixed list and dropped. Nothing else about the process is read **on this path**: this row is CoreAudio's process object list and it yields a bundle identifier, nothing more. The one place the app reads an executable path is row 30, which is Tier 2, off by default, and bounded there | Memory-only, one sample | No |
 | 28 | **Seconds the call hold has held a break today**, and the day they count for | Derived from #25, #26 and #27 by the call latch | So the three-hour daily ceiling on holding survives a relaunch instead of resetting to zero | Persisted, `call-hold.json` (a day index and a number of seconds) | Overwritten in place; reset on delete | Follows "Hold my break during calls" |
 | 29 | **The focused window's document path** (`/Users/you/p/a.swift`) | `kAXDocument` on the focused window, read in the same call that reads the title. Tier 1 | Names the file you have open when the title does not, and tells the git collector which registered folder you are in | Memory-only, one sample. `AccessibilityCollector.fileURL(from:)` keeps only a local file URL, which is what keeps a browser's full page URL out of this row. The same `kAXDocument` string is also handed to `host(from:)`, which keeps only an `http` or `https` host and drops the rest inside the function; that host is row 38, and it is dropped unless the Tier 1b switch is on | Until the next sample | Follows Tier 1 |
-| 30 | **Which of a fixed list of developer tools is running**, as an enum case, never a string, plus one `Bool` for whether anything is under a debugger | One `sysctl(KERN_PROC_ALL)`, then `proc_pidpath` for the pids whose `p_comm` already matched the `ToolToken` allowlist in `app/Sources/SitlessSensors/SignalContext.swift`. **No permission is required and none is requested** | The only signal in this product that can tell `DEBUGGING` from `CODING`. Without it the app degrades to `CODING` rather than guess between siblings ("Never overclaim" in [the rules a PR cannot break](../CONTRIBUTING.md#the-rules-a-pr-cannot-break)) | **Not persisted, and nothing but the match survives.** The path is compared and dropped. A process matching nothing is not recorded, not counted, not reported. No command line, environment or working directory is read at all | Memory-only, this sample and the one before it: the two are compared so that a tool which has just gone can count as a pause (`docs/BREAK-DECISION.md` §7.3), and the older is dropped as soon as a newer one is taken | **Yes, and off by default** |
+| 30 | **Which of a fixed list of developer tools is running**, as an enum case, never a string, plus one `Bool` for whether anything is under a debugger | One `sysctl(KERN_PROC_ALL)`, then `proc_pidpath` for the pids whose `p_comm` already matched the `ToolToken` allowlist in `app/Sources/StandupppSensors/SignalContext.swift`. **No permission is required and none is requested** | The only signal in this product that can tell `DEBUGGING` from `CODING`. Without it the app degrades to `CODING` rather than guess between siblings ("Never overclaim" in [the rules a PR cannot break](../CONTRIBUTING.md#the-rules-a-pr-cannot-break)) | **Not persisted, and nothing but the match survives.** The path is compared and dropped. A process matching nothing is not recorded, not counted, not reported. No command line, environment or working directory is read at all | Memory-only, this sample and the one before it: the two are compared so that a tool which has just gone can count as a pause (`docs/BREAK-DECISION.md` §7.3), and the older is dropped as soon as a newer one is taken | **Yes, and off by default** |
 | 31 | **Current git branch name** (`fix/retry-loop`), and whether a rebase, merge or bisect is in progress | The first line, at most 512 bytes, of `<repo>/.git/HEAD`, in a folder **you registered yourself** through an `NSOpenPanel`. In a worktree or submodule, first the `.git` file, at most 512 bytes and refused unless it is one `gitdir:` line as git requires; mid-rebase, the `head-name` line. Plus `lstat` on `.git` and on the git directory, its `HEAD`, `objects` and `commondir`, one `realpath` of a `gitdir:` target, and four `access` checks, none of which opens a file (§2.10). No `git` process is ever spawned | Fills the `{branch}` slot so a line can say something true instead of something generic | **Memory-only.** Held for the lifetime of one `DeveloperContext` and replaced by the next sample. There is **no field in `LoggedEvent` that could hold it** (§4.3), `--doctor` prints its length rather than the name (§8.12), and it is **withheld from the system-notification channel** so that the one path out of this process cannot carry it (§8.11) | Until the next sample, or process exit | **Yes, and off by default** |
 | 32 | **The activity at a focus event** (`act`: `coding`, `codeReview`, `documentation`…), one of the twelve `Activity` cases | Derived. From #1 alone at Tier 0; **with Tier 1 on, also from the window title (#12) and the document path (#29)**; with Tier 2 process context, also from #30 | So the log can say what kind of work a stretch was, not only which app it was in | Persisted, the `act` field of `focus` events (§4.3). A browser tab titled `Pull Request #12` is logged as `"act":"codeReview"` | Same as #1 | No switch of its own. It is title-derived only while Tier 1 is on |
 | 33 | **The update check's URL cache**: the appcast URL, the time it was fetched, and the appcast itself | Foundation's URL cache, filled by Sparkle's request in this process when you press **Check for updates** | Nothing in this app asks for it. It is what Foundation does with an HTTP response by default | Persisted, `~/Library/Caches/<BUNDLE_ID>/Cache.db` and `fsCachedData/` | Controlled by Foundation and macOS, not by the app. *Delete my data…* does not remove it | Only by never pressing the button |
 | 34 | **Foundation's HTTP storage** for this app | Created by the same request | As #33 | Persisted, `~/Library/HTTPStorages/<BUNDLE_ID>/`. On the Mac this was checked on it held one table, `alt_services`, and it was empty. Beside it, `~/Library/HTTPStorages/<BUNDLE_ID>.binarycookies` holds any cookie a server set | The folder: controlled by macOS. The cookie file: deleted by the app at every launch, before the updater starts (§2.9), so it can be left over from the last run. *Delete my data…* removes neither | Only by never pressing the button |
 | 35 | **Sparkle's staging folders** | Sparkle | Where a downloaded update waits before `Autoupdate` installs it | `~/Library/Caches/<BUNDLE_ID>.sparkle/org.sparkle-project.Sparkle/`, holding `Installation` and `PersistentDownloads`. Both were empty on the Mac this was checked on | Until Sparkle clears them. *Delete my data…* does not remove them | n/a |
-| 36 | **UserDefaults**: `SULastCheckTime` (when you last pressed **Check for updates**), `SUHasLaunchedBefore`, `SUEnableAutomaticChecks` and `SUSendProfileInfo` (both written `false`), and `NSStatusItem Preferred Position sitless` (where the menu bar icon sits) | Sparkle, and AppKit's status item autosave | The two `false` values are how the app keeps Sparkle from scheduling a check or sending a profile (§2.7). The rest is Sparkle's and AppKit's own bookkeeping | Persisted, `~/Library/Preferences/<BUNDLE_ID>.plist`, read with `defaults read <BUNDLE_ID>` | Until `defaults delete <BUNDLE_ID>`. *Delete my data…* does not remove it | No |
-| 37 | **The status line**: the state word the menu bar header shows (`running`, `break due`, `stopped`, `paused`…) and the waiting-line sentence under it, as one line of text | Derived from #15 by `StatusWord` and `WaitingLine` in `SitlessCore`, the same two functions the menu reads | So a tmux status bar or a shell prompt can `cat` it instead of running anything (README, *Can it show up in tmux…*) | Persisted, `status.txt`, mode 0600, rewritten with `SecureFile.write` only when the line changes, never per tick. A write that fails is tried again when the line changes or after a minute, not every tick, and the menu bar says "Could not write the status line" with the file's path, unless a more important write has already failed. It holds what the menu says and nothing the menu does not: a clock time, a duration, and the name of a call app the call hold names (§7.8 of `BREAK-DECISION.md`), never an app you are working in, a window title, a file, a project or a branch, because `WaitingLine` has no way to say those | Until the next change. Removed the moment the switch goes off, when sitless quits, at the next launch if a crash left it behind with the switch off, and by *Delete my data…*, and never through a symbolic link where the data folder should be, which is left alone as *Delete my data…* leaves it | **Yes, and off by default** |
+| 36 | **UserDefaults**: `SULastCheckTime` (when you last pressed **Check for updates**), `SUHasLaunchedBefore`, `SUEnableAutomaticChecks` and `SUSendProfileInfo` (both written `false`), and `NSStatusItem Preferred Position standuppp` (where the menu bar icon sits) | Sparkle, and AppKit's status item autosave | The two `false` values are how the app keeps Sparkle from scheduling a check or sending a profile (§2.7). The rest is Sparkle's and AppKit's own bookkeeping | Persisted, `~/Library/Preferences/<BUNDLE_ID>.plist`, read with `defaults read <BUNDLE_ID>` | Until `defaults delete <BUNDLE_ID>`. *Delete my data…* does not remove it | No |
+| 37 | **The status line**: the state word the menu bar header shows (`running`, `break due`, `stopped`, `paused`…) and the waiting-line sentence under it, as one line of text | Derived from #15 by `StatusWord` and `WaitingLine` in `StandupppCore`, the same two functions the menu reads | So a tmux status bar or a shell prompt can `cat` it instead of running anything (README, *Can it show up in tmux…*) | Persisted, `status.txt`, mode 0600, rewritten with `SecureFile.write` only when the line changes, never per tick. A write that fails is tried again when the line changes or after a minute, not every tick, and the menu bar says "Could not write the status line" with the file's path, unless a more important write has already failed. It holds what the menu says and nothing the menu does not: a clock time, a duration, and the name of a call app the call hold names (§7.8 of `BREAK-DECISION.md`), never an app you are working in, a window title, a file, a project or a branch, because `WaitingLine` has no way to say those | Until the next change. Removed the moment the switch goes off, when standuppp quits, at the next launch if a crash left it behind with the switch off, and by *Delete my data…*, and never through a symbolic link where the data folder should be, which is left alone as *Delete my data…* leaves it | **Yes, and off by default** |
 | 38 | **Host of the page in the front browser window** (`github.com`) | The same `kAXDocument` string as #29, through `AccessibilityCollector.host(from:)`, which accepts only `http` and `https`, reads the host still percent-encoded, refuses anything that is not bare host characters, and drops the path, query, fragment, credentials and port inside the function. Tier 1b. The string is parsed on every Tier 1 read; `ContextEngine` passes the host on only while the switch is on, and re-checks that on every sample | Names the site in the menu bar instead of the browser, and adds forge evidence (+0.6) on `github.com`, `gitlab.com` and `bitbucket.org` toward code review (`docs/ACTIVITY-DETECTION.md` §7.4). It decides no meeting and does not change `act` | **Memory-only, never persisted.** Shown in the menu bar, in the "why do you think that?" evidence on a forge, and in `--doctor`. `LoggedEvent` has no field that could hold it | Until the next sample | **Yes, and off by default**, its own switch under window titles, which it needs |
 
 Rows 25 to 27 are **property reads on device and process objects**. No stream is opened, no capture
@@ -112,7 +112,7 @@ the parts that cannot be proven from this side.
 ### 1.3 What a "focus" sample looks like end to end
 
 The code is `FrontmostAppCollector` in
-`app/Sources/SitlessSensors/Collectors/FrontmostAppCollector.swift`. `start()` subscribes to
+`app/Sources/StandupppSensors/Collectors/FrontmostAppCollector.swift`. `start()` subscribes to
 activation, deactivation, launch and termination on `NSWorkspace.shared.notificationCenter`, and every
 `NSRunningApplication` it is handed, by a notification or by the first read, is reduced to an
 `AppIdentity` here:
@@ -144,7 +144,7 @@ every app on your system can already see it.
 
 ### 1.4 Idle detection carries no input content
 
-The code is `IdleCollector.read()` in `app/Sources/SitlessSensors/Collectors/IdleCollector.swift`.
+The code is `IdleCollector.read()` in `app/Sources/StandupppSensors/Collectors/IdleCollector.swift`.
 It returns one number and the name of the source it came from. When the event source has no answer it
 falls back to the `HIDIdleTime` property of `IOHIDSystem`, which is also a single number:
 
@@ -185,8 +185,8 @@ with real paths, and the check that now runs in CI.
 **Where Accessibility lives.** Two files, and `.github/scripts/check-ax-isolation.py` fails the
 build if a third appears:
 
-    app/Sources/SitlessSensors/Collectors/AccessibilityCollector.swift   the reads
-    app/Sources/SitlessSensors/PermissionBroker.swift                    the trust check
+    app/Sources/StandupppSensors/Collectors/AccessibilityCollector.swift   the reads
+    app/Sources/StandupppSensors/PermissionBroker.swift                    the trust check
 
 **The one reader.** `AccessibilityCollector.read(pid:)` hands off to `readSync(pid:)`, which fetches
 the focused window and asks it for exactly two attributes:
@@ -232,7 +232,7 @@ second reader cannot be added in another file without the build failing.
 **There is no `TitleClassifier` and no `TitleSignal` enum.** The old listing described a six-value
 vocabulary produced by one classifier. The real design is per-provider: each provider matches the
 title against its own patterns and returns an `Activity`, and `BrowserTitlePatterns`
-(`app/Sources/SitlessSensors/Providers/BuiltinProviders.swift`) holds the regexes for the
+(`app/Sources/StandupppSensors/Providers/BuiltinProviders.swift`) holds the regexes for the
 browser case. `docs/ACTIVITY-DETECTION.md` §5 explains why there is no universal format to classify
 against. The consequence for this section is the same either way and is the part that matters: a
 title is matched and dropped inside `observe`, and the string itself is never returned upward.
@@ -288,8 +288,8 @@ resources and, with Tier 2 git context on, the few git files §2.10 names, in fo
 It requests no Full Disk Access. The app is not sandboxed (§3.6 describes a sandboxed flavor that is
 planned, not built), so nothing in macOS confines its file access: the bound is the code. The
 file-reading code in the tree is
-`FileEventStore` (`app/Sources/SitlessCore/Storage/FileStore.swift`), `SettingsStore`
-(`app/Sources/SitlessApp/Support.swift`) and `CallHoldLedger`, all scoped to the storage directory,
+`FileEventStore` (`app/Sources/StandupppCore/Storage/FileStore.swift`), `SettingsStore`
+(`app/Sources/StandupppApp/Support.swift`) and `CallHoldLedger`, all scoped to the storage directory,
 plus `GitCollector` for those git files.
 
 **Check.** No script asserts anything about file-access entitlements, because without the sandbox
@@ -306,11 +306,11 @@ $ codesign -d --entitlements - --xml <APP> 2>/dev/null | plutil -p -
 }
 ```
 
-The first is the one key in `app/Resources/sitless.entitlements`. The second is added by
+The first is the one key in `app/Resources/standuppp.entitlements`. The second is added by
 `app/Scripts/bundle.sh` to a build with no Team ID, because the Hardened Runtime could not load
 `Sparkle.framework` without it (§2.9). Neither grants access to a file.
 
-At runtime: `sudo fs_usage -w -f filesys $(pgrep -x sitless)` and watch that the only paths touched
+At runtime: `sudo fs_usage -w -f filesys $(pgrep -x standuppp)` and watch that the only paths touched
 are the app bundle and the storage directory, plus, once you press **Check for updates**, the caches
 in inventory rows 33 to 35.
 
@@ -414,12 +414,12 @@ offer a switch that governed a network call, and there is no schedule. The claim
 feature it described, which in this document is the one thing that must not happen.
 
 **What the app's own binary can do: still nothing.** This is the part that survived intact and is
-worth checking yourself. `sitless`'s executable links no networking framework and references no
+worth checking yourself. `standuppp`'s executable links no networking framework and references no
 networking symbol — not `NSURLSession`, not `socket`, not `getaddrinfo`. All the network code is
 inside `Sparkle.framework`. **The download runs in that framework, in this process.** This section
 claimed the opposite until it was checked: Sparkle bundles `Downloader.xpc`, but only uses it when
 the app sets `SUEnableDownloaderService`, which is meant for sandboxed apps and which Sparkle
-advises against otherwise. sitless does not set it.
+advises against otherwise. standuppp does not set it.
 
 What is out of process is the install. `Autoupdate` is a separate executable and always has been,
 so the code that replaces the app on disk is never the code holding your Accessibility grant. The
@@ -439,7 +439,7 @@ unless you ask it to.
 
 **Check.**
 ```
-BIN=<APP>/Contents/MacOS/sitless
+BIN=<APP>/Contents/MacOS/standuppp
 
 # the app's own binary references no networking at all
 nm -u "$BIN" | grep -E '^_(socket|connect|getaddrinfo|res_9_init)$'            # expect none
@@ -456,7 +456,7 @@ plutil -p <APP>/Contents/Info.plist | grep -E 'SUFeedURL|SUEnableAutomaticChecks
 codesign -d --entitlements - --xml <APP> | plutil -p - | grep network.server   # expect none
 
 # while it is running and you have not pressed anything
-sudo lsof -i -a -p "$(pgrep -x sitless)"                                        # expect no sockets
+sudo lsof -i -a -p "$(pgrep -x standuppp)"                                        # expect no sockets
 ```
 `make verify` runs the whole set against a built bundle and prints a line per assertion. See §6.3
 for the Little Snitch / `nettop` procedure, and §8.1 for what `otool -L` can and cannot prove.
@@ -475,7 +475,7 @@ account or a CDN edge.
 Sparkle closes that with EdDSA (Ed25519):
 
 - The **private key** exists in exactly one place: the maintainer's macOS login keychain, as a
-  generic password under service `https://sparkle-project.org`, account `sitless`. It is not in this
+  generic password under service `https://sparkle-project.org`, account `standuppp`. It is not in this
   repository, not in CI, and not on any build server. `make verify` greps the whole tree for a
   private key and fails if one appears.
 - The **public key** is compiled into the app as `SUPublicEDKey` in `Info.plist`. You can read it
@@ -502,9 +502,9 @@ sockets, the channels below matter more rather than less. Each is absent, with t
 
 | Channel | Why it matters | Guard |
 |---|---|---|
-| The updater's own request | A `GET` can carry data in a query string, a header, a cookie, or a hostname | The feed URL comes from `Info.plist`, sealed by the code signature, and a delegate in `UpdateChecker.swift` returns it, so a `SUFeedURL` written into the app's defaults by another process is ignored and cleared at launch. The same delegate allows no system-profile keys, so no parameters are appended whatever the defaults say, refuses every check that is not a press of the button, and tells Sparkle not to fetch a release-notes link a feed might name. The app deletes its own cookie file before the updater starts, so a cookie a server sets lives at most until the app quits and cannot follow you from one run to the next; refusing cookies outright would link CFNetwork into the app's binary, which §2.7 says it never does. `Accept-Language` is the constant `en`, and the user agent is the literal `"sitless"`, with no app version. Measured against a local feed with every one of those defaults planted: two presses sent two identical `GET`s with no query string, and a scheduled check was refused. `make verify` asserts `SUSendProfileInfo` is not set in the plist |
-| A second endpoint | One allowed URL is checkable; two is a policy | `make verify` extracts every URL string from the binary and fails on anything that is not an allowlisted `github.com/584144/sitless` browser link. The feed URL is not even in the binary — it is a plist key |
-| `NSWorkspace.open(URL)` | Opening `https://collector/?data=…` in the browser exfiltrates without a socket in this process | Every call site passes one of three things. The link rows in Settings pass a compile-time constant from the `Links` enum in `SettingsView.swift`. **Open releases in browser** passes `Links.releases`, or, when the appcast marks a release information-only, the link that release carries, and that link is opened only if it is `https` on `github.com` under `/584144/sitless/`; anything else opens `Links.releases`. `PermissionBroker.openAccessibilitySettings` passes a constant `x-apple.systempreferences:` URL for the Accessibility pane. The URL check above covers the constants. The appcast link arrives at runtime, so the scheme, host and path check is what bounds it |
+| The updater's own request | A `GET` can carry data in a query string, a header, a cookie, or a hostname | The feed URL comes from `Info.plist`, sealed by the code signature, and a delegate in `UpdateChecker.swift` returns it, so a `SUFeedURL` written into the app's defaults by another process is ignored and cleared at launch. The same delegate allows no system-profile keys, so no parameters are appended whatever the defaults say, refuses every check that is not a press of the button, and tells Sparkle not to fetch a release-notes link a feed might name. The app deletes its own cookie file before the updater starts, so a cookie a server sets lives at most until the app quits and cannot follow you from one run to the next; refusing cookies outright would link CFNetwork into the app's binary, which §2.7 says it never does. `Accept-Language` is the constant `en`, and the user agent is the literal `"standuppp"`, with no app version. Measured against a local feed with every one of those defaults planted: two presses sent two identical `GET`s with no query string, and a scheduled check was refused. `make verify` asserts `SUSendProfileInfo` is not set in the plist |
+| A second endpoint | One allowed URL is checkable; two is a policy | `make verify` extracts every URL string from the binary and fails on anything that is not an allowlisted `github.com/584144/standuppp` browser link. The feed URL is not even in the binary — it is a plist key |
+| `NSWorkspace.open(URL)` | Opening `https://collector/?data=…` in the browser exfiltrates without a socket in this process | Every call site passes one of three things. The link rows in Settings pass a compile-time constant from the `Links` enum in `SettingsView.swift`. **Open releases in browser** passes `Links.releases`, or, when the appcast marks a release information-only, the link that release carries, and that link is opened only if it is `https` on `github.com` under `/584144/standuppp/`; anything else opens `Links.releases`. `PermissionBroker.openAccessibilitySettings` passes a constant `x-apple.systempreferences:` URL for the Accessibility pane. The URL check above covers the constants. The appcast link arrives at runtime, so the scheme, host and path check is what bounds it |
 | `Process` / `NSTask` / `posix_spawn` | Shelling out to `curl` | Forbidden symbols; not referenced anywhere in app code |
 | `NSAppleScript` / `osascript` | Scripting another app into making the request | Forbidden symbols; no Automation usage string |
 | `NSXPCConnection` to a helper | A helper could hold the network code | The app ships no helper of its own. `Sparkle.framework` carries two XPC services, and only one is used. `Downloader.xpc` ships but is idle, because `SUEnableDownloaderService` is not set, so the download runs in this process (§2.7). `Installer.xpc` launches the installer, because `SUEnableInstallerLauncherService` is `true`, and the install itself runs in the separate `Autoupdate` executable. `ls <APP>/Contents/Frameworks` shows exactly one framework |
@@ -554,7 +554,7 @@ one line, and matches `ref: refs/heads/<name>`. Forty hex characters, or sixty-f
 reported as one rather than presented as a branch name. A repository that keeps its refs in
 reftable (`git init --ref-format=reftable`) has a `HEAD` that always reads `ref: refs/heads/.invalid`,
 a name git itself refuses, and reads the same on a branch and on a detached HEAD; the real one is in
-`.git/reftable`, which is never opened, so that line is reported as a HEAD kept in a format sitless
+`.git/reftable`, which is never opened, so that line is reported as a HEAD kept in a format standuppp
 does not read: never as a branch, least of all one called `.invalid`, and never as a detached HEAD.
 One indirection is followed and only one: in
 a git worktree or a submodule `.git` is a *file* holding a `gitdir:` line, so that file is read the
@@ -606,7 +606,7 @@ grep -rnE '(^|[^A-Za-z0-9_.])Process\(|NSTask|posix_spawn' app/Sources
 
 # every path fragment the git collector can build, in one grep. Ten lines: eight carry
 # the only names it ever appends, and two use a bare "/" as a separator
-grep -n '\"/' app/Sources/SitlessSensors/Collectors/GitCollector.swift
+grep -n '\"/' app/Sources/StandupppSensors/Collectors/GitCollector.swift
 #   230:            let inside = roots.filter { path == $0 || path.hasPrefix($0 + "/") }
 #   275:            switch readFirstLine(gitDirectory + "/HEAD") {
 #   293:        let dot = folder + "/.git"
@@ -622,7 +622,7 @@ grep -n '\"/' app/Sources/SitlessSensors/Collectors/GitCollector.swift
 
 # and the bound on how much of any of those files is read, which is 512 bytes, with a
 # .git file longer than that refused rather than read in part
-grep -n 'headReadLimit' app/Sources/SitlessSensors/Collectors/GitCollector.swift
+grep -n 'headReadLimit' app/Sources/StandupppSensors/Collectors/GitCollector.swift
 #   22:    private static let headReadLimit = 512
 #   393:        if wholeFile, info.st_size > headReadLimit { return .failure(.noRepository) }
 #   395:        var buffer = [UInt8](repeating: 0, count: headReadLimit)
@@ -630,10 +630,10 @@ grep -n 'headReadLimit' app/Sources/SitlessSensors/Collectors/GitCollector.swift
 ```
 
 If you would rather not take the source's word for it, the same two claims hold against the built
-binary, which is what `make verify` checks for the networking ones: `nm -u dist/sitless.app/Contents/MacOS/sitless`
+binary, which is what `make verify` checks for the networking ones: `nm -u dist/standuppp.app/Contents/MacOS/standuppp`
 lists no `_posix_spawn`, no `_proc_pidinfo` and no `_NSTask`.
 
-At runtime: `sudo fs_usage -w -f filesys $(pgrep -x sitless)` and watch that the only paths outside
+At runtime: `sudo fs_usage -w -f filesys $(pgrep -x standuppp)` and watch that the only paths outside
 the bundle and the storage directory are the git names above, under `.git` in folders you
 registered or in the git directory a `.git` file there names.
 
@@ -649,10 +649,10 @@ permission being present; every permission-gated signal enters through an option
 `nil` behavior.
 
 There is no single test named for it, and this paragraph used to cite one,
-`AppTests/ZeroPermissionModeTests.swift`, that does not exist. What does exist: `SitlessCore` cannot
-see a permission at all, so every engine test in `app/Tests/SitlessCoreTests`, driven by
+`AppTests/ZeroPermissionModeTests.swift`, that does not exist. What does exist: `StandupppCore` cannot
+see a permission at all, so every engine test in `app/Tests/StandupppCoreTests`, driven by
 `EngineHarness`, runs the break engine without one, because the engine takes none as input; and
-`PermissionStatusTests` in `app/Tests/SitlessSensorsTests` asserts that at zero permissions everything
+`PermissionStatusTests` in `app/Tests/StandupppSensorsTests` asserts that at zero permissions everything
 but the OS facts is off. No test stubs every provider to "denied" and runs a whole day end to end.
 
 ### 3.2 What is requested, and when
@@ -761,7 +761,7 @@ shell script that did not exist.
 Settings → Access says this in plain language, above the grant, before anyone presses anything:
 "macOS cannot limit this permission to window titles. Granting it means trusting this code, not
 the operating system." The same pane links to the one file that reads a window,
-`app/Sources/SitlessSensors/Collectors/AccessibilityCollector.swift`, under "check it".
+`app/Sources/StandupppSensors/Collectors/AccessibilityCollector.swift`, under "check it".
 
 **If you are not comfortable with that, leave it off.** The app is designed to be good without it.
 
@@ -826,8 +826,8 @@ guess. A few things live outside it, most of them left by the update check, in
 ├── badges.json                        (mode 0600)  which badges have unlocked, and when
 ├── counters.json                      (mode 0600)  today's budgets, overwritten in place
 ├── call-hold.json                     (mode 0600)  seconds the call hold has held today, overwritten in place
-├── status.txt                         (mode 0600)  one line for tmux or a prompt; only while that switch is on and sitless runs
-├── .lock                              (mode 0600)  empty; held while sitless runs, so a second copy leaves
+├── status.txt                         (mode 0600)  one line for tmux or a prompt; only while that switch is on and standuppp runs
+├── .lock                              (mode 0600)  empty; held while standuppp runs, so a second copy leaves
 ├── events/
 │   ├── 2026-09-18.jsonl               (mode 0600)  append-only, one JSON object per line
 │   ├── 2026-09-19.jsonl
@@ -844,7 +844,7 @@ the "notifications per day" setting was never a real constraint for anyone who r
 app. It is counts and one timestamp; it adds nothing to the inventory in §1.2 that the
 event log does not already hold, and nothing in it says what you were doing. When a launch
 cannot restore it (not there, will not open, will not decode), cycle numbers start again from 0,
-so the app first withdraws every sitless notification still showing, including any an earlier run
+so the app first withdraws every standuppp notification still showing, including any an earlier run
 left: a prompt answered from an old banner must not reach a new cycle with the same number.
 
 `summaries/YYYY-MM.json.unreadable` exists only if a month's file stopped decoding. The next
@@ -862,15 +862,15 @@ message stays until the next launch. Reading a month follows the same rule: a mo
 symbolic link, a pipe or anything else but a plain file is not read, through `SecureFile.read` like
 every other file here, so it adds no days to the uptime panel or the badges. It used to be read
 with `FileManager.contents(atPath:)`, which follows a link and waits on a pipe. A month written by
-a newer sitless, whose `v` is above this build's schema, is left as it is too: not read, and not
+a newer standuppp, whose `v` is above this build's schema, is left as it is too: not read, and not
 written, because rewriting it would drop every field this build does not know, and summaries are
 never pruned, so the loss would be for good. The menu bar says "Could not write the daily summary"
-and names it. It is read again by the sitless that wrote it.
+and names it. It is read again by the standuppp that wrote it.
 
 `status.txt` is inventory row 37: the menu bar's state word and its waiting-line sentence, written
 with `SecureFile.write` only when that line changes, so a `cat` from a tmux `status-right` or a
-prompt reads the same thing the menu shows without spawning anything of sitless's. It is removed
-when the switch is turned off, when sitless quits, at the next launch if a crash left it behind
+prompt reads the same thing the menu shows without spawning anything of standuppp's. It is removed
+when the switch is turned off, when standuppp quits, at the next launch if a crash left it behind
 with the switch off, and with everything else by *Delete my data…*. The switch, **Write a status
 line for tmux or your prompt**, is in Settings → Data and off by default.
 
@@ -878,14 +878,14 @@ line for tmux or your prompt**, is in Settings → Data and off by default.
 carries on from what it holds in memory, writes nothing over the file, posts no "unlocked" note
 while the ledger is out of reach, and says in the menu bar which file it left as it is. It reads
 the file again at the next launch. `badges.json` is treated the same way when it opens but will
-not decode, a ledger written by a newer sitless before a downgrade included, because it is the
+not decode, a ledger written by a newer standuppp before a downgrade included, because it is the
 only record of a badge whose evidence has been pruned. A `counters.json` that will not decode, or
 holds impossible numbers, is only the day's budgets, so the app starts them fresh and the next
 write replaces the file. A badge write that fails for any other reason says "Could not write the
 badges", is tried again with the next summary write, and the message goes once one succeeds.
 
 `settings.json` is the one file here a person is invited to edit, so it is the one most likely to
-hold a value this build does not know, a hand-typed `"Nuclear"` or a tone added by a newer sitless.
+hold a value this build does not know, a hand-typed `"Nuclear"` or a tone added by a newer standuppp.
 One unknown value fails the whole decode. The app then runs on the defaults, says in the menu bar
 that it left the file as it is, and keeps every change made in Settings in memory only, because
 saving would replace the project folders and opt-ins in that file with defaults nobody chose. It
@@ -893,7 +893,7 @@ reads the file again at the next launch, and *Delete my data…* removes it like
 
 | File | There, but will not open | Opens, but will not decode |
 |---|---|---|
-| `summaries/YYYY-MM.json` | left as it is, that month is not written or read | moved aside to `.unreadable`, the month starts again; written by a newer sitless, left as it is and not read |
+| `summaries/YYYY-MM.json` | left as it is, that month is not written or read | moved aside to `.unreadable`, the month starts again; written by a newer standuppp, left as it is and not read |
 | `badges.json` | left as it is, nothing written over it | left as it is, nothing written over it |
 | `counters.json` | left as it is, nothing written over it | started fresh, replaced at the next write |
 | `settings.json` | left as it is, nothing written over it | left as it is, nothing written over it |
@@ -997,7 +997,7 @@ in the sense that matters here: an app that cannot show its working cannot be au
   writing it never, which is what the app used to do, meant a fourteen minute hold
   computed the same answer 168 times and kept none of them. Expect roughly 20–60 lines a
   day. The value is the `GateReason` enum, a closed vocabulary of twenty-nine listed in
-  `app/Sources/SitlessCore/Decision/GateReason.swift`, every one of them a fact about the
+  `app/Sources/StandupppCore/Decision/GateReason.swift`, every one of them a fact about the
   machine or a name for a rate limit. **None of them is derived from a window title, a URL,
   a file path or anything you typed**, which is the guarantee "Never read content" asks for
   ([the rules a PR cannot break](../CONTRIBUTING.md#the-rules-a-pr-cannot-break)). Every
@@ -1098,7 +1098,7 @@ file look tidier, because either would mean buffering in front of a log you are 
 
 ### 4.4 The writer
 
-The writer is `FileEventStore` in `app/Sources/SitlessCore/Storage/FileStore.swift`, behind the
+The writer is `FileEventStore` in `app/Sources/StandupppCore/Storage/FileStore.swift`, behind the
 `EventStore` protocol in `Store.swift`. A line is a `LoggedEvent` from `EventLog.swift`, encoded by
 `EventLogCodec`. `append(contentsOf:)` groups events by their UTC day and hands each day's lines to
 `SecureFile.append` in `SecureFile.swift`:
@@ -1149,7 +1149,7 @@ stops it being written.
 
 Pruning runs at launch and then once an hour, measured on the continuous clock. The rule is
 one-sided: a day file is deleted only when its date is older than the window. This is the real
-code, `PruneMath` in `app/Sources/SitlessCore/Storage/Store.swift`:
+code, `PruneMath` in `app/Sources/StandupppCore/Storage/Store.swift`:
 
 ```swift
 public static func cutoffDay(retentionDays: Int, asOf now: Date) -> CalendarDay? {
@@ -1182,7 +1182,7 @@ everything" removes it with the rest, because delete means delete.
 **Export** (one button in Settings → Data, `NSSavePanel`, no permission needed): writes one text
 file. A commented header names the schema version, the source folder, the day range and every field
 the log can hold; under it, grouped by day, is every event that parses, one JSON object per line.
-It is the log as sitless reads it, not a byte copy, and the header says so: each line is written
+It is the log as standuppp reads it, not a byte copy, and the header says so: each line is written
 back out by this version, so a field it does not know is dropped; the lines are put in time order
 within their day, where the day file is in write order (§4.3); and a line that does not parse is
 left out: the header says how many and on which days, and the report in Settings says how many. A
@@ -1192,9 +1192,9 @@ day file that will not open is named at the end. For the bytes themselves, `cat`
 
 **Delete everything** (the **Delete my data…** button in Settings → Data, one confirmation):
 removes everything in the storage directory, the settings file with it, except its empty `.lock`:
-that stays held for the whole run, so a second copy started meanwhile still sees sitless running and
+that stays held for the whole run, so a second copy started meanwhile still sees standuppp running and
 leaves. A `.lock` that is not a plain file goes with the rest, and the app takes a new one at once.
-It withdraws every sitless notification still showing, an earlier run's too, unregisters the login
+It withdraws every standuppp notification still showing, an earlier run's too, unregisters the login
 item if it is registered, puts the default settings back everywhere they apply (the break policy, the sensors,
 the permission status), resets the call hold's daily total and the in-memory counters (a hold that is
 running keeps running, so a call you declared is still protected), and reports what it
@@ -1203,17 +1203,17 @@ you the two things the app cannot clean up itself, because no app can:
 
 ```
 Deleted: ~/Library/Application Support/<BUNDLE_ID>  (23 files, 412 KB)
-Kept: its .lock, which is empty and held while sitless runs, so a second copy leaves.
+Kept: its .lock, which is empty and held while standuppp runs, so a second copy leaves.
 Removed 555 events across 7 day(s).
-sitless is still running, so a new, empty log starts from now.
+standuppp is still running, so a new, empty log starts from now.
 
 Two things this app cannot remove for you:
   • The Accessibility permission you granted. Remove it in
     System Settings → Privacy & Security → Accessibility,
-    or run:  tccutil reset Accessibility io.github.584144.sitless
+    or run:  tccutil reset Accessibility io.github.584144.standuppp
   • What the system log holds about the app: what macOS logged, such as
     launches and permission checks, and what the updater logged. None of
-    it comes from sitless's own code, which writes nothing there.
+    it comes from standuppp's own code, which writes nothing there.
 
 There is no archive, no tombstone, no soft delete, and no copy kept anywhere.
 Removed: the login item.
@@ -1253,7 +1253,7 @@ The single exception is the update check, and it is worth stating precisely rath
 | How many endpoints | One. A static `appcast.xml`, the same bytes for everyone |
 | When | Only when you press **Check for updates**. There is no schedule and no launch check |
 | At launch | Never |
-| What is sent | A plain `GET`. No query string, no body, no cookie kept from an earlier run (the app deletes its cookie file at launch), no account, no install id, no machine id, no system profile, `Accept-Language: en` whatever your language is, and a user agent overridden to the constant `sitless`, not even the app version |
+| What is sent | A plain `GET`. No query string, no body, no cookie kept from an earlier run (the app deletes its cookie file at launch), no account, no install id, no machine id, no system profile, `Accept-Language: en` whatever your language is, and a user agent overridden to the constant `standuppp`, not even the app version |
 | What is stored about it | Nothing in the app's own files, and there is no server side to this codebase. On your Mac, Sparkle records the time of the last check in UserDefaults and Foundation caches the file under `~/Library/Caches` (inventory rows 33 to 36) |
 | What it necessarily reveals | Your IP address and the time of the request, to whoever serves the file. This cannot be avoided by any client |
 | What protects the download | EdDSA signature verification against a public key compiled into the app. See §2.8 |
@@ -1323,7 +1323,7 @@ concrete objection in the quoted text is either answered or admitted:
 
 | Old objection | Now |
 |---|---|
-| "reveals your app version" | Answered. The user agent is overridden to the constant `sitless`, and the updater's delegate allows no system-profile keys. The version comparison happens on your machine against a file that is the same for everyone |
+| "reveals your app version" | Answered. The user agent is overridden to the constant `standuppp`, and the updater's delegate allows no system-profile keys. The version comparison happens on your machine against a file that is the same for everyone |
 | "on a schedule that correlates with when your machine is awake" | Answered outright. There is no schedule. The app writes Sparkle's scheduling flag off on every launch, so there is no daily check, no launch check and no toggle that could turn one on |
 | "reveals your IP address and a timestamp" | **Admitted. Not fixable.** Any HTTPS request does this. If it matters to you, never press the button, and download releases yourself. Nothing else in the app will make the request for you |
 | "to a server that can log it" | Admitted, and defanged where it counts: the server cannot make you install anything, because of §2.8 |
@@ -1422,17 +1422,17 @@ strings -a "$BIN" | grep -E '^https?://' | sort -u
 ```
 
 All of the above should produce no output except the last, which should show only links into
-`github.com/584144/sitless`, the ones the app hands to your browser. On the current
+`github.com/584144/standuppp`, the ones the app hands to your browser. On the current
 build that is six: the repository, the Accessibility collector's source, this document, the
 new-issue page, the releases and the docs folder.
 
 ```
-https://github.com/584144/sitless
-https://github.com/584144/sitless/blob/main/app/Sources/SitlessSensors/Collectors/AccessibilityCollector.swift
-https://github.com/584144/sitless/blob/main/docs/PRIVACY.md
-https://github.com/584144/sitless/issues/new/choose
-https://github.com/584144/sitless/releases
-https://github.com/584144/sitless/tree/main/docs
+https://github.com/584144/standuppp
+https://github.com/584144/standuppp/blob/main/app/Sources/StandupppSensors/Collectors/AccessibilityCollector.swift
+https://github.com/584144/standuppp/blob/main/docs/PRIVACY.md
+https://github.com/584144/standuppp/issues/new/choose
+https://github.com/584144/standuppp/releases
+https://github.com/584144/standuppp/tree/main/docs
 ```
 
 Note what is *not* in that list: the update feed URL. It is not a string in the executable at all;
@@ -1453,7 +1453,7 @@ one, because you get to choose the moment and watch both halves of it.
 
 ```bash
 # 1. Sockets held by the process, sampled
-PID=$(pgrep -x sitless)
+PID=$(pgrep -x standuppp)
 sudo lsof -i -a -p "$PID"              # expect: nothing, until you press Check for updates
 
 # 2. Per-process network accounting, live
@@ -1492,7 +1492,7 @@ than the section was ever worth. What is below is the tree that is there.
 
 ```
 app/Sources/
-├── SitlessCore/                      pure domain. Imports no macOS UI framework at all
+├── StandupppCore/                      pure domain. Imports no macOS UI framework at all
 │   ├── Model/                        Activity, Confidence, Evidence, Settings
 │   ├── Session/                      the work clock, and the gap classifier
 │   ├── Decision/                     the engine: when a break is due and when it is not
@@ -1500,7 +1500,7 @@ app/Sources/
 │   ├── Badges/                       the ten, and the ledger
 │   ├── Storage/                      EventLog, the daily summaries, retention
 │   └── Summary/                      the rollup behind the uptime panel
-├── SitlessSensors/                   the ONLY layer that touches a macOS API
+├── StandupppSensors/                   the ONLY layer that touches a macOS API
 │   ├── Collectors/
 │   │   ├── AccessibilityCollector.swift   ← the only AX reading in the project
 │   │   ├── GitCollector.swift             ← one open+read of .git/HEAD, Tier 2
@@ -1508,7 +1508,7 @@ app/Sources/
 │   ├── PermissionBroker.swift        asks whether the grant exists. Asks, never reads
 │   ├── ContextEngine.swift           builds one sample and publishes it
 │   └── Providers/                    pure functions: a SignalContext in, a verdict out
-├── SitlessApp/                       menu bar, break overlay, settings, updates
+├── StandupppApp/                       menu bar, break overlay, settings, updates
 │   ├── UpdateChecker.swift           the one place Sparkle is spoken to
 │   ├── Doctor.swift                  what `--doctor` prints
 │   └── Views/                        SettingsView carries every URL the app can open
@@ -1577,7 +1577,7 @@ number, because they hold only commit subjects. See §8.7.
 ### 6.6 Check the app you installed
 
 Everything above assumes a clone and a build. Most people install the disk image, and the claims
-are about that bundle, so here is the same check against `/Applications/sitless.app`. `codesign`,
+are about that bundle, so here is the same check against `/Applications/standuppp.app`. `codesign`,
 `plutil`, `defaults` and `ls` ship with macOS. `otool`, `nm` and `strings` do not: `/usr/bin` holds
 a stub for each that runs the real tool from the Command Line Tools or Xcode and, on a Mac with
 neither, prompts to install the tools (`xcode-select --install`) instead of printing anything.
@@ -1589,10 +1589,10 @@ Sparkle, Apple's frameworks and the Swift runtime, and nothing else: no `CFNetwo
 `Network.framework`, no second `@rpath` framework.
 
 ```sh
-otool -L /Applications/sitless.app/Contents/MacOS/sitless
+otool -L /Applications/standuppp.app/Contents/MacOS/standuppp
 ```
 ```
-/Applications/sitless.app/Contents/MacOS/sitless (architecture x86_64):
+/Applications/standuppp.app/Contents/MacOS/standuppp (architecture x86_64):
 	@rpath/Sparkle.framework/Versions/B/Sparkle (compatibility version 1.6.0, current version 2.10.0)
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0)
 	/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (...)
@@ -1620,9 +1620,9 @@ below is what bites.
 **What it embeds, and which version.**
 
 ```sh
-ls /Applications/sitless.app/Contents/Frameworks
+ls /Applications/standuppp.app/Contents/Frameworks
 plutil -extract CFBundleShortVersionString raw \
-  /Applications/sitless.app/Contents/Frameworks/Sparkle.framework/Versions/B/Resources/Info.plist
+  /Applications/standuppp.app/Contents/Frameworks/Sparkle.framework/Versions/B/Resources/Info.plist
 ```
 ```
 Sparkle.framework
@@ -1633,7 +1633,7 @@ Sparkle.framework
 reaches out of a library. Networking would have to appear in it, and it does not:
 
 ```sh
-nm -u -arch all /Applications/sitless.app/Contents/MacOS/sitless \
+nm -u -arch all /Applications/standuppp.app/Contents/MacOS/standuppp \
   | grep -E 'NSURLSession|NSURLConnection|NWConnection|CFHost|^_(socket|connect|getaddrinfo)$'
 ```
 
@@ -1641,11 +1641,11 @@ Prints nothing. `-arch all` matters: on a universal binary `nm` reads only the s
 your Mac, so a symbol present in the other half would not show. Without the grep the table is
 about 1,460 lines per slice, headed `(for architecture x86_64):` and `(for architecture arm64):`.
 The URLs baked into the binary are the six links the app hands your browser, all under
-`github.com/584144/sitless`; the feed URL is not among them because it lives in
+`github.com/584144/standuppp`; the feed URL is not among them because it lives in
 `Info.plist`:
 
 ```sh
-strings -a /Applications/sitless.app/Contents/MacOS/sitless | grep -E '^https?://' | sort -u
+strings -a /Applications/standuppp.app/Contents/MacOS/standuppp | grep -E '^https?://' | sort -u
 ```
 
 **Its entitlements.** Two keys, and the ones that matter are the absent ones:
@@ -1656,10 +1656,10 @@ against (§2.9, §8.1d). The app is not sandboxed, so the absence of `network.cl
 and is not claimed (§8.1).
 
 ```sh
-codesign -d --entitlements - --xml /Applications/sitless.app | plutil -p -
+codesign -d --entitlements - --xml /Applications/standuppp.app | plutil -p -
 ```
 ```
-Executable=/Applications/sitless.app/Contents/MacOS/sitless
+Executable=/Applications/standuppp.app/Contents/MacOS/standuppp
 {
   "com.apple.security.automation.apple-events" => false
   "com.apple.security.cs.disable-library-validation" => true
@@ -1672,11 +1672,11 @@ EdDSA key below rather than on Apple's chain (§2.8). `flags=0x10002(adhoc,runti
 runtime is on, so dyld refuses `DYLD_*` injection.
 
 ```sh
-codesign -dvv /Applications/sitless.app
+codesign -dvv /Applications/standuppp.app
 ```
 ```
-Executable=/Applications/sitless.app/Contents/MacOS/sitless
-Identifier=io.github.584144.sitless
+Executable=/Applications/standuppp.app/Contents/MacOS/standuppp
+Identifier=io.github.584144.standuppp
 Format=app bundle with Mach-O universal (x86_64 arm64)
 CodeDirectory v=20500 size=14000 flags=0x10002(adhoc,runtime) hashes=427+7 location=embedded
 Signature=adhoc
@@ -1690,14 +1690,14 @@ Internal requirements count=0 size=12
 **What the updater is told, at build time.**
 
 ```sh
-plutil -p /Applications/sitless.app/Contents/Info.plist | grep '"SU'
+plutil -p /Applications/standuppp.app/Contents/Info.plist | grep '"SU'
 ```
 ```
   "SUAutomaticallyUpdate" => false
   "SUEnableAutomaticChecks" => false
   "SUEnableInstallerLauncherService" => true
   "SUEnableSystemProfiling" => false
-  "SUFeedURL" => "https://584144.github.io/sitless/appcast.xml"
+  "SUFeedURL" => "https://584144.github.io/standuppp/appcast.xml"
   "SUPublicEDKey" => "v0rY/NWn8izKVHcZl7vVyqRCsrV929pkGNyJpThhv6s="
   "SUVerifyUpdateBeforeExtraction" => true
 ```
@@ -1721,7 +1721,7 @@ them, so `UpdateChecker.swift` writes two of them off every time the app starts,
 is started:
 
 ```sh
-defaults read io.github.584144.sitless
+defaults read io.github.584144.standuppp
 ```
 
 | Key | Value | Means |
@@ -1736,16 +1736,16 @@ defaults read io.github.584144.sitless
 `defaults` prints booleans as `0` and `1`. Whatever else is there is AppKit's record of where the
 menu bar mark sits, in keys beginning `NSStatusItem`, or one of Sparkle's own bookkeeping keys,
 which `SUConstants.m` in the framework's source lists. On a Mac where the app has never run the
-command says `Error: Domain 'io.github.584144.sitless' not found.`, which is also the answer after the
+command says `Error: Domain 'io.github.584144.standuppp' not found.`, which is also the answer after the
 uninstall steps in the README. This block lists the keys rather than pasting a domain, because the
-only `io.github.584144.sitless` domain on the machine this was written on is the maintainer's; the names are
+only `io.github.584144.standuppp` domain on the machine this was written on is the maintainer's; the names are
 from `UpdateChecker.swift` and Sparkle's `SPUUpdaterSettings.m`.
 
 **Everything at once.** With a clone of this repository, the guard in §6.4 accepts the installed
 copy instead of a fresh build:
 
 ```sh
-BUNDLE=/Applications/sitless.app app/Scripts/verify.sh
+BUNDLE=/Applications/standuppp.app app/Scripts/verify.sh
 ```
 
 It runs every check in this section against that bundle, one line per assertion, and both slices
@@ -1770,12 +1770,12 @@ toolchain, and physical access to an unlocked machine.
 | # | Threat | Actor | Structural defense | Residual risk |
 |---|---|---|---|---|
 | 1 | A contributor adds an analytics or "crash reporting" call | Maintainer under commercial pressure, or a contributor | `make verify` fails on any networking symbol in the app's own binary, on any URL literal outside the allowlist, and on ~25 analytics and crash-reporting SDKs by name, checked against the built bundle | Someone with merge rights can also edit the check. There is no `CODEOWNERS` file, so nothing but review protects `app/Scripts/verify.sh`; it runs in CI on every push, so an edit to it is at least visible |
-| 2 | A dependency ships a malicious update | Upstream package | **Exactly one third-party runtime dependency: Sparkle, pinned with `exact:` rather than a range, so a new upstream tag cannot enter a build without a commit that says so.** It is attached to `SitlessApp` only; `SitlessCore` and `SitlessSensors` remain dependency-free, and `make verify` asserts Sparkle is the only embedded framework | A malicious Sparkle release that someone then deliberately bumps to. Mitigation is the pin plus review of the bump. The argument for admitting the dependency at all is §2.8, and the rule it had to clear is "One dependency" in [the rules a PR cannot break](../CONTRIBUTING.md#the-rules-a-pr-cannot-break) |
+| 2 | A dependency ships a malicious update | Upstream package | **Exactly one third-party runtime dependency: Sparkle, pinned with `exact:` rather than a range, so a new upstream tag cannot enter a build without a commit that says so.** It is attached to `StandupppApp` only; `StandupppCore` and `StandupppSensors` remain dependency-free, and `make verify` asserts Sparkle is the only embedded framework | A malicious Sparkle release that someone then deliberately bumps to. Mitigation is the pin plus review of the bump. The argument for admitting the dependency at all is §2.8, and the rule it had to clear is "One dependency" in [the rules a PR cannot break](../CONTRIBUTING.md#the-rules-a-pr-cannot-break) |
 | 3 | Code is loaded at runtime that was never reviewed | Another process running as you, or one that can write to the bundle | The Hardened Runtime is on, so `DYLD_INSERT_LIBRARIES` is refused, and `make verify` fails if the runtime flag goes or `allow-dyld-environment-variables`, `allow-unsigned-executable-memory` or `get-task-allow` appears. One `@rpath`, `Contents/Frameworks`. No `dlopen`, no plugin directory, no bundle loading, no JavaScriptCore | Library Validation is off in the ad-hoc build, because it cannot load the embedded framework without a Team ID (§2.9). A process that can rewrite the bundle in `/Applications` could replace a library inside it and keep the Accessibility grant, which replacing the executable would lose. A Developer ID would close this |
 | 3b | A malicious update is served to users | Attacker who compromises GitHub, the CDN, or the network path | **EdDSA signature verification (§2.8).** The private key is in the maintainer's login keychain only; the public key is compiled into the app; Sparkle refuses an archive whose signature does not verify | Theft of the private key. Rotation does not reach installs that already hold the old public key. upstream's `docs/RELEASING.md` §6 |
 | 4 | A malicious **message pack** exfiltrates or executes | A contributor. A user cannot install a third-party pack: there is no loader for one | Packs are data, not code, and there is one: `corpus.json`, inside the signed bundle. It is decoded by a plain `JSONDecoder` into `String` fields; there is no schema validation at load (`docs/MESSAGE-ENGINE.md` §4.4 says why). A slot is filled by literal replacement of its `{name}` token, never through a format string or a templating engine. The text reaches the screen as a `String` in SwiftUI `Text`, which draws it verbatim with no Markdown and no attributes, or as a plain-text notification body. `.github/scripts/check-corpus.py` lints it in CI, including the 240-character limit; nothing checks for URLs, and a URL in a line would be shown as text, never opened. A pack cannot cause a network call: the app's own binary has no networking code at all, and the only URL the bundle can fetch is the compile-time feed constant | A pack could still contain hostile or manipulative *text*. Defense is review: the pack ships only in-tree, every change to it requires a human review, and nothing loads a pack from disk |
 | 5 | The Accessibility grant is abused to read message/document contents | Malicious future version of the app | `.github/scripts/check-ax-isolation.py` in CI; the AX code is two files and one `private` reader that touches two attribute constants; the permission is off by default | **Real and unavoidable.** If you grant Accessibility, a future build could read anything. Defenses are social (review, reproducible hashes) not technical. Two of the mitigations this row used to claim — a shell script and a raw-title debug ring — did not exist. See §8.2 |
-| 6 | Exfiltration without a socket (open a URL, spawn `curl`, AppleScript another app) | Contributor | `.github/scripts/check-forbidden-apis.py` fails CI on `Process`, `NSTask`, `posix_spawn`, `NSAppleScript`, `NSPasteboard` and screen capture in the source, and `make verify` checks the binary for the same symbols; the URL-literal allowlist in `make verify` catches a smuggled collector endpoint. `NSWorkspace.open` is called with a `Links` constant, the Accessibility pane's constant URL, or an appcast link that must be `https` on `github.com` under `/584144/sitless/` (§2.9) | A URL assembled at runtime from string fragments could evade the literal check, and nothing but review stops a new `NSWorkspace.open` call site: no check counts them |
+| 6 | Exfiltration without a socket (open a URL, spawn `curl`, AppleScript another app) | Contributor | `.github/scripts/check-forbidden-apis.py` fails CI on `Process`, `NSTask`, `posix_spawn`, `NSAppleScript`, `NSPasteboard` and screen capture in the source, and `make verify` checks the binary for the same symbols; the URL-literal allowlist in `make verify` catches a smuggled collector endpoint. `NSWorkspace.open` is called with a `Links` constant, the Accessibility pane's constant URL, or an appcast link that must be `https` on `github.com` under `/584144/standuppp/` (§2.9) | A URL assembled at runtime from string fragments could evade the literal check, and nothing but review stops a new `NSWorkspace.open` call site: no check counts them |
 | 6b | Exfiltration *through* the update request | Contributor, or another process writing the app's defaults | The feed URL is a plist constant with no query string, pinned by a delegate so a defaults override is ignored; the delegate allows no system-profile keys and refuses release-notes fetches and background checks; the cookie file is deleted at launch; the user agent is overridden to a constant carrying no version; there is no second endpoint and the allowlist check fails if one appears | A contributor could add a delegate that appends feed parameters. That would be a visible code change to one file, and would have to survive review against this row |
 | 7 | Another local process reads the event log | Malware running as the user | Files are `0600` in a `0700` directory. Nothing else: the app is not sandboxed, so there is no container and no sandbox protection on it (§3.6) | Any process running as you can read your files. App-level encryption would not help, because the key would have to be available to the app as the same user. FileVault is the real defense. See §8.5 |
 | 8 | Supply-chain attack on the release artifact | Attacker with repo or CI access | **EdDSA signing, done on the maintainer's machine from a key that is never in the repository or in CI.** An attacker with full repository and CI access can therefore publish a release and still cannot produce an update an installed copy will accept. A first download is different: it is whatever the release page serves, so it rests on GitHub alone. The release notes carry no hashes (§6.5). | A compromised signing key defeats this. There is no Developer ID and no notarization to fall back on (§8.1), so the EdDSA key is the single point of failure and is treated as one in upstream's `docs/RELEASING.md` |

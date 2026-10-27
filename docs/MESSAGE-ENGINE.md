@@ -80,7 +80,7 @@ public enum TimeBand: String, Codable, Sendable, CaseIterable, Hashable {
 }
 ```
 
-`WorkBand` and `TimeBand`, from `app/Sources/SitlessCore/Message/MessageContext.swift`. Beside them
+`WorkBand` and `TimeBand`, from `app/Sources/StandupppCore/Message/MessageContext.swift`. Beside them
 are `AppKey` (`cursor`, `vscode`, `zed`, `xcode`, `jetbrains`, `terminal`, `browser`, `figma`,
 `docker`, `slack`, `discord`, `unknown`), `AppFamily`, `Weekday`, `StreakKey`, `FactKey`,
 `FactValue` and `FactMatch`. There is no `ActivityKind`: predicates and slots use `Activity`, the
@@ -179,7 +179,7 @@ public enum Predicate: Sendable, Hashable, Codable {
     }
 ```
 
-`Predicate`, in `app/Sources/SitlessCore/Message/MessageTemplate.swift`. An `activity` predicate also
+`Predicate`, in `app/Sources/StandupppCore/Message/MessageTemplate.swift`. An `activity` predicate also
 holds for a parent: a template for `coding` matches while you are debugging.
 
 **A missing fact fails the predicate.** Absence is never treated as truth. This is the rule
@@ -281,7 +281,7 @@ public final class MessageEngine: @unchecked Sendable {
     }
 ```
 
-From `app/Sources/SitlessCore/Message/MessageEngine.swift`. Selection is `select(for:)`, which
+From `app/Sources/StandupppCore/Message/MessageEngine.swift`. Selection is `select(for:)`, which
 takes a `MessageContext` and returns a `SelectionResult`.
 
 Pipeline, in order:
@@ -319,7 +319,7 @@ public func freshness(_ t: MessageTemplate, now: Date) -> Double {
 }
 ```
 
-`RecencyLedger.freshness(_:now:)`, in `app/Sources/SitlessCore/Message/RecencyLedger.swift`, and the
+`RecencyLedger.freshness(_:now:)`, in `app/Sources/StandupppCore/Message/RecencyLedger.swift`, and the
 sampling that uses it, `MessageEngine.weightedPick` in `MessageEngine.swift`:
 
 ```swift
@@ -423,7 +423,7 @@ public struct SlotValue: Sendable, Hashable, Codable {
 }
 ```
 
-From `app/Sources/SitlessCore/Message/SlotFiller.swift`. `canDegrade` is false for `branch`,
+From `app/Sources/StandupppCore/Message/SlotFiller.swift`. `canDegrade` is false for `branch`,
 `streak`, `minutes`, `count`, `hour`, `breakLength` and `breakSeconds`.
 
 ### 2.2 Declaration is mandatory
@@ -552,7 +552,7 @@ Repetition is the failure mode that gets the app uninstalled. The ledger is ther
 a hard gate. It is not persistent: `AppModel` holds one `MessageEngine` with a fresh
 `RecencyLedger`, nothing writes it to disk, and a relaunch starts it empty.
 
-`RecencyLedger`, in `app/Sources/SitlessCore/Message/RecencyLedger.swift`, is a class, not a
+`RecencyLedger`, in `app/Sources/StandupppCore/Message/RecencyLedger.swift`, is a class, not a
 protocol. It holds `LedgerEntry` values (template id, category, tone, time shown) in memory, answers
 the lookups this section needs, and decides eligibility in `allows(_:at:now:calendar:)`.
 `purge(before:)` exists and nothing calls it.
@@ -653,7 +653,7 @@ public enum Tone: String, Sendable, Codable, CaseIterable, Hashable, Comparable 
     public static func < (a: Self, b: Self) -> Bool { a.rank < b.rank }
 ```
 
-The first lines of `Tone`, in `app/Sources/SitlessCore/Model/Settings.swift`. It also carries a
+The first lines of `Tone`, in `app/Sources/StandupppCore/Model/Settings.swift`. It also carries a
 `displayName` and a one-line `blurb`.
 
 ### 4.1 What separates the tiers
@@ -719,7 +719,7 @@ Apply all seven to every submitted line. Any single failure is a rejection.
 ### 4.4 Lint / CI enforcement
 
 `.github/scripts/check-corpus.py` runs on every push and pull request, as a step in
-`.github/workflows/ci.yml`. It reads `app/Sources/SitlessCore/Message/corpus.json` and
+`.github/workflows/ci.yml`. It reads `app/Sources/StandupppCore/Message/corpus.json` and
 `.github/lint/banned-lexicon.json`. Hard failures exit non-zero and fail the build;
 warnings print and do not, because each has a false-positive mode a person has to judge.
 
@@ -778,7 +778,7 @@ and not appearance. The script takes a path argument for exactly this reason.
 The rubric items a machine cannot decide, §4.3's target, standup, bad-day and specificity
 tests, stay human. `.github/PULL_REQUEST_TEMPLATE.md` asks for them.
 
-**Golden tests** live in `app/Tests/SitlessCoreTests/MessageEngineTests.swift` and run under
+**Golden tests** live in `app/Tests/StandupppCoreTests/MessageEngineTests.swift` and run under
 `make test`, a separate CI step from the lint. The ones that guard selection:
 
 - *Selection is total* (suite `MessageEngine selection`) enumerates every `AppKey` ×
@@ -821,7 +821,7 @@ public enum EscalationLevel: Int, Sendable, Codable, CaseIterable, Hashable, Com
 }
 ```
 
-`EscalationLevel`, in `app/Sources/SitlessCore/Model/Settings.swift`. There is no
+`EscalationLevel`, in `app/Sources/StandupppCore/Model/Settings.swift`. There is no
 `EscalationPolicy` and no `ReminderOutcome`: the level a line is chosen for comes from the
 `PromptRequest` being delivered (`docs/BREAK-DECISION.md` §11).
 
@@ -884,7 +884,7 @@ public static func confidenceGate(_ t: MessageTemplate, _ ctx: MessageContext) -
 }
 ```
 
-`MessageEngine.confidenceGate`, in `app/Sources/SitlessCore/Message/MessageEngine.swift`.
+`MessageEngine.confidenceGate`, in `app/Sources/StandupppCore/Message/MessageEngine.swift`.
 `usesActivityClaim` and `usesAppPredicate` are properties of `MessageTemplate`.
 
 Recommended `minConfidence` by how specific the claim is:
@@ -1048,7 +1048,7 @@ be a consolation prize; it carries ~10% of the corpus and gets the same rubric.
 
 ### 7.3 Swift decoding
 
-From `app/Sources/SitlessCore/Message/MessageTemplate.swift`, the stored fields of
+From `app/Sources/StandupppCore/Message/MessageTemplate.swift`, the stored fields of
 `MessageTemplate`. `escalation` is decoded from `{min, max}`, and `minConfidence`, `weight` and
 `authorPriority` are clamped when a template is built:
 
@@ -1096,7 +1096,7 @@ rather than a gap.**
 An earlier draft of this document described loading packs from
 `~/Library/Application Support/<app>/packs/*.json`. That was never built, and the document
 was wrong to describe it as though it were. The contribution path is a pull request against
-`app/Sources/SitlessCore/Message/corpus.json`: every line that ships has been read by a
+`app/Sources/StandupppCore/Message/corpus.json`: every line that ships has been read by a
 human, which is the only defence that actually works against the real risk here. A pack is
 data, not code, so it cannot execute anything or reach the network. What it *can* contain is
 hostile or manipulative text, and no schema catches that. Review does.

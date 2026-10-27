@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         **Run `--doctor` first and paste the output below.** From a downloaded build that is
-        `/Applications/sitless.app/Contents/MacOS/sitless --doctor`, and from a checkout it is
+        `/Applications/standuppp.app/Contents/MacOS/standuppp --doctor`, and from a checkout it is
         `make doctor`. It exists for exactly this.
         It prints every signal the app can currently see, which tier it came from, the inferred
         activity, the confidence, and the evidence behind it, and it is honest about what is
@@ -16,7 +16,7 @@ body:
         **If the Accessibility permission "keeps turning itself off", that is almost certainly
         not a bug.** macOS ties the grant to the binary's cdhash, and `swift build` ad-hoc signs,
         so the cdhash changes on every compile. Read the first section of
-        [CONTRIBUTING.md](https://github.com/584144/sitless/blob/main/CONTRIBUTING.md) and sign with a stable identity before
+        [CONTRIBUTING.md](https://github.com/584144/standuppp/blob/main/CONTRIBUTING.md) and sign with a stable identity before
         filing.
 
   - type: textarea
@@ -71,7 +71,7 @@ body:
   - type: textarea
     id: doctor
     attributes:
-      label: sitless --doctor
+      label: standuppp --doctor
       description: >-
         Paste the whole thing, and read it first. It contains no window title and no branch
         name: a title is parsed and dropped, and Tier 2 prints how many characters long your
@@ -118,7 +118,7 @@ body:
       label: Event log lines, if they are relevant
       description: >-
         For anything about timing, breaks, or the session tracker, the log is usually decisive.
-        It lives at `~/Library/Application Support/io.github.584144.sitless/events/YYYY-MM-DD.jsonl`, one
+        It lives at `~/Library/Application Support/io.github.584144.standuppp/events/YYYY-MM-DD.jsonl`, one
         JSON object per line, and it never contains content. Paste the minute or two around the
         problem, not the whole day.
       render: json

@@ -1,5 +1,5 @@
 import Foundation
-import SitlessCore
+import StandupppCore
 
 struct Conditions {
     var working = true
@@ -34,7 +34,7 @@ struct World {
     static let tick: TimeInterval = 5
 
     let engine: BreakDecisionEngine
-    var settings: SitlessSettings
+    var settings: StandupppSettings
     var state: EngineState
     var day = DailyCounters()
     var now: Date
@@ -50,7 +50,7 @@ struct World {
     private var lastVerdictName = ""
     private var lastSaid = ""
 
-    init(settings: SitlessSettings, start: Date) {
+    init(settings: StandupppSettings, start: Date) {
         self.settings = settings
         self.engine = BreakDecisionEngine(settings: settings)
         self.now = start
@@ -216,13 +216,13 @@ struct World {
 struct Scenario {
     let name: String
     let question: String
-    let settings: SitlessSettings
+    let settings: StandupppSettings
     let beats: [Beat]
     let check: (World) -> String?
 }
 
-func settings(workMinutes: Int = 5, breakMinutes: Int = 5) -> SitlessSettings {
-    var s = SitlessSettings.default
+func settings(workMinutes: Int = 5, breakMinutes: Int = 5) -> StandupppSettings {
+    var s = StandupppSettings.default
     s.workIntervalMinutes = workMinutes
     s.breakDurationMinutes = breakMinutes
     s.useSystemNotifications = false

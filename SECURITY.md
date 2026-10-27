@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Use GitHub's
-[Report a vulnerability](https://github.com/584144/sitless/security/advisories/new)
+[Report a vulnerability](https://github.com/584144/standuppp/security/advisories/new)
 form. It is private until we publish it together. Do not open a normal issue for anything
 with a security consequence, because the tracker is public and so is the exploit.
 
@@ -27,7 +27,7 @@ Accessibility it can read window titles. The things that would matter most:
 - A way to make the updater install something the maintainer did not sign. Updates are
   gated on an EdDSA signature checked against a key compiled into the app, and that check
   is the thing standing between a compromised CDN and arbitrary code on your machine.
-- Anything that writes outside `~/Library/Application Support/io.github.584144.sitless`, or that
+- Anything that writes outside `~/Library/Application Support/io.github.584144.standuppp`, or that
   leaves a file in it readable by another user on the same Mac.
 
 ## What is already known and is not a vulnerability

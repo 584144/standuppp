@@ -45,7 +45,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-APP_NAME="sitless"
+APP_NAME="standuppp"
 BUNDLE="${BUNDLE:-dist/${APP_NAME}.app}"
 BIN="${BUNDLE}/Contents/MacOS/${APP_NAME}"
 PLIST="${BUNDLE}/Contents/Info.plist"
@@ -316,7 +316,7 @@ esac
 # Every other URL compiled into the app is a link handed to the user's browser,
 # which docs/PRIVACY.md §2.9 allowlists by call site. If a URL shows up here that
 # is not on this list, someone added an endpoint.
-ALLOWED='^https://github\.com/584144/sitless'
+ALLOWED='^https://github\.com/584144/standuppp'
 UNEXPECTED=$(all_slices strings -a \
   | grep -oE 'https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+' \
   | sort -u \
@@ -399,7 +399,7 @@ fi
 if [ -d "${BUILD_DIR}" ]; then mv "${BUILD_DIR}" "${BUILD_HIDDEN}"; HIDDEN=1; fi
 
 CFFIXED_USER_HOME="${PROBE_HOME}" HOME="${PROBE_HOME}" \
-  "${BUNDLE}/Contents/MacOS/sitless" --doctor >"${PROBE_LOG}" 2>&1
+  "${BUNDLE}/Contents/MacOS/standuppp" --doctor >"${PROBE_LOG}" 2>&1
 PROBE_STATUS=$?
 
 if [ "${HIDDEN}" -eq 1 ]; then mv "${BUILD_HIDDEN}" "${BUILD_DIR}"; HIDDEN=0; fi

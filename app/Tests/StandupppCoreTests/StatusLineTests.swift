@@ -1,0 +1,127 @@
+import Foundation
+import Testing
+
+@testable import StandupppCore
+
+@Suite("one line for a status bar, and only when it changes")
+struct StatusLineTests {
+
+    private let noon = Date(timeIntervalSince1970: 1_700_000_000)
+    private let cycle = CycleID.initial
+
+    private var due: BreakDue { BreakDue(cycle: cycle, dueSince: noon, lastStepMono: 0) }
+
+    @Test("every engine state has the word the menu bar header shows")
+    func wordsMatchTheHeader() {
+        let working = EngineState.working(WorkingState(armThreshold: 2700))
+        #expect(StatusWord.read(state: working, indicator: .working) == "running")
+        #expect(StatusWord.read(state: .breakDue(due), indicator: .breakDue) == "break due")
+        #expect(StatusWord.read(state: .breakDue(due), indicator: .held) == "break due")
+
+        let escalation = Escalation(
+            cycle: cycle, dueSince: noon,
+            notificationsThisCycle: 1, totalElapsed: 600, lastStepMono: 0
+        )
+        #expect(StatusWord.read(state: .ignored(escalation), indicator: .escalating) == "escalating")
+
+        let snoozed = SnoozedState(cycle: cycle, until: noon, untilMono: 300, due: due)
+        #expect(StatusWord.read(state: .snoozed(snoozed), indicator: .working) == "snoozed")
+
+        let onBreak = BreakActive(
+            cycle: cycle, plannedEnd: noon.addingTimeInterval(300),
+            startedMono: 0, plannedDuration: 300, origin: .accepted
+        )
+        #expect(StatusWord.read(state: .breakActive(onBreak), indicator: .onBreak) == "stopped")
+
+        let idle = IdleState()
+        #expect(StatusWord.read(state: .idle(idle), indicator: .idle) == "idle")
+    }
+
+    @Test("a quiet state is named by its cause, and a pause is a pause whatever the indicator says")
+    func quietStatesAreNamedByCause() {
+        for cause in QuietCause.allCases {
+            let quiet = EngineState.quiet(QuietState(until: noon, cause: cause))
+            let expected = cause == .userPaused ? "paused" : cause.title
+            #expect(StatusWord.read(state: quiet, indicator: .quiet) == expected)
+        }
+        let paused = EngineState.quiet(QuietState(until: nil, cause: .userPaused))
+        #expect(StatusWord.read(state: paused, indicator: .backedOff) == "paused")
+    }
+
+    @Test("stood down is the indicator's word, not the engine's")
+    func stoodDown() {
+        let working = EngineState.working(WorkingState(armThreshold: 2700, standDown: .backedOff))
+        #expect(StatusWord.read(state: working, indicator: .backedOff) == "stood down")
+        #expect(StatusWord.read(state: .breakDue(due), indicator: .backedOff) == "stood down")
+    }
+
+    @Test("the line is the word, the waiting sentence, and one newline")
+    func renderedLine() {
+        let line = StatusLine.render(
+            word: "running",
+            waiting: WaitingLine(.notAskingYet, "next break in 12m of work")
+        )
+        #expect(line == "running \u{00B7} next break in 12m of work.\n")
+        #expect(line.filter { $0 == "\n" }.count == 1)
+        #expect(!line.contains("\u{2014}"))
+        #expect(StatusLine.fileName == "status.txt")
+    }
+
+    @Test("the ledger writes on a change, never on a repeat, and removes once when switched off")
+    func ledgerWritesOnlyOnChange() {
+        var ledger = StatusLineLedger()
+        let first = "running \u{00B7} next break in 12m of work.\n"
+        let second = "running \u{00B7} next break in 11m of work.\n"
+
+        #expect(ledger.update(enabled: false, line: first, now: 0) == nil)
+        #expect(ledger.update(enabled: true, line: first, now: 5) == .write(first))
+        #expect(ledger.update(enabled: true, line: first, now: 10) == nil)
+        #expect(ledger.update(enabled: true, line: first, now: 15) == nil)
+        #expect(ledger.update(enabled: true, line: second, now: 20) == .write(second))
+        #expect(ledger.update(enabled: false, line: second, now: 25) == .remove)
+        #expect(ledger.update(enabled: false, line: second, now: 30) == nil)
+        #expect(ledger.update(enabled: true, line: second, now: 35) == .write(second))
+    }
+
+    @Test("a failed write is tried again when the line changes or after a minute, never per tick")
+    func failedWriteIsRetriedOnChangeOrAfterAMinute() {
+        var ledger = StatusLineLedger()
+        let line = "idle \u{00B7} the work clock is stopped while you are away.\n"
+        let other = "running \u{00B7} next break in 12m of work.\n"
+        #expect(ledger.update(enabled: true, line: line, now: 0) == .write(line))
+        ledger.noteWriteFailed(at: 0)
+        #expect(ledger.update(enabled: true, line: line, now: 5) == nil)
+        #expect(ledger.update(enabled: true, line: line, now: 59) == nil)
+        #expect(ledger.update(enabled: true, line: line, now: 60) == .write(line))
+        ledger.noteWriteFailed(at: 60)
+        #expect(ledger.update(enabled: true, line: line, now: 65) == nil)
+        #expect(ledger.update(enabled: true, line: other, now: 70) == .write(other))
+        #expect(StatusLineLedger.retryInterval == 60)
+    }
+
+    @Test("switching off after a failed write still removes the file the last good write left")
+    func switchOffAfterAFailedWriteStillRemoves() {
+        var ledger = StatusLineLedger()
+        let line = "idle \u{00B7} the work clock is stopped while you are away.\n"
+        #expect(ledger.update(enabled: true, line: line, now: 0) == .write(line))
+        ledger.noteWriteFailed(at: 0)
+        #expect(ledger.update(enabled: false, line: line, now: 5) == .remove)
+        #expect(ledger.update(enabled: false, line: line, now: 10) == nil)
+
+        var neverWritten = StatusLineLedger()
+        #expect(neverWritten.update(enabled: true, line: line, now: 0) == .write(line))
+        neverWritten.noteWriteFailed(at: 0)
+        #expect(neverWritten.update(enabled: false, line: line, now: 5) == .remove)
+    }
+
+    @Test("the switch is off by default and survives a settings file that does not know it")
+    func settingIsOffByDefault() throws {
+        #expect(StandupppSettings.default.statusLineEnabled == false)
+        let decoded = try JSONDecoder().decode(StandupppSettings.self, from: Data("{}".utf8))
+        #expect(decoded.statusLineEnabled == false)
+        let on = try JSONDecoder().decode(
+            StandupppSettings.self, from: Data(#"{"statusLineEnabled":true}"#.utf8)
+        )
+        #expect(on.statusLineEnabled == true)
+    }
+}

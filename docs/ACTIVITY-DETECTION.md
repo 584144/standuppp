@@ -77,12 +77,12 @@ Mitigation, required in the dev workflow:
 
 ```sh
 cd app
-make dev-cert                          # once: prints the Keychain Access steps for sitless-dev
-SIGN_IDENTITY=sitless-dev make run     # every build after that keeps the grant
+make dev-cert                          # once: prints the Keychain Access steps for standuppp-dev
+SIGN_IDENTITY=standuppp-dev make run     # every build after that keeps the grant
 ```
 
 `make dev-cert` does not create the identity: it needs the Keychain Access UI, so the target prints
-the one-time steps to create a self-signed code-signing certificate named `sitless-dev`, and says
+the one-time steps to create a self-signed code-signing certificate named `standuppp-dev`, and says
 so if one already exists. `Scripts/bundle.sh` signs with `SIGN_IDENTITY`, which defaults to ad-hoc
 (`-`).
 
@@ -133,7 +133,7 @@ public func openAccessibilitySettings(_ gesture: UserGesture) {
 ```
 
 That is `PermissionBroker.openAccessibilitySettings(_:)`, in
-`app/Sources/SitlessSensors/PermissionBroker.swift`, and it is the only way the app asks for
+`app/Sources/StandupppSensors/PermissionBroker.swift`, and it is the only way the app asks for
 Accessibility: it opens System Settings at the Accessibility pane. The app never calls
 `AXIsProcessTrustedWithOptions` with the prompt option, so macOS never raises its own dialog on
 the app's behalf. A `UserGesture` can only be made by `clickedButton`, which is how the signature
@@ -181,7 +181,7 @@ static func deviceIsRunningSomewhere(_ device: AudioObjectID) -> Bool? {
 ```
 
 `AudioDeviceCollector.deviceIsRunningSomewhere(_:)`, in
-`app/Sources/SitlessSensors/Collectors/AudioDeviceCollector.swift`. A read that fails is `nil`, never
+`app/Sources/StandupppSensors/Collectors/AudioDeviceCollector.swift`. A read that fails is `nil`, never
 `false`.
 
 We enumerate `kAudioHardwarePropertyDevices`, keep those with a non-empty input
@@ -332,7 +332,7 @@ refuse it, and nothing in the activity model is worth it.
   }
   ```
 
-  That is `IdleCollector.read()` in `app/Sources/SitlessSensors/Collectors/IdleCollector.swift`.
+  That is `IdleCollector.read()` in `app/Sources/StandupppSensors/Collectors/IdleCollector.swift`.
 
 - **`.hidSystemState` vs `.combinedSessionState`** — `.combinedSessionState` also counts *synthetic*
   events posted by other processes, so mouse jigglers, automation tools, and some conferencing apps
@@ -362,7 +362,7 @@ refuse it, and nothing in the activity model is worth it.
 
 ## 3. Core model
 
-The model, from `app/Sources/SitlessCore/Model/Activity.swift`. The activity taxonomy and its
+The model, from `app/Sources/StandupppCore/Model/Activity.swift`. The activity taxonomy and its
 parents:
 
 ```swift
@@ -494,7 +494,7 @@ it was wrong in a useful way. It said Chrome-family browsers expose "a web area 
 Probed on Chrome, macOS 27.0, 2026-09-21: the focused window answers `AXURL` with nil, no
 `AXWebArea` appears within 400 nodes and six levels of the focused window's subtree, and the
 window's attribute list contains exactly one URL-shaped entry — `AXDocument`, the attribute the
-file reader was already fetching. It returns `https://github.com/584144/sitless`.
+file reader was already fetching. It returns `https://github.com/584144/standuppp`.
 
 So Tier 1b costs no new read and no tree traversal. `AccessibilityCollector.host(from:)` parses
 that string, returns the host and drops everything else inside the function; `ContextEngine`
@@ -634,7 +634,7 @@ runs is knowing something about them. The rules are absolute:
 ### 4.4 Tier availability is a runtime value
 
 There is no `SignalAvailability` actor. The tier set is computed by `PermissionBroker`, a class in
-`app/Sources/SitlessSensors/PermissionBroker.swift`: `currentTiers()` returns the last set published,
+`app/Sources/StandupppSensors/PermissionBroker.swift`: `currentTiers()` returns the last set published,
 `stream` delivers changes, and `refresh()` re-checks the grant:
 
 ```swift
@@ -664,7 +664,7 @@ continuing to emit stale high-confidence observations.
 
 ### 5.1 The protocol
 
-The protocol, in `app/Sources/SitlessSensors/Providers/ActivityProvider.swift`. An extension gives
+The protocol, in `app/Sources/StandupppSensors/Providers/ActivityProvider.swift`. An extension gives
 `priority` a default of 0:
 
 ```swift
@@ -721,11 +721,11 @@ public struct AppClaim: Sendable, Hashable {
 `ProviderVerdict`, in the same file, carries `activity`, `evidence`, `context` and
 `degradedFromAmbiguity`, plus `concurrentHints`, `labelOverride` and `maximumConfidence`. A provider
 cannot set the final confidence, only lower its cap through `maximumConfidence`; `ConfidenceEngine`
-computes it (§6). `ProviderID` is in `app/Sources/SitlessCore/Model/Identity.swift`.
+computes it (§6). `ProviderID` is in `app/Sources/StandupppCore/Model/Identity.swift`.
 
 ### 5.2 What providers receive
 
-The stored properties of `SignalContext`, in `app/Sources/SitlessSensors/SignalContext.swift`:
+The stored properties of `SignalContext`, in `app/Sources/StandupppSensors/SignalContext.swift`:
 
 ```swift
 public struct SignalContext: Sendable {
@@ -771,7 +771,7 @@ holds `matchedTools`, `childrenOfFrontmost`, `tracedUnderFrontmost`, `tracedElse
 ### 5.3 Resolution and ranking
 
 `ProviderRegistry` is a struct, not an actor, in
-`app/Sources/SitlessSensors/Providers/ActivityProvider.swift`. It has `resolve(for:)` and
+`app/Sources/StandupppSensors/Providers/ActivityProvider.swift`. It has `resolve(for:)` and
 `classify(_:)`, and no `loadManifests`:
 
 ```swift
@@ -891,7 +891,7 @@ state machines), a third party depends on the `ActivityCore` module, conforms to
 and exposes a `ProviderBundle`:
 
 There is no `ProviderBundle` protocol and no `ActivityCore` module: providers live in
-`SitlessSensors`, and the ones the app runs are listed in `BuiltinProviders.all`.
+`StandupppSensors`, and the ones the app runs are listed in `BuiltinProviders.all`.
 
 The host app links the package and builds its registry as
 `ProviderRegistry(providers: BuiltinProviders.all + theirs)`. This requires a
@@ -986,9 +986,9 @@ and two of the verified rows contradicted expectation, the design called for bun
 a data file loaded at launch and overridable by the user's own manifests, so that a wrong ID would
 be a one-line data fix rather than a release. There is no such file. The IDs are **Swift
 literals**: the `BundleIDs` enum and `GenericProvider.categories` in
-`app/Sources/SitlessSensors/Providers/BuiltinProviders.swift`, and a second, lowercased set in
+`app/Sources/StandupppSensors/Providers/BuiltinProviders.swift`, and a second, lowercased set in
 `AppKey` (`terminalIDs`, `browserIDs` and inline prefixes) in
-`app/Sources/SitlessCore/Message/MessageContext.swift`, which keys the message corpus and an app
+`app/Sources/StandupppCore/Message/MessageContext.swift`, which keys the message corpus and an app
 category rather than the activity. A wrong ID is a code change and a release. What does hold is
 the fallback: every unrecognised app falls through to `GenericProvider` rather than being
 misclassified.
@@ -1049,7 +1049,7 @@ public enum ConfidenceEngine {
 ```
 
 The constants and the arithmetic of `ConfidenceEngine`, in
-`app/Sources/SitlessSensors/Providers/ActivityProvider.swift`. Besides the tier ceilings it caps
+`app/Sources/StandupppSensors/Providers/ActivityProvider.swift`. Besides the tier ceilings it caps
 `debugging` and `meeting` at 0.90, and with no evidence it returns 0.20.
 
 ### 6.2 Invariants (enforced by tests, not by convention)
@@ -1417,9 +1417,9 @@ public static func secondsUntilNextThreshold(
 ```
 
 That is `IdleCollector.secondsUntilNextThreshold`, in
-`app/Sources/SitlessSensors/Collectors/IdleCollector.swift`, and `IdleCollector.thresholds` is 90,
+`app/Sources/StandupppSensors/Collectors/IdleCollector.swift`, and `IdleCollector.thresholds` is 90,
 120 and 300 seconds. `ContextEngine.scheduleNextWake()`, in
-`app/Sources/SitlessSensors/ContextEngine.swift`, reads idle once and arms one timer for that delay,
+`app/Sources/StandupppSensors/ContextEngine.swift`, reads idle once and arms one timer for that delay,
 capped at 60 s while Tier 1 is on so that a missed `AXObserver` notification is reconciled, with a
 quarter of the delay as leeway:
 
@@ -1520,7 +1520,7 @@ were not built. Their jobs are done by `AccessibilityCollector`, a class that
 reads on its own serial queue and runs its `AXObserver`s on a thread with its own `CFRunLoop`;
 `FrontmostAppCollector`, a `@MainActor` class whose `events` stream carries `WorkspaceEvent`s; and
 `ContextEngine`, a `@MainActor` class that applies the dwell gate and decay, resolves a provider and
-publishes a `ContextSample`. All three are in `app/Sources/SitlessSensors/`.
+publishes a `ContextSample`. All three are in `app/Sources/StandupppSensors/`.
 
 Notes that matter under strict concurrency:
 

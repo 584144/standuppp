@@ -9,7 +9,7 @@ never having made it.
 
 The claim itself turned out to be nearly true, so it is enforced here rather than deleted.
 Measured: every AX symbol in the repository that is not inside a comment lives in
-SitlessSensors, in exactly two files. AccessibilityCollector.swift does the reading;
+StandupppSensors, in exactly two files. AccessibilityCollector.swift does the reading;
 PermissionBroker.swift asks whether the grant exists and nothing else.
 
 That the reading is isolated is what lets PRIVACY.md say the window title is classified and
@@ -26,8 +26,8 @@ SOURCES = ROOT / "app/Sources"
 AX = re.compile(r"\bAX[A-Za-z]\w*")
 
 # The reader, and the file that only ever asks whether the grant exists.
-READER = "SitlessSensors/Collectors/AccessibilityCollector.swift"
-TRUST = "SitlessSensors/PermissionBroker.swift"
+READER = "StandupppSensors/Collectors/AccessibilityCollector.swift"
+TRUST = "StandupppSensors/PermissionBroker.swift"
 
 # What the trust file is allowed to name. Anything beyond this is reading, not asking.
 TRUST_ONLY = {"AXIsProcessTrusted"}
