@@ -46,15 +46,15 @@ enum SkitPlayer {
 
     /// Plays the next skit and returns the line it speaks, for the pet's bubble.
     @discardableResult
-    static func playNext(chinese: Bool) -> String {
+    static func playNext(chinese: Bool, minutes: Int = 50) -> String {
         var bag = loadBag()
         let skit = bag.draw()
         saveBag(bag)
-        play(skit, chinese: chinese)
-        return skit.line(chinese: chinese)
+        play(skit, chinese: chinese, minutes: minutes)
+        return skit.line(chinese: chinese, minutes: minutes)
     }
 
-    static func play(_ skit: ReminderSkit, chinese: Bool) {
+    static func play(_ skit: ReminderSkit, chinese: Bool, minutes: Int = 50) {
         speaker.stopSpeaking(at: .immediate)
         let intro = NSSound(data: skit.introWAV)
         intro?.volume = 0.6
@@ -64,9 +64,10 @@ enum SkitPlayer {
         let introLength = Double(skit.intro.count) / 22_050.0
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(introLength + 0.25))
-            let utterance = AVSpeechUtterance(string: skit.line(chinese: chinese))
+            let utterance = AVSpeechUtterance(string: skit.line(chinese: chinese, minutes: minutes))
             utterance.voice = voice(chinese: chinese, male: skit.prefersMaleVoice)
-            utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+            utterance.pitchMultiplier = Float(skit.delivery.pitch)
+            utterance.rate = AVSpeechUtteranceDefaultSpeechRate * Float(skit.delivery.rate)
             utterance.volume = 0.95
             speaker.delegate = finisher
             finisher.then = {

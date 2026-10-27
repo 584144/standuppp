@@ -687,7 +687,10 @@ final class AppModel {
         let message = engine.select(for: messageContext).message
         let audible = settings.promptSound && !captureLive
         if audible, settings.reminderVoice, request.level == .first {
-            reminderLine = SkitPlayer.playNext(chinese: settings.language.isChinese)
+            reminderLine = SkitPlayer.playNext(
+                chinese: settings.language.isChinese,
+                minutes: Int((tracker.session.continuousActiveWork / 60).rounded())
+            )
         } else {
             PromptSound.play(for: request.level, enabled: audible)
         }

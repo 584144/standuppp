@@ -3,7 +3,7 @@ import Testing
 
 @testable import SitlessCore
 
-@Suite("the ten reminder skits")
+@Suite("the reminder skits")
 struct ReminderSkitTests {
     @Test("every sound is short, audible and does not clip")
     func soundsAreSane() {
@@ -27,6 +27,19 @@ struct ReminderSkitTests {
         }
     }
 
+    @Test("the commentator says how long you actually sat")
+    func minutesInTheLine() {
+        #expect(ReminderSkit.commentator.line(chinese: true, minutes: 73).contains("73分钟"))
+        #expect(ReminderSkit.commentator.line(chinese: false, minutes: 73).contains("73 minutes"))
+    }
+
+    @Test("delivery stays within fifteen percent so words stay clear")
+    func deliveryIsMild() {
+        for skit in ReminderSkit.allCases {
+            #expect(abs(skit.delivery.pitch - 1) <= 0.1501 && abs(skit.delivery.rate - 1) <= 0.1501)
+        }
+    }
+
     @Test("the WAV header describes the samples")
     func wav() {
         let data = ReminderSkit.duck.introWAV
@@ -38,9 +51,10 @@ struct ReminderSkitTests {
     func shuffleBag() {
         var bag = SkitBag()
         var drawn: [ReminderSkit] = []
-        for _ in 0..<100 { drawn.append(bag.draw()) }
-        for round in stride(from: 0, to: 100, by: 10) {
-            #expect(Set(drawn[round..<round + 10]).count == 10)
+        let size = ReminderSkit.allCases.count
+        for _ in 0..<(size * 10) { drawn.append(bag.draw()) }
+        for round in stride(from: 0, to: size * 10, by: size) {
+            #expect(Set(drawn[round..<round + size]).count == size)
         }
         for i in 1..<drawn.count { #expect(drawn[i] != drawn[i - 1]) }
     }
@@ -49,7 +63,7 @@ struct ReminderSkitTests {
     func noRepeatAcrossRounds() {
         var bag = SkitBag(remaining: [3], last: nil)
         #expect(bag.draw() == .cat)
-        let next = bag.draw { _ in [3, 1, 2, 4, 5, 6, 7, 8, 9, 10] }
+        let next = bag.draw { _ in [3] + ReminderSkit.allCases.map(\.rawValue).filter { $0 != 3 } }
         #expect(next != .cat)
     }
 

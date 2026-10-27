@@ -6,6 +6,7 @@ import Foundation
 /// same one twice in a row.
 public enum ReminderSkit: Int, CaseIterable, Sendable {
     case duck = 1, buttAlarm, cat, ghost, frog, emperor, rogueAI, rooster, quest, fart
+    case duckling, grandpa, sitAlarm, cuddly, commentator
 
     public var title: String {
         switch self {
@@ -19,10 +20,16 @@ public enum ReminderSkit: Int, CaseIterable, Sendable {
         case .rooster: return "公鸡上班"
         case .quest: return "游戏任务"
         case .fart: return "放屁警告"
+        case .duckling: return "鸭子小喇叭"
+        case .grandpa: return "老爷爷蘑菇"
+        case .sitAlarm: return "久坐警报"
+        case .cuddly: return "撒娇小鸭"
+        case .commentator: return "体育解说"
         }
     }
 
-    public func line(chinese: Bool) -> String {
+    /// `minutes` is how long you have been sitting, for the lines that say so.
+    public func line(chinese: Bool, minutes: Int = 50) -> String {
         switch (self, chinese) {
         case (.duck, true): return "喂！屁股已经焊在椅子上了吗？起来动动！"
         case (.duck, false): return "Hey! Is your butt welded to that chair? Get up and move!"
@@ -44,6 +51,16 @@ public enum ReminderSkit: Int, CaseIterable, Sendable {
         case (.quest, false): return "New quest: stand up and walk ten steps! Reward: ten more minutes of butt life!"
         case (.fart, true): return "不好！你的椅子快被坐出包浆啦！"
         case (.fart, false): return "Oh no! Your chair is getting a permanent butt print!"
+        case (.duckling, true): return "你该起来动动了！再不动，我就叫全村的鸭子来啄你的键盘啦！"
+        case (.duckling, false): return "Time to get up and move! Or I'll call every duck in the village to peck your keyboard!"
+        case (.grandpa, true): return "哎哟……年轻人，屁股，要，长，蘑菇，了……快起来走走吧。"
+        case (.grandpa, false): return "Oh dear... young one, your butt... is growing... mushrooms. Up you get, take a walk."
+        case (.sitAlarm, true): return "警报警报！久坐超标！请立刻起立，原地转三圈！重复一遍，立刻起立！"
+        case (.sitAlarm, false): return "Alert! Alert! Sitting limit exceeded! Stand up and spin three times! Repeat, stand up now!"
+        case (.cuddly, true): return "主人～起来陪我走两步嘛～就两步，好不好嘛～"
+        case (.cuddly, false): return "Pleeease get up and walk with me~ just two steps, pretty please~"
+        case (.commentator, true): return "各位观众！这位选手已经连续坐了\(minutes)分钟，打破了今日纪录！让我们请他起立，为他的屁股鼓掌！"
+        case (.commentator, false): return "Ladies and gentlemen! This player has been sitting for \(minutes) minutes straight, a new record! Let's have him stand up for a round of applause!"
         }
     }
 
@@ -60,6 +77,11 @@ public enum ReminderSkit: Int, CaseIterable, Sendable {
         case .rooster: return s.rooster()
         case .quest: return s.ding()
         case .fart: return s.fart()
+        case .duckling: return s.cat(s.quack(), s.silence(0.06), s.quack(0.17, 520, 300))
+        case .grandpa: return s.cat(s.quack(0.6, 520, 240), s.silence(0.15), s.caneTaps())
+        case .sitAlarm: return s.cat(s.quack(0.1), s.silence(0.03), s.quack(0.1), s.silence(0.03), s.quack(0.12, 600, 300), s.silence(0.1), s.siren())
+        case .cuddly: return s.cat(s.squeak(), s.silence(0.08), s.squeak())
+        case .commentator: return s.cat(s.quack(), s.silence(0.1), s.cheer())
         }
     }
 
@@ -76,6 +98,11 @@ public enum ReminderSkit: Int, CaseIterable, Sendable {
         case .rooster: return s.flap()
         case .quest: return s.levelUp()
         case .fart: return s.slideDown()
+        case .duckling: return s.flap()
+        case .grandpa: return s.mushroomPops()
+        case .sitAlarm: return s.allClear()
+        case .cuddly: return s.kissChime()
+        case .commentator: return s.applause()
         }
     }
 
@@ -290,6 +317,72 @@ struct Synth {
         return formant(roughen(src, 0.6), [(220, 2, 1), (500, 3, 0.5)])
     }
 
+    func caneTaps() -> [Double] {
+        let wood: [(Double, Double, Double)] = [(900, 6, 1), (1_800, 8, 0.4)]
+        var out: [Double] = []
+        for i in 0..<3 {
+            let pitch: Double = 180 + 20 * Double(i)
+            out += formant(osc(0.09, .sine, attack: 0.002, decay: 3) { _, _ in pitch }, wood)
+            out += silence(0.22)
+        }
+        return out
+    }
+
+    func mushroomPops() -> [Double] {
+        var out: [Double] = []
+        for i in 0..<3 {
+            let base: Double = 500 + 150 * Double(i)
+            out += osc(0.12, .sine, attack: 0.002, decay: 2) { _, p in base * (1 + 1.5 * p) }
+            out += silence(0.12)
+        }
+        return out
+    }
+
+    func allClear() -> [Double] {
+        cat(osc(0.35, .sine, attack: 0.005, decay: 1.4) { _, _ in 1_319 },
+            osc(0.6, .sine, attack: 0.005, decay: 1.6) { _, _ in 1_047 })
+    }
+
+    func squeak() -> [Double] {
+        osc(0.22, .sine, attack: 0.01, decay: 0.8) { t, p in
+            let rise: Double = 700 * sin(Double.pi * p)
+            let wobble: Double = 60 * sin(2 * Double.pi * 28 * t)
+            return 1_700 + rise + wobble
+        }
+    }
+
+    func kissChime() -> [Double] {
+        var out = osc(0.08, .sine, attack: 0.002, decay: 1.5) { _, p in 1_200 + 1_400 * p }
+        out += silence(0.05)
+        for f in [2_093.0, 2_637, 3_136] {
+            out += osc(0.18, .sine, attack: 0.003, decay: 2) { _, _ in f }
+        }
+        return out
+    }
+
+    /// Many short noise claps scattered in time, the way a crowd sounds.
+    mutating func applause(_ seconds: Double = 1.8) -> [Double] {
+        let n = Int(seconds * sr)
+        var out = [Double](repeating: 0, count: n)
+        for _ in 0..<Int(seconds * 60) {
+            let start = Int(random() * Double(n - 2_000))
+            let clap = formant(noise(0.025, attack: 0.001, decay: 3), [(1_200 + random() * 1_500, 1.2, 1)])
+            let fade = 1 - Double(start) / Double(n)
+            for (k, v) in clap.enumerated() where start + k < n { out[start + k] += v * (0.4 + 0.6 * fade) }
+        }
+        return out
+    }
+
+    mutating func cheer() -> [Double] {
+        let crowd = formant(noise(1.1, attack: 0.2, decay: 0.8), [(600, 2, 1), (1_100, 3, 0.6)])
+        let whoo = osc(1.1, .saw, attack: 0.2, decay: 0.8) { t, p in
+            let vibrato: Double = 15 * sin(2 * Double.pi * 6 * t)
+            return 380 + 160 * p + vibrato
+        }
+        let voices = formant(whoo, [(750, 5, 1), (1_200, 6, 0.5)])
+        return zip(crowd, voices).map { $0 * 0.6 + $1 * 0.4 }
+    }
+
     func slideDown() -> [Double] { osc(0.9, .sine, attack: 0.01, decay: 0.4) { _, p in 1_500 * pow(300 / 1_500, p) } }
 }
 
@@ -318,9 +411,22 @@ struct Resonator {
 extension ReminderSkit {
     /// The emperor, the rogue AI, the rooster and the frog want a man's voice; the rest are
     /// fine with whatever is clearest.
+    /// How the line is read, as multipliers on the voice's normal pitch and speed. Kept within
+    /// fifteen percent so every word stays clear.
+    public var delivery: (pitch: Double, rate: Double) {
+        switch self {
+        case .grandpa: return (0.88, 0.85)
+        case .sitAlarm: return (1.05, 1.15)
+        case .cuddly, .cat, .ghost: return (1.12, 1.0)
+        case .commentator, .emperor: return (0.95, 0.95)
+        case .duckling: return (1.1, 1.05)
+        default: return (1, 1)
+        }
+    }
+
     public var prefersMaleVoice: Bool {
         switch self {
-        case .emperor, .rogueAI, .rooster, .frog: return true
+        case .emperor, .rogueAI, .rooster, .frog, .grandpa, .commentator: return true
         default: return false
         }
     }
