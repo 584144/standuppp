@@ -277,7 +277,7 @@ struct PetFace: View {
     var wiggle: Bool = false
 
     static let pearl = Color(.sRGB, red: 1.0, green: 0.99, blue: 1.0)
-    static let lilac = Color(.sRGB, red: 0.88, green: 0.84, blue: 0.98)
+    static let lilac = Color(.sRGB, red: 0.93, green: 0.90, blue: 0.99)
     static let shade = Color(.sRGB, red: 0.76, green: 0.70, blue: 0.93)
     static let ink = Color(.sRGB, red: 0.10, green: 0.09, blue: 0.13)
     static let blush = Color(.sRGB, red: 1.0, green: 0.62, blue: 0.72)
@@ -324,8 +324,8 @@ struct PetFace: View {
             GhostShape()
                 .fill(
                     RadialGradient(
-                        colors: [Self.pearl, Self.pearl, Self.lilac, Self.shade.opacity(0.9)],
-                        center: UnitPoint(x: 0.38, y: 0.3), startRadius: 0, endRadius: s * 0.62
+                        colors: [Self.pearl, Self.pearl, Self.pearl, Self.lilac, Self.shade.opacity(0.75)],
+                        center: UnitPoint(x: 0.4, y: 0.32), startRadius: 0, endRadius: s * 0.66
                     )
                 )
                 .overlay(
@@ -344,7 +344,7 @@ struct PetFace: View {
                 .offset(y: -s * 0.04)
             if mood == .tired || mood == .sulking { sweat(s) }
         }
-        .frame(width: s * 0.72, height: s * 0.8)
+        .frame(width: s * 0.8, height: s * 0.8)
         .saturation(mood == .away ? 0.7 : 1)
     }
 
@@ -372,7 +372,7 @@ struct PetFace: View {
 
     private func face(_ s: CGFloat) -> some View {
         ZStack {
-            HStack(spacing: s * 0.15) {
+            HStack(spacing: s * 0.19) {
                 eye(s, left: true)
                 eye(s, left: false)
             }
@@ -382,7 +382,7 @@ struct PetFace: View {
                 Ellipse().fill(Self.blush.opacity(blushOpacity))
                 Ellipse().fill(Self.blush.opacity(blushOpacity))
             }
-            .frame(width: s * 0.46, height: s * 0.05)
+            .frame(width: s * 0.54, height: s * 0.055)
             .blur(radius: s * 0.008)
             .offset(y: s * 0.065)
             mouth(s).offset(y: s * 0.07)
@@ -399,7 +399,7 @@ struct PetFace: View {
 
     @ViewBuilder
     private func eye(_ s: CGFloat, left: Bool) -> some View {
-        let w = s * 0.075, h = s * 0.105
+        let w = s * 0.085, h = s * 0.115
         switch mood {
         case .resting:
             Arc(up: false).stroke(Self.ink, style: StrokeStyle(lineWidth: s * 0.022, lineCap: .round))
