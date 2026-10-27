@@ -125,7 +125,7 @@ else
   fail "could not read the signals that need no permission"
 fi
 
-if printf '%s' "${DOCTOR}" | grep -qiE "^\s+bundle\s+dev\.sigstop\.app"; then
+if printf '%s' "${DOCTOR}" | grep -qiE "^\s+bundle\s+io\.github\.584144\.sitless"; then
   pass "identifies itself as the shipped bundle"
 else
   fail "did not report its own bundle identifier"
