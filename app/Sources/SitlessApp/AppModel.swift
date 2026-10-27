@@ -39,6 +39,8 @@ final class AppModel {
     private(set) var badgeEvidence: BadgeEvidence = BadgeEvidence()
     private(set) var badgeNote: String?
     private(set) var breakEndsAt: Date?
+    /// How the last break ended, for the desktop pet's afterglow.
+    private(set) var lastBreak: PetMood.LastBreak?
     private(set) var breakContent: BreakContent?
     private(set) var snoozeUntil: Date?
     private(set) var pausedUntil: Date?
@@ -621,6 +623,7 @@ final class AppModel {
 
         case .endBreak(_, let origin, let honored, let elapsed, let threshold, _):
             tracker.endBreak(origin: origin, threshold: threshold, counts: honored || elapsed < threshold)
+            lastBreak = PetMood.LastBreak(counted: honored, endedAt: now)
             overlay.dismissBreak()
             breakOrigin = nil
             breakEndsAt = nil

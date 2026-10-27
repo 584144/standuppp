@@ -54,6 +54,13 @@ enum SitlessEntryPoint {
                 BreakRenderer.runAndExit(stem: stem)
             }
         }
+        if let index = CommandLine.arguments.firstIndex(of: "--render-pet") {
+            let stem = renderStem(at: index + 1, or: "pet")
+            MainActor.assumeIsolated {
+                NSApplication.shared.setActivationPolicy(.prohibited)
+                PetSheetRenderer.runAndExit(stem: stem)
+            }
+        }
         if let index = CommandLine.arguments.firstIndex(of: "--render-badges") {
             renderBadgesAndExit(stem: renderStem(at: index + 1, or: "badges"))
         }
@@ -149,6 +156,7 @@ final class StatusItemController: NSObject, NSWindowDelegate {
         )
     )
     private var settingsWindow: NSWindow?
+    private lazy var pet = DesktopPetController(model: model)
     private var outsideClickMonitor: Any?
     private var escapeMonitor: Any?
     private var isDismissing = false
@@ -186,8 +194,12 @@ final class StatusItemController: NSObject, NSWindowDelegate {
         panel.onCancel = { [weak self] in self?.dismiss() }
 
         applyActivationPolicy()
-        model.onSettingsChanged = { [weak self] in self?.applyActivationPolicy() }
+        model.onSettingsChanged = { [weak self] in
+            self?.applyActivationPolicy()
+            self?.pet.apply()
+        }
         model.start()
+        pet.apply()
         if CommandLine.arguments.contains("--bench-break") {
             Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(3))

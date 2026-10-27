@@ -534,6 +534,11 @@ struct MenuBarView: View {
                 TerminalButton("Pause · today", style: .quiet) { model.pauseUntilTomorrow() }
                     .accessibilityLabel("Pause for the rest of today")
             }
+            TerminalButton(model.settings.showDesktopPet ? "Hide pet" : "Show pet", style: .quiet) {
+                var updated = model.settings
+                updated.showDesktopPet.toggle()
+                model.update(settings: updated)
+            }
             TerminalButton("Settings…", style: .quiet) { openSettings() }
             Spacer(minLength: 0)
             TerminalButton("Quit", style: .quiet) { NSApp.terminate(nil) }

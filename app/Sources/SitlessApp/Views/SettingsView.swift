@@ -183,6 +183,12 @@ struct SettingsView: View {
                 ) {
                     TerminalStepper(value: settings.maxActiveDuringBreakSeconds, range: 10...600, step: 10, unit: "sec")
                 }
+                SettingRow(
+                    "Show the desktop pet",
+                    detail: "A small companion floating on the desktop whose face follows how long you have sat. Drag it anywhere; click for today's numbers, double-click to start a break, right-click to hide it. It never takes focus and stays out of screen recordings."
+                ) {
+                    TerminalSwitch(isOn: settings.showDesktopPet)
+                }
                 SettingRow("Suggest something to do", detail: "A small, finishable nudge to leave the chair.") {
                     TerminalSwitch(isOn: settings.breakQuestsEnabled)
                 }
@@ -213,7 +219,7 @@ struct SettingsView: View {
                         options: [(AppLanguage.system, "System"), (.chinese, "中文"), (.english, "English")]
                     )
                 }
-                SettingRow("Show in the Dock", detail: "On by default, so the app is still findable when the menu bar hides its mark. Turn it off for menu bar only.") {
+                SettingRow("Show in the Dock", detail: "Off by default: the app lives in the menu bar and on the desktop pet, and closing a window never quits it. Turn it on if the menu bar hides its mark.") {
                     TerminalSwitch(isOn: settings.showInDock)
                 }
                 SettingRow("Launch at login", detail: launchAtLoginFailure) {

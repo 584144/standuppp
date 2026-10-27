@@ -166,8 +166,8 @@ enum Localizer {
         "Light": "浅色",
         "Dark": "深色",
         "Show in the Dock": "在程序坞显示",
-        "On by default, so the app is still findable when the menu bar hides its mark. Turn it off for menu bar only.":
-            "默认开启，这样菜单栏图标被挤掉时也能找到 App。关闭后只在菜单栏显示。",
+        "Off by default: the app lives in the menu bar and on the desktop pet, and closing a window never quits it. Turn it on if the menu bar hides its mark.":
+            "默认关闭：App 只在菜单栏和桌面宠物上，关掉窗口也不会退出。如果菜单栏图标被挤掉了，可以打开它。",
         "Launch at login": "开机自动启动",
         "Launching at login needs the bundled app, build it with `make bundle`.": "开机启动需要打包后的 App，请用 `make bundle` 构建。",
         "Language": "界面语言",
@@ -439,6 +439,25 @@ enum Localizer {
         "Say the last thing you were doing out loud. It will still be there.": "把刚才在做的事说出来，它会一直在那等你。",
 
         "sitless Settings": "久坐工具提醒 设置",
+        "Hide pet": "隐藏宠物",
+        "Show pet": "显示宠物",
+        "Hide the pet": "隐藏宠物",
+        "Show the desktop pet": "显示桌面宠物",
+        "A small companion floating on the desktop whose face follows how long you have sat. Drag it anywhere; click for today's numbers, double-click to start a break, right-click to hide it. It never takes focus and stays out of screen recordings.":
+            "桌面上的一个小伙伴，表情跟着你坐了多久变化。可以拖到任何位置；单击看今天的数据，双击开始休息，右键可以隐藏。它不会抢走焦点，也不会出现在录屏和屏幕共享里。",
+        "Time to stand up!": "该起来动动啦！",
+        "zZ…": "zZ…",
+        "Nice break!": "休息得真棒！",
+        "That break didn't count…": "一直敲键盘，不算数哦…",
+        "Getting stiff…": "坐得有点僵了…",
+        "Pet, fresh": "宠物，精神饱满",
+        "Pet, focused": "宠物，专心中",
+        "Pet, tired": "宠物，有点累了",
+        "Pet, asking you to stand up": "宠物，在叫你起来",
+        "Pet, asleep": "宠物，睡着了",
+        "Pet, proud of your break": "宠物，为你的休息骄傲",
+        "Pet, sulking": "宠物，不开心",
+        "Pet, waiting": "宠物，等你回来",
         "sitless": "久坐工具提醒",
     ]
 }
